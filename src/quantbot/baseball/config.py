@@ -19,7 +19,7 @@ class BaseballSettings:
     paper_mode: bool
 
     @classmethod
-    def from_env(cls, root: Path) -> "BaseballSettings":
+    def from_env(cls, root: Path) -> BaseballSettings:
         def integer(name: str, default: int) -> int:
             return int(os.getenv(name, str(default)).strip())
 
