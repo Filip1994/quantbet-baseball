@@ -50,7 +50,7 @@ def _game_time(game: dict[str, Any]) -> datetime | None:
     if not raw:
         return None
     try:
-        parsed = datetime.fromisoformat(_text(raw).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(_text(raw))
     except ValueError:
         return None
     return parsed.astimezone(UTC)
@@ -138,9 +138,7 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
             market_name = market["name"]
             market_norm = _norm(market_name)
             market_names.add(market_name)
-            if keep_bookmaker or any(
-                token in market_norm for token in TARGET_MARKET_TOKENS
-            ):
+            if keep_bookmaker or any(token in market_norm for token in TARGET_MARKET_TOKENS):
                 markets.append(market)
         if keep_bookmaker or markets:
             bookmakers.append({"name": bookmaker_name, "markets": markets})
@@ -158,9 +156,7 @@ def _append_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
         for row in rows:
-            handle.write(
-                json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n"
-            )
+            handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
 
 
 def collect_once(
@@ -195,18 +191,14 @@ def collect_once(
         if len(selected) >= max_odds_requests:
             break
     if len(selected) < max_odds_requests:
-        for _, game in sorted(
-            candidates, key=lambda item: abs((item[0] - now).total_seconds())
-        ):
+        for _, game in sorted(candidates, key=lambda item: abs((item[0] - now).total_seconds())):
             if game in selected:
                 continue
             selected.append(game)
             if len(selected) >= max_odds_requests:
                 break
 
-    day_path = (
-        root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
-    )
+    day_path = root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
     coverage_path = root / "data" / "baseball" / "market_coverage.json"
     rows: list[dict[str, Any]] = []
     coverage: dict[str, Any] = {}
