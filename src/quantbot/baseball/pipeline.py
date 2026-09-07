@@ -25,6 +25,14 @@ class BaseballPipeline:
     def daily_games(self, date_iso: str) -> list[dict[str, Any]]:
         return self.client.games_by_date(date_iso)
 
-    def plan_refresh_budget(self, games: list[tuple[int, datetime]], now: datetime, *, reserve: int = 500) -> dict[int, int]:
+    def plan_refresh_budget(
+        self,
+        games: list[tuple[int, datetime]],
+        now: datetime,
+        *,
+        reserve: int = 500,
+    ) -> dict[int, int]:
         priorities = rank_games(games, now)
-        return allocate_budget(self.client.settings.api_request_budget, priorities, reserve=reserve)
+        return allocate_budget(
+            self.client.settings.api_request_budget, priorities, reserve=reserve
+        )
