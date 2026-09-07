@@ -1,6 +1,9 @@
 name: Baseball data footprint
 
 on:
+  push:
+    paths:
+      - ".github/workflows/baseball-collect.yml"
   workflow_dispatch:
   schedule:
     - cron: "*/30 6-23 * * *"
