@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-from collections import Counter, defaultdict
-from datetime import datetime, UTC
+from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -65,11 +65,29 @@ def main() -> None:
         "|---|---:|",
     ]
     lines += [f"| {k} | {v} |" for k, v in leagues.most_common()]
-    lines += ["", "## Bookmakers returned by API", "", "| Bookmaker | Snapshot appearances |", "|---|---:|"]
+    lines += [
+        "",
+        "## Bookmakers returned by API",
+        "",
+        "| Bookmaker | Snapshot appearances |",
+        "|---|---:|",
+    ]
     lines += [f"| {k} | {v} |" for k, v in bookmakers.most_common()]
-    lines += ["", "## Markets returned by API", "", "| Market | Snapshot appearances |", "|---|---:|"]
+    lines += [
+        "",
+        "## Markets returned by API",
+        "",
+        "| Market | Snapshot appearances |",
+        "|---|---:|",
+    ]
     lines += [f"| {k} | {v} |" for k, v in markets.most_common()]
-    lines += ["", "## Snapshot days", "", "| Date | Rows |", "|---|---:|"]
+    lines += [
+        "",
+        "## Snapshot days",
+        "",
+        "| Date | Rows |",
+        "|---|---:|",
+    ]
     lines += [f"| {k} | {v} |" for k, v in sorted(snapshots_by_day.items())]
     lines += ["", "## API errors", ""]
     if errors:
