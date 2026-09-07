@@ -28,13 +28,16 @@ class BaseballSettings:
 
         return cls(
             api_key=os.getenv("API_BASEBALL_KEY", "").strip(),
-            api_base_url=os.getenv("API_BASEBALL_BASE_URL", "https://v1.baseball.api-sports.io").rstrip("/"),
+            api_base_url=os.getenv(
+                "API_BASEBALL_BASE_URL", "https://v1.baseball.api-sports.io"
+            ).rstrip("/"),
             api_request_budget=integer("BASEBALL_API_REQUEST_BUDGET", 7500),
             api_max_attempts=integer("BASEBALL_API_MAX_ATTEMPTS", 3),
             api_retry_base_seconds=floating("BASEBALL_API_RETRY_BASE_SECONDS", 1.0),
             cache_dir=root / ".cache" / "baseball-api",
             timezone_name=os.getenv("TIMEZONE", "Europe/Belgrade").strip(),
-            paper_mode=os.getenv("PAPER_MODE", "true").strip().lower() in {"1", "true", "yes", "on"},
+            paper_mode=os.getenv("PAPER_MODE", "true").strip().lower()
+            in {"1", "true", "yes", "on"},
         )
 
     def validate(self) -> None:
