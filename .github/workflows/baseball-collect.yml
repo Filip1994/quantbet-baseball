@@ -56,7 +56,8 @@ jobs:
 
       - name: Commit Baseball data footprint
         run: |
-          git add data/baseball baseball_intraday_signals.json
+          git add data/baseball
+          if [ -f baseball_intraday_signals.json ]; then git add baseball_intraday_signals.json; fi
           if git diff --cached --quiet; then
             echo "No new Baseball snapshot data"
             exit 0
