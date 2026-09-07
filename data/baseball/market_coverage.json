@@ -1,0 +1,23 @@
+{
+  "IL": {
+    "bookmakers": [],
+    "snapshots": 2
+  },
+  "MLB": {
+    "bookmakers": [
+      "10Bet",
+      "1xbet",
+      "Bet365",
+      "BetVictor",
+      "Betano",
+      "Betfair",
+      "Marathon",
+      "Pinnacle",
+      "SBO",
+      "Superbet",
+      "Unibet",
+      "WilliamHill"
+    ],
+    "snapshots": 4
+  }
+}
