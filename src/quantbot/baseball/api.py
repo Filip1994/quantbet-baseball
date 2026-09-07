@@ -5,6 +5,7 @@ import json
 import os
 import tempfile
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
@@ -42,6 +43,49 @@ class BaseballAPIClient:
         )
         digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         return self.settings.cache_dir / f"{digest}.json"
+
+    def _raw_archive_path(self, endpoint: str, params: dict[str, Any]) -> Path:
+        captured = datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ")
+        canonical = json.dumps(
+            [endpoint, sorted(params.items())], ensure_ascii=True, separators=(",", ":")
+        )
+        digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
+        safe_endpoint = endpoint.strip("/").replace("/", "_") or "root"
+        return (
+            self.settings.raw_archive_dir
+            / datetime.now(UTC).strftime("%Y-%m-%d")
+            / f"{captured}_{safe_endpoint}_{digest}.json"
+        )
+
+    def _archive_raw_payload(
+        self, endpoint: str, params: dict[str, Any], raw: str
+    ) -> None:
+        """Persist the decoded API envelope for exact post-hoc parser auditing."""
+        try:
+            payload = json.loads(raw)
+        except json.JSONDecodeError:
+            return
+        archive_path = self._raw_archive_path(endpoint, params)
+        archive_path.parent.mkdir(parents=True, exist_ok=True)
+        document = {
+            "captured_at": datetime.now(UTC).isoformat(),
+            "endpoint": endpoint,
+            "params": params,
+            "payload": payload,
+        }
+        fd, temp_name = tempfile.mkstemp(
+            prefix=f".{archive_path.name}.", suffix=".tmp", dir=archive_path.parent
+        )
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as handle:
+                json.dump(document, handle, ensure_ascii=False, indent=2)
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(temp_name, archive_path)
+        finally:
+            if os.path.exists(temp_name):
+                os.unlink(temp_name)
 
     def _read_cache(self, path: Path) -> list[dict[str, Any]] | None:
         try:
@@ -147,6 +191,7 @@ class BaseballAPIClient:
                     f"API network error for {endpoint}: {reason}"
                 ) from exc
 
+        self._archive_raw_payload(endpoint, params, raw)
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError as exc:
@@ -199,11 +244,7 @@ class BaseballAPIClient:
         )
 
     def player_statistics(self, player_id: int, season: int) -> list[dict[str, Any]]:
-        return self.get(
-            "players/statistics",
-            {"id": player_id, "season": season},
-            ttl_seconds=86_400,
-        )
+        return self.get("players/statistics", {"id": player_id, "season": season}, ttl_seconds=86_400)
 
     def odds(self, game_id: int) -> list[dict[str, Any]]:
         return self.get("odds", {"game": game_id}, ttl_seconds=120)
