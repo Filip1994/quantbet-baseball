@@ -30,24 +30,32 @@ def rank_games(games: list[tuple[int, datetime]], now: datetime) -> list[GamePri
         if minutes < -180:
             continue
         ranked.append(GamePriority(game_id, minutes, priority_weight(minutes)))
-    return sorted(ranked, key=lambda item: (-item.weight, item.minutes_to_start, item.game_id))
+    return sorted(
+        ranked, key=lambda item: (-item.weight, item.minutes_to_start, item.game_id)
+    )
 
 
-def allocate_budget(total_budget: int, priorities: list[GamePriority], *, reserve: int = 0) -> dict[int, int]:
+def allocate_budget(
+    total_budget: int, priorities: list[GamePriority], *, reserve: int = 0
+) -> dict[int, int]:
     if total_budget < 0 or reserve < 0 or reserve > total_budget:
         raise ValueError("Invalid budget/reserve")
     if not priorities:
         return {}
     spendable = total_budget - reserve
     total_weight = sum(item.weight for item in priorities)
-    allocation = {item.game_id: int(spendable * item.weight / total_weight) for item in priorities}
+    allocation = {
+        item.game_id: int(spendable * item.weight / total_weight) for item in priorities
+    }
     for item in priorities:
         if allocation[item.game_id] == 0 and spendable > 0:
             allocation[item.game_id] = 1
             spendable -= 1
     used = sum(allocation.values())
     remaining = max(0, total_budget - reserve - used)
-    ordered = sorted(priorities, key=lambda item: (-item.weight, item.minutes_to_start, item.game_id))
+    ordered = sorted(
+        priorities, key=lambda item: (-item.weight, item.minutes_to_start, item.game_id)
+    )
     index = 0
     while remaining:
         allocation[ordered[index % len(ordered)].game_id] += 1
