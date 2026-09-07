@@ -51,14 +51,17 @@ jobs:
         run: |
           python -c "from pathlib import Path; from quantbot.baseball.signals import scan_once, send_alerts; from quantbot.baseball.config import BaseballSettings; root=Path('.'); print(scan_once(root)); print({'alerts_sent': send_alerts(root, BaseballSettings.from_env(root))})"
 
+      - name: Build human-readable API audit
+        run: python scripts/baseball_audit.py
+
       - name: Commit Baseball data footprint
         run: |
-          if git diff --quiet -- data/baseball baseball_intraday_signals.json; then
+          git add data/baseball baseball_intraday_signals.json
+          if git diff --cached --quiet; then
             echo "No new Baseball snapshot data"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/baseball baseball_intraday_signals.json
           git commit -m "Collect Baseball market snapshots"
           git push origin main
