@@ -15,6 +15,7 @@ class BaseballSettings:
     api_max_attempts: int
     api_retry_base_seconds: float
     cache_dir: Path
+    raw_archive_dir: Path
     timezone_name: str
     paper_mode: bool
 
@@ -35,6 +36,7 @@ class BaseballSettings:
             api_max_attempts=integer("BASEBALL_API_MAX_ATTEMPTS", 3),
             api_retry_base_seconds=floating("BASEBALL_API_RETRY_BASE_SECONDS", 1.0),
             cache_dir=root / ".cache" / "baseball-api",
+            raw_archive_dir=root / "data" / "baseball" / "raw_api",
             timezone_name=os.getenv("TIMEZONE", "Europe/Belgrade").strip(),
             paper_mode=os.getenv("PAPER_MODE", "true").strip().lower()
             in {"1", "true", "yes", "on"},
