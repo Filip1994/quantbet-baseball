@@ -1,0 +1,3379 @@
+{
+  "captured_at": "2026-09-08T08:45:00.284446+00:00",
+  "endpoint": "odds",
+  "params": {
+    "game": 181377
+  },
+  "payload": {
+    "get": "odds",
+    "parameters": {
+      "game": "181377"
+    },
+    "errors": [],
+    "results": 1,
+    "response": [
+      {
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "season": 2026,
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "game": {
+          "id": 181377,
+          "date": "2026-09-08T09:00:00+00:00",
+          "time": "09:00",
+          "timestamp": 1788858000,
+          "timezone": "UTC",
+          "week": null,
+          "status": {
+            "long": "Not Started",
+            "short": "NS"
+          },
+          "country": {
+            "id": 2,
+            "name": "Japan",
+            "code": "JP",
+            "flag": "https://media.api-sports.io/flags/jp.svg"
+          },
+          "league": {
+            "id": 2,
+            "name": "NPB",
+            "type": "League",
+            "season": 2026,
+            "logo": "https://media.api-sports.io/baseball/leagues/2.png"
+          },
+          "teams": {
+            "home": {
+              "id": 61,
+              "name": "Orix Buffaloes",
+              "logo": "https://media.api-sports.io/baseball/teams/61.png"
+            },
+            "away": {
+              "id": 63,
+              "name": "Seibu Lions",
+              "logo": "https://media.api-sports.io/baseball/teams/63.png"
+            }
+          },
+          "scores": {
+            "home": {
+              "hits": null,
+              "errors": null,
+              "innings": {
+                "1": null,
+                "2": null,
+                "3": null,
+                "4": null,
+                "5": null,
+                "6": null,
+                "7": null,
+                "8": null,
+                "9": null,
+                "extra": null
+              },
+              "total": null
+            },
+            "away": {
+              "hits": null,
+              "errors": null,
+              "innings": {
+                "1": null,
+                "2": null,
+                "3": null,
+                "4": null,
+                "5": null,
+                "6": null,
+                "7": null,
+                "8": null,
+                "9": null,
+                "extra": null
+              },
+              "total": null
+            }
+          }
+        },
+        "bookmakers": [
+          {
+            "id": 22,
+            "name": "WilliamHill",
+            "bets": [
+              {
+                "id": 14,
+                "name": "Match Winner",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.25"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "7.00"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.91"
+                  }
+                ]
+              },
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.08"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.78"
+                  }
+                ]
+              },
+              {
+                "id": 9,
+                "name": "Odd/Even (Including OT)",
+                "values": [
+                  {
+                    "value": "Odd",
+                    "odd": "1.66"
+                  },
+                  {
+                    "value": "Even",
+                    "odd": "2.28"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 2,
+            "name": "Bet365",
+            "bets": [
+              {
+                "id": 14,
+                "name": "Match Winner",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "23.00"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.74"
+                  }
+                ]
+              },
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.00"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.71"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -0.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Away -0.5",
+                    "odd": "1.66"
+                  },
+                  {
+                    "value": "Home +0.5",
+                    "odd": "1.95"
+                  },
+                  {
+                    "value": "Away +0.5",
+                    "odd": "1.74"
+                  },
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.15"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.32"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.52"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.40"
+                  },
+                  {
+                    "value": "Home -2.5",
+                    "odd": "4.40"
+                  },
+                  {
+                    "value": "Away -2.5",
+                    "odd": "1.18"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.29"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.30"
+                  },
+                  {
+                    "value": "Home -3.5",
+                    "odd": "6.50"
+                  },
+                  {
+                    "value": "Away -3.5",
+                    "odd": "1.10"
+                  },
+                  {
+                    "value": "Home +3.5",
+                    "odd": "1.16"
+                  },
+                  {
+                    "value": "Away +3.5",
+                    "odd": "4.50"
+                  },
+                  {
+                    "value": "Home +4.5",
+                    "odd": "1.10"
+                  },
+                  {
+                    "value": "Away +4.5",
+                    "odd": "6.50"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 3.5",
+                    "odd": "1.22"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "3.90"
+                  },
+                  {
+                    "value": "Over 4",
+                    "odd": "1.26"
+                  },
+                  {
+                    "value": "Under 4",
+                    "odd": "3.60"
+                  },
+                  {
+                    "value": "Over 5",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Under 5",
+                    "odd": "2.50"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.40"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "2.75"
+                  },
+                  {
+                    "value": "Over 7",
+                    "odd": "2.50"
+                  },
+                  {
+                    "value": "Under 7",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Over 7.5",
+                    "odd": "2.72"
+                  },
+                  {
+                    "value": "Under 7.5",
+                    "odd": "1.40"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.74"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "1.95"
+                  },
+                  {
+                    "value": "Over 6",
+                    "odd": "1.86"
+                  },
+                  {
+                    "value": "Under 6",
+                    "odd": "1.80"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.66"
+                  }
+                ]
+              },
+              {
+                "id": 23,
+                "name": "Correct Score",
+                "values": [
+                  {
+                    "value": "1:0",
+                    "odd": "34.00"
+                  },
+                  {
+                    "value": "2:0",
+                    "odd": "34.00"
+                  },
+                  {
+                    "value": "2:1",
+                    "odd": "19.00"
+                  },
+                  {
+                    "value": "3:0",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "3:1",
+                    "odd": "26.00"
+                  },
+                  {
+                    "value": "3:2",
+                    "odd": "21.00"
+                  },
+                  {
+                    "value": "4:0",
+                    "odd": "51.00"
+                  },
+                  {
+                    "value": "4:1",
+                    "odd": "36.00"
+                  },
+                  {
+                    "value": "0:1",
+                    "odd": "34.00"
+                  },
+                  {
+                    "value": "0:2",
+                    "odd": "29.00"
+                  },
+                  {
+                    "value": "0:3",
+                    "odd": "34.00"
+                  },
+                  {
+                    "value": "1:2",
+                    "odd": "21.00"
+                  },
+                  {
+                    "value": "1:3",
+                    "odd": "21.00"
+                  },
+                  {
+                    "value": "2:3",
+                    "odd": "23.00"
+                  },
+                  {
+                    "value": "0:4",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "1:4",
+                    "odd": "29.00"
+                  },
+                  {
+                    "value": "2:4",
+                    "odd": "29.00"
+                  },
+                  {
+                    "value": "4:2",
+                    "odd": "34.00"
+                  },
+                  {
+                    "value": "0:5",
+                    "odd": "51.00"
+                  },
+                  {
+                    "value": "0:6",
+                    "odd": "61.00"
+                  },
+                  {
+                    "value": "1:5",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "1:6",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "2:5",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "2:6",
+                    "odd": "51.00"
+                  },
+                  {
+                    "value": "3:4",
+                    "odd": "34.00"
+                  },
+                  {
+                    "value": "5:0",
+                    "odd": "66.00"
+                  },
+                  {
+                    "value": "5:1",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "5:2",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "6:0",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "6:1",
+                    "odd": "61.00"
+                  },
+                  {
+                    "value": "6:2",
+                    "odd": "51.00"
+                  },
+                  {
+                    "value": "4:3",
+                    "odd": "29.00"
+                  },
+                  {
+                    "value": "3:5",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "3:6",
+                    "odd": "51.00"
+                  },
+                  {
+                    "value": "4:5",
+                    "odd": "51.00"
+                  },
+                  {
+                    "value": "4:6",
+                    "odd": "61.00"
+                  },
+                  {
+                    "value": "5:3",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "5:4",
+                    "odd": "41.00"
+                  },
+                  {
+                    "value": "5:6",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "6:3",
+                    "odd": "61.00"
+                  },
+                  {
+                    "value": "6:4",
+                    "odd": "66.00"
+                  },
+                  {
+                    "value": "6:5",
+                    "odd": "66.00"
+                  },
+                  {
+                    "value": "7:0",
+                    "odd": "126.00"
+                  },
+                  {
+                    "value": "7:1",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "7:2",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "7:3",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "7:4",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "7:5",
+                    "odd": "126.00"
+                  },
+                  {
+                    "value": "7:6",
+                    "odd": "126.00"
+                  },
+                  {
+                    "value": "8:0",
+                    "odd": "151.00"
+                  },
+                  {
+                    "value": "8:1",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "8:2",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "8:3",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "8:4",
+                    "odd": "126.00"
+                  },
+                  {
+                    "value": "8:5",
+                    "odd": "151.00"
+                  },
+                  {
+                    "value": "8:6",
+                    "odd": "201.00"
+                  },
+                  {
+                    "value": "8:7",
+                    "odd": "201.00"
+                  },
+                  {
+                    "value": "0:7",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "0:8",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "1:7",
+                    "odd": "61.00"
+                  },
+                  {
+                    "value": "1:8",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "2:7",
+                    "odd": "61.00"
+                  },
+                  {
+                    "value": "2:8",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "3:7",
+                    "odd": "66.00"
+                  },
+                  {
+                    "value": "3:8",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "4:7",
+                    "odd": "81.00"
+                  },
+                  {
+                    "value": "4:8",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "5:7",
+                    "odd": "101.00"
+                  },
+                  {
+                    "value": "5:8",
+                    "odd": "151.00"
+                  },
+                  {
+                    "value": "6:7",
+                    "odd": "151.00"
+                  },
+                  {
+                    "value": "6:8",
+                    "odd": "201.00"
+                  },
+                  {
+                    "value": "7:8",
+                    "odd": "201.00"
+                  }
+                ]
+              },
+              {
+                "id": 9,
+                "name": "Odd/Even (Including OT)",
+                "values": [
+                  {
+                    "value": "Odd",
+                    "odd": "1.58"
+                  },
+                  {
+                    "value": "Even",
+                    "odd": "2.22"
+                  }
+                ]
+              },
+              {
+                "id": 37,
+                "name": "HT/FT (Including OT)",
+                "values": [
+                  {
+                    "value": "1/1",
+                    "odd": "3.30"
+                  },
+                  {
+                    "value": "1/2",
+                    "odd": "14.00"
+                  },
+                  {
+                    "value": "X/1",
+                    "odd": "7.50"
+                  },
+                  {
+                    "value": "X/2",
+                    "odd": "8.00"
+                  },
+                  {
+                    "value": "2/1",
+                    "odd": "9.00"
+                  },
+                  {
+                    "value": "2/2",
+                    "odd": "2.30"
+                  }
+                ]
+              },
+              {
+                "id": 69,
+                "name": "Result/Total Goals",
+                "values": [
+                  {
+                    "value": "Home/Over 4.5",
+                    "odd": "2.90"
+                  },
+                  {
+                    "value": "Home/Under 4.5",
+                    "odd": "5.75"
+                  },
+                  {
+                    "value": "Away/Over 7.5",
+                    "odd": "4.25"
+                  },
+                  {
+                    "value": "Away/Under 7.5",
+                    "odd": "2.60"
+                  },
+                  {
+                    "value": "Home/Over 5.5",
+                    "odd": "3.70"
+                  },
+                  {
+                    "value": "Away/Over 5.5",
+                    "odd": "2.85"
+                  },
+                  {
+                    "value": "Home/Under 5.5",
+                    "odd": "4.00"
+                  },
+                  {
+                    "value": "Away/Under 5.5",
+                    "odd": "3.70"
+                  },
+                  {
+                    "value": "Home/Over 6.5",
+                    "odd": "4.25"
+                  },
+                  {
+                    "value": "Away/Over 6.5",
+                    "odd": "3.50"
+                  },
+                  {
+                    "value": "Home/Under 6.5",
+                    "odd": "3.45"
+                  },
+                  {
+                    "value": "Away/Under 6.5",
+                    "odd": "3.00"
+                  }
+                ]
+              },
+              {
+                "id": 6,
+                "name": "Over/Under (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.15"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.64"
+                  }
+                ]
+              },
+              {
+                "id": 10,
+                "name": "1x2 (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "5.00"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "1.44"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "4.50"
+                  }
+                ]
+              },
+              {
+                "id": 38,
+                "name": "A Run (1st Inning)",
+                "values": [
+                  {
+                    "value": "Yes",
+                    "odd": "2.55"
+                  },
+                  {
+                    "value": "No",
+                    "odd": "1.47"
+                  }
+                ]
+              },
+              {
+                "id": 33,
+                "name": "First Team To Score",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.12"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.64"
+                  }
+                ]
+              },
+              {
+                "id": 45,
+                "name": "Last Team To Score",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "1.86"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.80"
+                  }
+                ]
+              },
+              {
+                "id": 32,
+                "name": "Extra Innings",
+                "values": [
+                  {
+                    "value": "Yes",
+                    "odd": "6.00"
+                  },
+                  {
+                    "value": "No",
+                    "odd": "1.11"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Asian Handicap (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "1.95"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.74"
+                  }
+                ]
+              },
+              {
+                "id": 11,
+                "name": "Over/Under (1st Inning)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "4.50"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "1.20"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "7.25"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.07"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "11.00"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.02"
+                  },
+                  {
+                    "value": "Over 0.5",
+                    "odd": "2.55"
+                  },
+                  {
+                    "value": "Under 0.5",
+                    "odd": "1.47"
+                  }
+                ]
+              },
+              {
+                "id": 30,
+                "name": "Over/Under (1st 7 Innings)",
+                "values": [
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.86"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.80"
+                  }
+                ]
+              },
+              {
+                "id": 31,
+                "name": "Over/Under (1st 3 Innings)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.80"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "1.86"
+                  }
+                ]
+              },
+              {
+                "id": 35,
+                "name": "Asian Handicap (1st 3 Innings)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "1.95"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.74"
+                  }
+                ]
+              },
+              {
+                "id": 43,
+                "name": "Home Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.38"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "2.90"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.75"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.42"
+                  },
+                  {
+                    "value": "Over 0.5",
+                    "odd": "1.10"
+                  },
+                  {
+                    "value": "Under 0.5",
+                    "odd": "6.50"
+                  },
+                  {
+                    "value": "Over 8.5",
+                    "odd": "12.00"
+                  },
+                  {
+                    "value": "Under 8.5",
+                    "odd": "1.02"
+                  },
+                  {
+                    "value": "Over 9.5",
+                    "odd": "16.00"
+                  },
+                  {
+                    "value": "Under 9.5",
+                    "odd": "1.01"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "4.00"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.22"
+                  },
+                  {
+                    "value": "Over 7.5",
+                    "odd": "10.00"
+                  },
+                  {
+                    "value": "Under 7.5",
+                    "odd": "1.04"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "5.75"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "1.12"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "8.00"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.07"
+                  }
+                ]
+              },
+              {
+                "id": 44,
+                "name": "Away Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.27"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "3.60"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.62"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.20"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.25"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.60"
+                  },
+                  {
+                    "value": "Over 0.5",
+                    "odd": "1.07"
+                  },
+                  {
+                    "value": "Under 0.5",
+                    "odd": "8.00"
+                  },
+                  {
+                    "value": "Over 8.5",
+                    "odd": "10.00"
+                  },
+                  {
+                    "value": "Under 8.5",
+                    "odd": "1.04"
+                  },
+                  {
+                    "value": "Over 9.5",
+                    "odd": "12.00"
+                  },
+                  {
+                    "value": "Under 9.5",
+                    "odd": "1.02"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "3.10"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.33"
+                  },
+                  {
+                    "value": "Over 7.5",
+                    "odd": "8.25"
+                  },
+                  {
+                    "value": "Under 7.5",
+                    "odd": "1.06"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "4.30"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "1.20"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "6.25"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.11"
+                  }
+                ]
+              },
+              {
+                "id": 46,
+                "name": "Asian Handicap (1st 7 Innings)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "2.00"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.71"
+                  }
+                ]
+              },
+              {
+                "id": 65,
+                "name": "Home Odd/Even (OT)",
+                "values": [
+                  {
+                    "value": "Odd",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Even",
+                    "odd": "1.83"
+                  }
+                ]
+              },
+              {
+                "id": 66,
+                "name": "Away Odd/Even (OT)",
+                "values": [
+                  {
+                    "value": "Odd",
+                    "odd": "1.86"
+                  },
+                  {
+                    "value": "Even",
+                    "odd": "1.80"
+                  }
+                ]
+              },
+              {
+                "id": 83,
+                "name": "Team With Highest Scoring",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.60"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "3.55"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "2.25"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 29,
+            "name": "Superbet",
+            "bets": [
+              {
+                "id": 14,
+                "name": "Match Winner",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.32"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "6.70"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.97"
+                  }
+                ]
+              },
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.02"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.76"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.30"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.30"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.53"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.40"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.32"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.25"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.41"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "2.77"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.74"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.02"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.07"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.70"
+                  }
+                ]
+              },
+              {
+                "id": 6,
+                "name": "Over/Under (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.59"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.22"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.66"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Asian Handicap (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home -0.5",
+                    "odd": "2.47"
+                  },
+                  {
+                    "value": "Away -0.5",
+                    "odd": "1.48"
+                  },
+                  {
+                    "value": "Home +0.5",
+                    "odd": "1.66"
+                  },
+                  {
+                    "value": "Away +0.5",
+                    "odd": "2.10"
+                  }
+                ]
+              },
+              {
+                "id": 29,
+                "name": "1x2 (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.52"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "4.35"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "2.12"
+                  }
+                ]
+              },
+              {
+                "id": 43,
+                "name": "Home Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.85"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.82"
+                  }
+                ]
+              },
+              {
+                "id": 44,
+                "name": "Away Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.62"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.12"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 10,
+            "name": "Marathon",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.02"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.71"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -1",
+                    "odd": "2.75"
+                  },
+                  {
+                    "value": "Away -1",
+                    "odd": "1.36"
+                  },
+                  {
+                    "value": "Home +1",
+                    "odd": "1.68"
+                  },
+                  {
+                    "value": "Away +1",
+                    "odd": "2.01"
+                  },
+                  {
+                    "value": "Home +2",
+                    "odd": "1.36"
+                  },
+                  {
+                    "value": "Away +2",
+                    "odd": "2.79"
+                  },
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.28"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.25"
+                  },
+                  {
+                    "value": "Home +3",
+                    "odd": "1.18"
+                  },
+                  {
+                    "value": "Away +3",
+                    "odd": "3.88"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.53"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.31"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.29"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.08"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 4",
+                    "odd": "1.22"
+                  },
+                  {
+                    "value": "Under 4",
+                    "odd": "3.48"
+                  },
+                  {
+                    "value": "Over 5",
+                    "odd": "1.46"
+                  },
+                  {
+                    "value": "Under 5",
+                    "odd": "2.45"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.35"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "2.79"
+                  },
+                  {
+                    "value": "Over 7",
+                    "odd": "2.35"
+                  },
+                  {
+                    "value": "Under 7",
+                    "odd": "1.47"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.70"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.01"
+                  },
+                  {
+                    "value": "Over 6",
+                    "odd": "1.84"
+                  },
+                  {
+                    "value": "Under 6",
+                    "odd": "1.82"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.01"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.66"
+                  }
+                ]
+              },
+              {
+                "id": 9,
+                "name": "Odd/Even (Including OT)",
+                "values": [
+                  {
+                    "value": "Odd",
+                    "odd": "1.56"
+                  },
+                  {
+                    "value": "Even",
+                    "odd": "2.21"
+                  }
+                ]
+              },
+              {
+                "id": 10,
+                "name": "1x2 (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "4.80"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "1.49"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "4.40"
+                  }
+                ]
+              },
+              {
+                "id": 33,
+                "name": "First Team To Score",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.15"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.59"
+                  }
+                ]
+              },
+              {
+                "id": 45,
+                "name": "Last Team To Score",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "1.80"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.86"
+                  }
+                ]
+              },
+              {
+                "id": 32,
+                "name": "Extra Innings",
+                "values": [
+                  {
+                    "value": "Yes",
+                    "odd": "6.40"
+                  },
+                  {
+                    "value": "No",
+                    "odd": "1.07"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Asian Handicap (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "1.95"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.72"
+                  }
+                ]
+              },
+              {
+                "id": 29,
+                "name": "1x2 (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.45"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "4.30"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "2.13"
+                  }
+                ]
+              },
+              {
+                "id": 11,
+                "name": "Over/Under (1st Inning)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "4.30"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "1.16"
+                  },
+                  {
+                    "value": "Over 0.5",
+                    "odd": "2.23"
+                  },
+                  {
+                    "value": "Under 0.5",
+                    "odd": "1.55"
+                  }
+                ]
+              },
+              {
+                "id": 12,
+                "name": "Asian Handicap (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "1.91"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.76"
+                  },
+                  {
+                    "value": "Home -1.5",
+                    "odd": "9.20"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.01"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.03"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "8.30"
+                  }
+                ]
+              },
+              {
+                "id": 43,
+                "name": "Home Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Over 2",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Under 2",
+                    "odd": "2.34"
+                  },
+                  {
+                    "value": "Over 3",
+                    "odd": "2.23"
+                  },
+                  {
+                    "value": "Under 3",
+                    "odd": "1.55"
+                  }
+                ]
+              },
+              {
+                "id": 44,
+                "name": "Away Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.61"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.12"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.62"
+                  },
+                  {
+                    "value": "Over 2",
+                    "odd": "1.36"
+                  },
+                  {
+                    "value": "Under 2",
+                    "odd": "2.79"
+                  },
+                  {
+                    "value": "Over 3",
+                    "odd": "1.81"
+                  },
+                  {
+                    "value": "Under 3",
+                    "odd": "1.85"
+                  },
+                  {
+                    "value": "Over 4",
+                    "odd": "2.54"
+                  },
+                  {
+                    "value": "Under 4",
+                    "odd": "1.43"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 11,
+            "name": "Unibet",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.04"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.76"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -0.5",
+                    "odd": "2.06"
+                  },
+                  {
+                    "value": "Away -0.5",
+                    "odd": "1.68"
+                  },
+                  {
+                    "value": "Home +0.5",
+                    "odd": "1.93"
+                  },
+                  {
+                    "value": "Away +0.5",
+                    "odd": "1.79"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.45"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 8.5",
+                    "odd": "2.85"
+                  },
+                  {
+                    "value": "Under 8.5",
+                    "odd": "1.38"
+                  },
+                  {
+                    "value": "Over 7.5",
+                    "odd": "2.70"
+                  },
+                  {
+                    "value": "Under 7.5",
+                    "odd": "1.42"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.68"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.07"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.02"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.72"
+                  }
+                ]
+              },
+              {
+                "id": 43,
+                "name": "Home Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.77"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.92"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.20"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.58"
+                  }
+                ]
+              },
+              {
+                "id": 44,
+                "name": "Away Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.64"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 13,
+            "name": "Betfair",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.67"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.50"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.67"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.10"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 30,
+            "name": "BetVictor",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "1.95"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.73"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.38"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.40"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "2.75"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.73"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.00"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.05"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.67"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 4,
+            "name": "Pinnacle",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.14"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.78"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -2",
+                    "odd": "4.70"
+                  },
+                  {
+                    "value": "Away -2",
+                    "odd": "1.18"
+                  },
+                  {
+                    "value": "Home +2",
+                    "odd": "1.42"
+                  },
+                  {
+                    "value": "Away +2",
+                    "odd": "2.95"
+                  },
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.56"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.30"
+                  },
+                  {
+                    "value": "Home +3",
+                    "odd": "1.23"
+                  },
+                  {
+                    "value": "Away +3",
+                    "odd": "3.99"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.60"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.43"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.34"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.26"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 5",
+                    "odd": "1.52"
+                  },
+                  {
+                    "value": "Under 5",
+                    "odd": "2.57"
+                  },
+                  {
+                    "value": "Over 8",
+                    "odd": "3.00"
+                  },
+                  {
+                    "value": "Under 8",
+                    "odd": "1.40"
+                  },
+                  {
+                    "value": "Over 7",
+                    "odd": "2.39"
+                  },
+                  {
+                    "value": "Under 7",
+                    "odd": "1.60"
+                  },
+                  {
+                    "value": "Over 7.5",
+                    "odd": "2.64"
+                  },
+                  {
+                    "value": "Under 7.5",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.75"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.12"
+                  },
+                  {
+                    "value": "Over 6",
+                    "odd": "1.90"
+                  },
+                  {
+                    "value": "Under 6",
+                    "odd": "1.93"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.78"
+                  }
+                ]
+              },
+              {
+                "id": 15,
+                "name": "Goals Over/Under 1st Half",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.61"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.32"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.14"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.72"
+                  },
+                  {
+                    "value": "Over 2",
+                    "odd": "1.37"
+                  },
+                  {
+                    "value": "Under 2",
+                    "odd": "3.08"
+                  },
+                  {
+                    "value": "Over 3",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Under 3",
+                    "odd": "1.99"
+                  },
+                  {
+                    "value": "Over 4",
+                    "odd": "2.54"
+                  },
+                  {
+                    "value": "Under 4",
+                    "odd": "1.52"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "2.71"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.46"
+                  }
+                ]
+              },
+              {
+                "id": 17,
+                "name": "Asian Handicap First Half",
+                "values": [
+                  {
+                    "value": "Home -1",
+                    "odd": "3.42"
+                  },
+                  {
+                    "value": "Away -1",
+                    "odd": "1.29"
+                  },
+                  {
+                    "value": "Home -0.5",
+                    "odd": "2.50"
+                  },
+                  {
+                    "value": "Away -0.5",
+                    "odd": "1.53"
+                  },
+                  {
+                    "value": "Home +0",
+                    "odd": "2.03"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.81"
+                  },
+                  {
+                    "value": "Home +0.5",
+                    "odd": "1.65"
+                  },
+                  {
+                    "value": "Away +0.5",
+                    "odd": "2.23"
+                  },
+                  {
+                    "value": "Home +1",
+                    "odd": "1.40"
+                  },
+                  {
+                    "value": "Away +1",
+                    "odd": "2.84"
+                  }
+                ]
+              },
+              {
+                "id": 70,
+                "name": "Home Team Total Goals(1st Half)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "2.26"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "1.65"
+                  }
+                ]
+              },
+              {
+                "id": 71,
+                "name": "Away Team Total Goals(1st Half)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "2.03"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "1.81"
+                  }
+                ]
+              },
+              {
+                "id": 43,
+                "name": "Home Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.47"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "2.70"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.99"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.80"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.44"
+                  }
+                ]
+              },
+              {
+                "id": 44,
+                "name": "Away Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.31"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "3.41"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.68"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.21"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.21"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.68"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 5,
+            "name": "SBO",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "1.93"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.73"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home +2",
+                    "odd": "1.33"
+                  },
+                  {
+                    "value": "Away +2",
+                    "odd": "2.66"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.46"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.35"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.73"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "1.93"
+                  },
+                  {
+                    "value": "Over 6",
+                    "odd": "1.85"
+                  },
+                  {
+                    "value": "Under 6",
+                    "odd": "1.81"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "1.99"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.68"
+                  }
+                ]
+              },
+              {
+                "id": 6,
+                "name": "Over/Under (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Over 3.5",
+                    "odd": "1.99"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.68"
+                  },
+                  {
+                    "value": "Over 3",
+                    "odd": "1.70"
+                  },
+                  {
+                    "value": "Under 3",
+                    "odd": "1.98"
+                  },
+                  {
+                    "value": "Over 4",
+                    "odd": "2.26"
+                  },
+                  {
+                    "value": "Under 4",
+                    "odd": "1.50"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Asian Handicap (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home -0.5",
+                    "odd": "2.29"
+                  },
+                  {
+                    "value": "Away -0.5",
+                    "odd": "1.48"
+                  },
+                  {
+                    "value": "Home +0.5",
+                    "odd": "1.58"
+                  },
+                  {
+                    "value": "Away +0.5",
+                    "odd": "2.12"
+                  },
+                  {
+                    "value": "Home +",
+                    "odd": "1.91"
+                  },
+                  {
+                    "value": "Away +",
+                    "odd": "1.75"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 1,
+            "name": "1xbet",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.05"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.83"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -1",
+                    "odd": "2.67"
+                  },
+                  {
+                    "value": "Away -1",
+                    "odd": "1.38"
+                  },
+                  {
+                    "value": "Home +1",
+                    "odd": "1.65"
+                  },
+                  {
+                    "value": "Away +1",
+                    "odd": "2.05"
+                  },
+                  {
+                    "value": "Home +2",
+                    "odd": "1.34"
+                  },
+                  {
+                    "value": "Away +2",
+                    "odd": "2.88"
+                  },
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.20"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.26"
+                  },
+                  {
+                    "value": "Home +3",
+                    "odd": "1.17"
+                  },
+                  {
+                    "value": "Away +3",
+                    "odd": "4.00"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.57"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.49"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.28"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.14"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 4",
+                    "odd": "1.23"
+                  },
+                  {
+                    "value": "Under 4",
+                    "odd": "3.42"
+                  },
+                  {
+                    "value": "Over 5",
+                    "odd": "1.46"
+                  },
+                  {
+                    "value": "Under 5",
+                    "odd": "2.45"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.35"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "2.79"
+                  },
+                  {
+                    "value": "Over 7",
+                    "odd": "2.38"
+                  },
+                  {
+                    "value": "Under 7",
+                    "odd": "1.46"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.78"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.11"
+                  },
+                  {
+                    "value": "Over 6",
+                    "odd": "1.84"
+                  },
+                  {
+                    "value": "Under 6",
+                    "odd": "1.82"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.01"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.66"
+                  }
+                ]
+              },
+              {
+                "id": 9,
+                "name": "Odd/Even (Including OT)",
+                "values": [
+                  {
+                    "value": "Odd",
+                    "odd": "1.56"
+                  },
+                  {
+                    "value": "Even",
+                    "odd": "2.21"
+                  }
+                ]
+              },
+              {
+                "id": 6,
+                "name": "Over/Under (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.36"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "1.93"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.74"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "2.57"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.42"
+                  }
+                ]
+              },
+              {
+                "id": 10,
+                "name": "1x2 (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "4.75"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "1.49"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "4.45"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Asian Handicap (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "1.92"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.75"
+                  }
+                ]
+              },
+              {
+                "id": 29,
+                "name": "1x2 (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.40"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "4.30"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "2.17"
+                  }
+                ]
+              },
+              {
+                "id": 11,
+                "name": "Over/Under (1st Inning)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "4.30"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "1.16"
+                  },
+                  {
+                    "value": "Over 0.5",
+                    "odd": "2.23"
+                  },
+                  {
+                    "value": "Under 0.5",
+                    "odd": "1.55"
+                  }
+                ]
+              },
+              {
+                "id": 12,
+                "name": "Asian Handicap (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home +0",
+                    "odd": "1.88"
+                  },
+                  {
+                    "value": "Away +0",
+                    "odd": "1.78"
+                  },
+                  {
+                    "value": "Home -1.5",
+                    "odd": "9.10"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.02"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.03"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "8.40"
+                  }
+                ]
+              },
+              {
+                "id": 43,
+                "name": "Home Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.33"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "2.95"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.73"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "1.94"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.39"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.48"
+                  },
+                  {
+                    "value": "Over 2",
+                    "odd": "1.48"
+                  },
+                  {
+                    "value": "Under 2",
+                    "odd": "2.40"
+                  },
+                  {
+                    "value": "Over 3",
+                    "odd": "2.19"
+                  },
+                  {
+                    "value": "Under 3",
+                    "odd": "1.57"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "3.46"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.24"
+                  }
+                ]
+              },
+              {
+                "id": 44,
+                "name": "Away Team Total Goals (Including OT)",
+                "values": [
+                  {
+                    "value": "Over 1.5",
+                    "odd": "1.27"
+                  },
+                  {
+                    "value": "Under 1.5",
+                    "odd": "3.27"
+                  },
+                  {
+                    "value": "Over 2.5",
+                    "odd": "1.60"
+                  },
+                  {
+                    "value": "Under 2.5",
+                    "odd": "2.13"
+                  },
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.12"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.61"
+                  },
+                  {
+                    "value": "Over 2",
+                    "odd": "1.36"
+                  },
+                  {
+                    "value": "Under 2",
+                    "odd": "2.79"
+                  },
+                  {
+                    "value": "Over 3",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Under 3",
+                    "odd": "1.83"
+                  },
+                  {
+                    "value": "Over 4.5",
+                    "odd": "2.87"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "1.34"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 28,
+            "name": "Betano",
+            "bets": [
+              {
+                "id": 1,
+                "name": "Home/Away",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.07"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.70"
+                  }
+                ]
+              },
+              {
+                "id": 2,
+                "name": "Asian Handicap",
+                "values": [
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.15"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.34"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.55"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.42"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.33"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.20"
+                  }
+                ]
+              },
+              {
+                "id": 5,
+                "name": "Over/Under",
+                "values": [
+                  {
+                    "value": "Over 4.5",
+                    "odd": "1.44"
+                  },
+                  {
+                    "value": "Under 4.5",
+                    "odd": "2.77"
+                  },
+                  {
+                    "value": "Over 7.5",
+                    "odd": "2.75"
+                  },
+                  {
+                    "value": "Under 7.5",
+                    "odd": "1.44"
+                  },
+                  {
+                    "value": "Over 5.5",
+                    "odd": "1.75"
+                  },
+                  {
+                    "value": "Under 5.5",
+                    "odd": "2.05"
+                  },
+                  {
+                    "value": "Over 6.5",
+                    "odd": "2.10"
+                  },
+                  {
+                    "value": "Under 6.5",
+                    "odd": "1.72"
+                  }
+                ]
+              },
+              {
+                "id": 23,
+                "name": "Correct Score",
+                "values": [
+                  {
+                    "value": "1:0",
+                    "odd": "15.00"
+                  },
+                  {
+                    "value": "2:0",
+                    "odd": "17.50"
+                  },
+                  {
+                    "value": "2:1",
+                    "odd": "11.25"
+                  },
+                  {
+                    "value": "3:0",
+                    "odd": "22.00"
+                  },
+                  {
+                    "value": "3:1",
+                    "odd": "16.00"
+                  },
+                  {
+                    "value": "3:2",
+                    "odd": "11.25"
+                  },
+                  {
+                    "value": "4:0",
+                    "odd": "27.00"
+                  },
+                  {
+                    "value": "4:1",
+                    "odd": "21.00"
+                  },
+                  {
+                    "value": "0:1",
+                    "odd": "17.50"
+                  },
+                  {
+                    "value": "0:2",
+                    "odd": "18.00"
+                  },
+                  {
+                    "value": "0:3",
+                    "odd": "18.50"
+                  },
+                  {
+                    "value": "1:2",
+                    "odd": "12.50"
+                  },
+                  {
+                    "value": "1:3",
+                    "odd": "15.00"
+                  },
+                  {
+                    "value": "2:3",
+                    "odd": "13.50"
+                  },
+                  {
+                    "value": "0:4",
+                    "odd": "21.00"
+                  },
+                  {
+                    "value": "1:4",
+                    "odd": "17.00"
+                  },
+                  {
+                    "value": "2:4",
+                    "odd": "16.50"
+                  },
+                  {
+                    "value": "4:2",
+                    "odd": "19.00"
+                  },
+                  {
+                    "value": "0:5",
+                    "odd": "27.00"
+                  },
+                  {
+                    "value": "0:6",
+                    "odd": "32.00"
+                  },
+                  {
+                    "value": "1:5",
+                    "odd": "20.00"
+                  },
+                  {
+                    "value": "1:6",
+                    "odd": "28.00"
+                  },
+                  {
+                    "value": "2:5",
+                    "odd": "21.00"
+                  },
+                  {
+                    "value": "2:6",
+                    "odd": "30.00"
+                  },
+                  {
+                    "value": "3:4",
+                    "odd": "17.00"
+                  },
+                  {
+                    "value": "5:0",
+                    "odd": "32.00"
+                  },
+                  {
+                    "value": "5:1",
+                    "odd": "28.00"
+                  },
+                  {
+                    "value": "5:2",
+                    "odd": "25.00"
+                  },
+                  {
+                    "value": "6:0",
+                    "odd": "45.00"
+                  },
+                  {
+                    "value": "6:1",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "6:2",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "4:3",
+                    "odd": "15.50"
+                  },
+                  {
+                    "value": "3:5",
+                    "odd": "24.00"
+                  },
+                  {
+                    "value": "3:6",
+                    "odd": "32.00"
+                  },
+                  {
+                    "value": "4:5",
+                    "odd": "25.00"
+                  },
+                  {
+                    "value": "4:6",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "5:3",
+                    "odd": "27.00"
+                  },
+                  {
+                    "value": "5:4",
+                    "odd": "23.00"
+                  },
+                  {
+                    "value": "5:6",
+                    "odd": "45.00"
+                  },
+                  {
+                    "value": "6:3",
+                    "odd": "40.00"
+                  },
+                  {
+                    "value": "6:4",
+                    "odd": "45.00"
+                  },
+                  {
+                    "value": "6:5",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "7:0",
+                    "odd": "60.00"
+                  },
+                  {
+                    "value": "7:1",
+                    "odd": "50.00"
+                  },
+                  {
+                    "value": "7:2",
+                    "odd": "50.00"
+                  },
+                  {
+                    "value": "7:3",
+                    "odd": "60.00"
+                  },
+                  {
+                    "value": "7:4",
+                    "odd": "70.00"
+                  },
+                  {
+                    "value": "7:5",
+                    "odd": "75.00"
+                  },
+                  {
+                    "value": "7:6",
+                    "odd": "80.00"
+                  },
+                  {
+                    "value": "8:0",
+                    "odd": "90.00"
+                  },
+                  {
+                    "value": "8:1",
+                    "odd": "70.00"
+                  },
+                  {
+                    "value": "8:2",
+                    "odd": "75.00"
+                  },
+                  {
+                    "value": "8:3",
+                    "odd": "80.00"
+                  },
+                  {
+                    "value": "8:4",
+                    "odd": "110.00"
+                  },
+                  {
+                    "value": "8:5",
+                    "odd": "120.00"
+                  },
+                  {
+                    "value": "8:6",
+                    "odd": "120.00"
+                  },
+                  {
+                    "value": "8:7",
+                    "odd": "150.00"
+                  },
+                  {
+                    "value": "0:7",
+                    "odd": "45.00"
+                  },
+                  {
+                    "value": "0:8",
+                    "odd": "55.00"
+                  },
+                  {
+                    "value": "0:9",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "1:7",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "1:8",
+                    "odd": "45.00"
+                  },
+                  {
+                    "value": "1:9",
+                    "odd": "32.00"
+                  },
+                  {
+                    "value": "2:7",
+                    "odd": "37.00"
+                  },
+                  {
+                    "value": "2:8",
+                    "odd": "50.00"
+                  },
+                  {
+                    "value": "2:9",
+                    "odd": "32.00"
+                  },
+                  {
+                    "value": "3:7",
+                    "odd": "40.00"
+                  },
+                  {
+                    "value": "3:8",
+                    "odd": "60.00"
+                  },
+                  {
+                    "value": "3:9",
+                    "odd": "40.00"
+                  },
+                  {
+                    "value": "4:7",
+                    "odd": "55.00"
+                  },
+                  {
+                    "value": "4:8",
+                    "odd": "70.00"
+                  },
+                  {
+                    "value": "4:9",
+                    "odd": "45.00"
+                  },
+                  {
+                    "value": "5:7",
+                    "odd": "70.00"
+                  },
+                  {
+                    "value": "5:8",
+                    "odd": "80.00"
+                  },
+                  {
+                    "value": "5:9",
+                    "odd": "70.00"
+                  },
+                  {
+                    "value": "6:7",
+                    "odd": "80.00"
+                  },
+                  {
+                    "value": "6:8",
+                    "odd": "110.00"
+                  },
+                  {
+                    "value": "6:9",
+                    "odd": "100.00"
+                  },
+                  {
+                    "value": "7:8",
+                    "odd": "150.00"
+                  },
+                  {
+                    "value": "7:9",
+                    "odd": "175.00"
+                  },
+                  {
+                    "value": "8:9",
+                    "odd": "200.00"
+                  }
+                ]
+              },
+              {
+                "id": 6,
+                "name": "Over/Under (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Over 3.5",
+                    "odd": "2.07"
+                  },
+                  {
+                    "value": "Under 3.5",
+                    "odd": "1.70"
+                  }
+                ]
+              },
+              {
+                "id": 10,
+                "name": "1x2 (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "4.70"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "4.50"
+                  }
+                ]
+              },
+              {
+                "id": 33,
+                "name": "First Team To Score",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.12"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.65"
+                  }
+                ]
+              },
+              {
+                "id": 45,
+                "name": "Last Team To Score",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "1.85"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "1.85"
+                  }
+                ]
+              },
+              {
+                "id": 3,
+                "name": "Asian Handicap (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.33"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "3.15"
+                  }
+                ]
+              },
+              {
+                "id": 29,
+                "name": "1x2 (1st 5 Innings)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "2.37"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "4.25"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "2.15"
+                  }
+                ]
+              },
+              {
+                "id": 46,
+                "name": "Asian Handicap (1st 7 Innings)",
+                "values": [
+                  {
+                    "value": "Home -1.5",
+                    "odd": "3.05"
+                  },
+                  {
+                    "value": "Away -1.5",
+                    "odd": "1.33"
+                  },
+                  {
+                    "value": "Home +1.5",
+                    "odd": "1.42"
+                  },
+                  {
+                    "value": "Away +1.5",
+                    "odd": "2.67"
+                  },
+                  {
+                    "value": "Home +2.5",
+                    "odd": "1.24"
+                  },
+                  {
+                    "value": "Away +2.5",
+                    "odd": "3.60"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": 9,
+            "name": "10Bet",
+            "bets": [
+              {
+                "id": 10,
+                "name": "1x2 (1st Inning)",
+                "values": [
+                  {
+                    "value": "Home",
+                    "odd": "4.75"
+                  },
+                  {
+                    "value": "Draw",
+                    "odd": "1.50"
+                  },
+                  {
+                    "value": "Away",
+                    "odd": "4.20"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,28 @@
 {
+  "CPBL": {
+    "bookmakers": [],
+    "snapshots": 2
+  },
   "IL": {
     "bookmakers": [],
-    "snapshots": 4
+    "snapshots": 13
+  },
+  "KBO": {
+    "bookmakers": [
+      "10Bet",
+      "1xbet",
+      "Bet365",
+      "BetVictor",
+      "Betano",
+      "Betfair",
+      "Marathon",
+      "Pinnacle",
+      "SBO",
+      "Superbet",
+      "Unibet",
+      "WilliamHill"
+    ],
+    "snapshots": 5
   },
   "MLB": {
     "bookmakers": [
@@ -18,6 +39,27 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 5
+    "snapshots": 15
+  },
+  "NPB": {
+    "bookmakers": [
+      "10Bet",
+      "1xbet",
+      "Bet365",
+      "BetVictor",
+      "Betano",
+      "Betfair",
+      "Marathon",
+      "Pinnacle",
+      "SBO",
+      "Superbet",
+      "Unibet",
+      "WilliamHill"
+    ],
+    "snapshots": 6
+  },
+  "PCL": {
+    "bookmakers": [],
+    "snapshots": 2
   }
 }
