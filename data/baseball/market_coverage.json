@@ -1,11 +1,11 @@
 {
   "CPBL": {
     "bookmakers": [],
-    "snapshots": 2
+    "snapshots": 4
   },
   "IL": {
     "bookmakers": [],
-    "snapshots": 13
+    "snapshots": 22
   },
   "KBO": {
     "bookmakers": [
@@ -28,6 +28,7 @@
     "bookmakers": [
       "10Bet",
       "1xbet",
+      "888Sport",
       "Bet365",
       "BetVictor",
       "Betano",
@@ -39,7 +40,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 15
+    "snapshots": 25
   },
   "NPB": {
     "bookmakers": [
@@ -60,6 +61,6 @@
   },
   "PCL": {
     "bookmakers": [],
-    "snapshots": 2
+    "snapshots": 4
   }
 }
