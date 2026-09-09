@@ -26,7 +26,7 @@
   },
   "LMB": {
     "bookmakers": [],
-    "snapshots": 2
+    "snapshots": 3
   },
   "MLB": {
     "bookmakers": [
@@ -44,7 +44,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 65
+    "snapshots": 70
   },
   "NPB": {
     "bookmakers": [
@@ -65,6 +65,6 @@
   },
   "PCL": {
     "bookmakers": [],
-    "snapshots": 15
+    "snapshots": 18
   }
 }

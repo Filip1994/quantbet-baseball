@@ -1,10 +1,10 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-09T01:56:43.358529+00:00`
+Generated: `2026-09-09T02:54:18.117057+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **171**
+- Snapshot rows collected: **180**
 - Unique games observed: **104**
 - Leagues observed: **7**
 - Bookmakers observed: **13**
@@ -15,13 +15,13 @@ Generated: `2026-09-09T01:56:43.358529+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 65 |
+| MLB | 70 |
 | IL | 50 |
 | NPB | 18 |
-| PCL | 15 |
+| PCL | 18 |
 | KBO | 13 |
 | CPBL | 8 |
-| LMB | 2 |
+| LMB | 3 |
 
 ## Bookmakers returned by API
 
@@ -97,7 +97,7 @@ Generated: `2026-09-09T01:56:43.358529+00:00`
 |---|---:|
 | 2026-09-07 | 9 |
 | 2026-09-08 | 98 |
-| 2026-09-09 | 64 |
+| 2026-09-09 | 73 |
 
 ## API errors
 
