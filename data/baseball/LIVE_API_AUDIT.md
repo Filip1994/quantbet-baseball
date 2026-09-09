@@ -1,12 +1,12 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-09T02:54:18.117057+00:00`
+Generated: `2026-09-09T07:30:25.672816+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **180**
-- Unique games observed: **104**
-- Leagues observed: **7**
+- Snapshot rows collected: **238**
+- Unique games observed: **107**
+- Leagues observed: **8**
 - Bookmakers observed: **13**
 - Distinct market names observed: **45**
 - Odds/API errors recorded: **0**
@@ -15,78 +15,79 @@ Generated: `2026-09-09T02:54:18.117057+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 70 |
-| IL | 50 |
-| NPB | 18 |
-| PCL | 18 |
-| KBO | 13 |
-| CPBL | 8 |
-| LMB | 3 |
+| MLB | 87 |
+| IL | 60 |
+| NPB | 30 |
+| PCL | 23 |
+| KBO | 21 |
+| CPBL | 12 |
+| LMB | 4 |
+| Hoofdklasse | 1 |
 
 ## Bookmakers returned by API
 
 | Bookmaker | Snapshot appearances |
 |---|---:|
-| 10Bet | 56 |
-| 1xbet | 56 |
-| Bet365 | 56 |
-| BetVictor | 56 |
-| Betano | 56 |
-| Betfair | 56 |
-| Marathon | 56 |
-| Pinnacle | 56 |
-| SBO | 56 |
-| Superbet | 56 |
-| Unibet | 56 |
-| WilliamHill | 56 |
-| 888Sport | 30 |
+| 10Bet | 80 |
+| 1xbet | 80 |
+| BetVictor | 80 |
+| Betano | 80 |
+| Marathon | 80 |
+| Superbet | 80 |
+| Unibet | 80 |
+| WilliamHill | 80 |
+| Bet365 | 79 |
+| SBO | 79 |
+| Pinnacle | 77 |
+| Betfair | 66 |
+| 888Sport | 53 |
 
 ## Markets returned by API
 
 | Market | Snapshot appearances |
 |---|---:|
-| 1x2 (1st 5 Innings) | 56 |
-| 1x2 (1st Inning) | 56 |
-| A Run (1st Inning) | 56 |
-| Asian Handicap | 56 |
-| Asian Handicap (1st 3 Innings) | 56 |
-| Asian Handicap (1st 5 Innings) | 56 |
-| Asian Handicap (1st 7 Innings) | 56 |
-| Asian Handicap (1st Inning) | 56 |
-| Asian Handicap First Half | 56 |
-| Away Team Total Goals (Including OT) | 56 |
-| Away Team Total Goals(1st Half) | 56 |
-| Correct Score | 56 |
-| Extra Innings | 56 |
-| First Team To Score | 56 |
-| Goals Over/Under 1st Half | 56 |
-| Home Team Total Goals (Including OT) | 56 |
-| Home Team Total Goals(1st Half) | 56 |
-| Home/Away | 56 |
-| Last Team To Score | 56 |
-| Match Winner | 56 |
-| Odd/Even (Including OT) | 56 |
-| Over/Under | 56 |
-| Over/Under (1st 3 Innings) | 56 |
-| Over/Under (1st 5 Innings) | 56 |
-| Over/Under (1st 7 Innings) | 56 |
-| Over/Under (1st Inning) | 56 |
-| Result/Total Goals | 56 |
-| HT/FT (Including OT) | 55 |
-| Away Odd/Even (OT) | 52 |
-| Home Odd/Even (OT) | 52 |
-| Team With Highest Scoring | 52 |
-| Away Total Hits | 45 |
+| 1x2 (1st 5 Innings) | 80 |
+| 1x2 (1st Inning) | 80 |
+| Asian Handicap | 80 |
+| Asian Handicap (1st 5 Innings) | 80 |
+| Asian Handicap (1st 7 Innings) | 80 |
+| Asian Handicap (1st Inning) | 80 |
+| Away Team Total Goals (Including OT) | 80 |
+| Correct Score | 80 |
+| Extra Innings | 80 |
+| First Team To Score | 80 |
+| Home Team Total Goals (Including OT) | 80 |
+| Home/Away | 80 |
+| Last Team To Score | 80 |
+| Match Winner | 80 |
+| Odd/Even (Including OT) | 80 |
+| Over/Under | 80 |
+| Over/Under (1st 5 Innings) | 80 |
+| Over/Under (1st Inning) | 80 |
+| Result/Total Goals | 78 |
+| Asian Handicap First Half | 77 |
+| Away Team Total Goals(1st Half) | 77 |
+| Goals Over/Under 1st Half | 77 |
+| Home Team Total Goals(1st Half) | 77 |
+| A Run (1st Inning) | 76 |
+| Asian Handicap (1st 3 Innings) | 75 |
+| Over/Under (1st 3 Innings) | 75 |
+| Over/Under (1st 7 Innings) | 74 |
+| HT/FT (Including OT) | 65 |
+| Away Odd/Even (OT) | 64 |
+| Home Odd/Even (OT) | 64 |
+| Team With Highest Scoring | 62 |
+| Player Runs | 57 |
+| Total Hits | 56 |
+| Away Total Hits | 55 |
+| Home Total Hits | 55 |
+| Asian Handicap (4.5 Innings) | 52 |
+| Over/Under (4.5 Innings) | 52 |
 | First Home Run | 45 |
-| Home Total Hits | 45 |
-| Player Runs | 45 |
-| Total Hits | 45 |
-| Asian Handicap (4.5 Innings) | 41 |
-| Over/Under (4.5 Innings) | 41 |
 | Player Total Bases | 7 |
 | Player Doubles | 6 |
+| Pitcher Strikeouts | 3 |
 | Pitcher Hits Allowed | 3 |
-| Pitcher Strikeouts | 2 |
 | Player Stolen Bases | 1 |
 | Player Hits | 1 |
 | Pitcher Outs | 1 |
@@ -97,7 +98,7 @@ Generated: `2026-09-09T02:54:18.117057+00:00`
 |---|---:|
 | 2026-09-07 | 9 |
 | 2026-09-08 | 98 |
-| 2026-09-09 | 73 |
+| 2026-09-09 | 131 |
 
 ## API errors
 
