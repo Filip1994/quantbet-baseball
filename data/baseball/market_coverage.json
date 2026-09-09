@@ -9,7 +9,7 @@
   },
   "IL": {
     "bookmakers": [],
-    "snapshots": 119
+    "snapshots": 126
   },
   "KBO": {
     "bookmakers": [
@@ -49,7 +49,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 147
+    "snapshots": 161
   },
   "NPB": {
     "bookmakers": [
@@ -71,6 +71,6 @@
   },
   "PCL": {
     "bookmakers": [],
-    "snapshots": 41
+    "snapshots": 45
   }
 }
