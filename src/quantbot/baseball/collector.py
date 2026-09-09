@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .api import BaseballAPIBudgetExceeded, BaseballAPIClient, BaseballAPIError
+from .lifecycle import flatten_market_observations
 
 LOCAL_BOOKMAKER_TOKENS = (
     "bet365",
@@ -98,9 +99,7 @@ def _bookmaker_records(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 for market in bets:
                     if not isinstance(market, dict):
                         continue
-                    market_name = _text(
-                        market.get("name") or market.get("label") or market.get("type")
-                    )
+                    market_name = _text(market.get("name") or market.get("label") or market.get("type"))
                     values = market.get("values") or market.get("outcomes") or []
                     if isinstance(values, dict):
                         values = [values]
@@ -110,12 +109,8 @@ def _bookmaker_records(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
                             if not isinstance(value, dict):
                                 continue
                             row = {
-                                "value": value.get("value")
-                                or value.get("label")
-                                or value.get("name"),
-                                "odd": value.get("odd")
-                                or value.get("price")
-                                or value.get("odds"),
+                                "value": value.get("value") or value.get("label") or value.get("name"),
+                                "odd": value.get("odd") or value.get("price") or value.get("odds"),
                                 "handicap": value.get("handicap") or value.get("point"),
                             }
                             if any(v is not None for v in row.values()):
@@ -160,15 +155,12 @@ def _append_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
             handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
 
 
-def collect_once(
-    root: Path, *, now: datetime | None = None, max_odds_requests: int = 148
-) -> dict[str, int]:
-    """Collect aggressively while enforcing a hard per-run request ceiling.
+def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: int = 72) -> dict[str, int]:
+    """Collect market evidence under a hard budget while prioritising decision proximity.
 
-    The production workflow reserves 150 API attempts per 30-minute run:
-    two date-level games calls plus at most 148 odds calls. With 48 runs/day this
-    is capped at 7,200 attempts/day, leaving ~300 requests of headroom below a
-    7,500/day subscription for retries, diagnostics, and future enrichment.
+    The production workflow runs every 15 minutes. Two date-discovery calls plus at
+    most 72 odds calls give a theoretical ceiling of 7,104 API attempts/day (96 runs),
+    leaving 396/day headroom under a 7,500/day subscription.
     """
     now = (now or datetime.now(UTC)).astimezone(UTC)
     from .config import BaseballSettings
@@ -176,8 +168,6 @@ def collect_once(
     settings = BaseballSettings.from_env(root)
     client = BaseballAPIClient(settings)
 
-    # Query today and tomorrow so games entering the +36h window are visible even
-    # when the collector runs late at night. Cache makes repeated date discovery cheap.
     dates = [now.date(), now.date() + timedelta(days=1)]
     games: list[dict[str, Any]] = []
     seen_game_ids: set[int] = set()
@@ -202,8 +192,7 @@ def collect_once(
         if -180 <= minutes <= 36 * 60:
             candidates.append((kickoff, game))
 
-    # Spread coverage across leagues first, then use every remaining slot on games
-    # nearest to first pitch. This prevents MLB from consuming the whole budget.
+    # First protect league diversity, then fill by proximity to decision time.
     candidates.sort(key=lambda item: (item[0], _league_name(item[1]), _game_id(item[1]) or 0))
     selected: list[dict[str, Any]] = []
     seen_leagues: set[str] = set()
@@ -222,9 +211,11 @@ def collect_once(
             if len(selected) >= max_odds_requests:
                 break
 
-    day_path = root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
+    snapshot_path = root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
+    observation_path = root / "data" / "baseball" / "market_observations.jsonl"
     coverage_path = root / "data" / "baseball" / "market_coverage.json"
     rows: list[dict[str, Any]] = []
+    observations: list[dict[str, Any]] = []
     coverage: dict[str, Any] = {}
     if coverage_path.exists():
         try:
@@ -243,14 +234,12 @@ def collect_once(
         except BaseballAPIBudgetExceeded:
             break
         except BaseballAPIError as exc:
-            rows.append(
-                {
-                    "captured_at": now.isoformat(),
-                    "game": game,
-                    "game_id": game_id,
-                    "odds_error": str(exc),
-                }
-            )
+            rows.append({
+                "captured_at": now.isoformat(),
+                "game": game,
+                "game_id": game_id,
+                "odds_error": str(exc),
+            })
             continue
         odds_calls += 1
         compact = compact_odds(odds)
@@ -265,29 +254,28 @@ def collect_once(
         existing["snapshots"] = int(existing.get("snapshots") or 0) + 1
         home, away = _team_names(game)
         kickoff = _game_time(game)
-        rows.append(
-            {
-                "captured_at": now.isoformat(),
-                "game_id": game_id,
-                "kickoff": kickoff.isoformat() if kickoff else None,
-                "league": league,
-                "home": home,
-                "away": away,
-                "game": game,
-                "odds": compact,
-            }
-        )
+        snapshot = {
+            "captured_at": now.isoformat(),
+            "game_id": game_id,
+            "kickoff": kickoff.isoformat() if kickoff else None,
+            "league": league,
+            "home": home,
+            "away": away,
+            "game": game,
+            "odds": compact,
+        }
+        rows.append(snapshot)
+        observations.extend(flatten_market_observations(snapshot))
 
-    _append_jsonl(day_path, rows)
+    _append_jsonl(snapshot_path, rows)
+    _append_jsonl(observation_path, observations)
     coverage_path.parent.mkdir(parents=True, exist_ok=True)
-    coverage_path.write_text(
-        json.dumps(coverage, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    coverage_path.write_text(json.dumps(coverage, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return {
         "games_seen": games_seen,
         "games_selected": len(selected),
         "odds_calls": odds_calls,
+        "observations_written": len(observations),
         "api_requests": client.request_count,
         "api_remaining": client.remaining_budget,
         "rows_written": len(rows),
