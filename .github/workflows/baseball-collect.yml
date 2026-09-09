@@ -4,9 +4,10 @@ on:
   push:
     paths:
       - ".github/workflows/baseball-collect.yml"
+      - "src/quantbot/baseball/**"
   workflow_dispatch:
   schedule:
-    - cron: "*/30 6-23 * * *"
+    - cron: "*/30 * * * *"
       timezone: "Europe/Belgrade"
 
 permissions:
@@ -22,7 +23,9 @@ jobs:
     env:
       API_BASEBALL_KEY: ${{ secrets.API_BASEBALL_KEY }}
       API_BASEBALL_BASE_URL: https://v1.baseball.api-sports.io
-      BASEBALL_API_REQUEST_BUDGET: "200"
+      # 150 hard request attempts/run x 48 runs/day = 7,200/day max.
+      # Leaves ~300/day headroom under a 7,500/day subscription.
+      BASEBALL_API_REQUEST_BUDGET: "150"
       BASEBALL_API_MAX_ATTEMPTS: "3"
       BASEBALL_API_RETRY_BASE_SECONDS: "1"
       TIMEZONE: Europe/Belgrade
@@ -45,7 +48,7 @@ jobs:
 
       - name: Collect Baseball snapshots and market coverage
         run: |
-          python -c "from pathlib import Path; from quantbot.baseball.collector import collect_once; print(collect_once(Path('.'), max_odds_requests=199))"
+          python -c "from pathlib import Path; from quantbot.baseball.collector import collect_once; print(collect_once(Path('.'), max_odds_requests=148))"
 
       - name: Scan Baseball intraday paper signals
         run: |
