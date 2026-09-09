@@ -5,6 +5,8 @@ on:
     paths:
       - ".github/workflows/baseball-collect.yml"
       - "src/quantbot/baseball/**"
+      - "scripts/baseball_*.py"
+      - "docs/**"
   workflow_dispatch:
   schedule:
     - cron: "*/15 * * * *"
@@ -56,6 +58,9 @@ jobs:
 
       - name: Build human-readable API audit
         run: python scripts/baseball_audit.py
+
+      - name: Build dashboard presentation contract
+        run: python scripts/baseball_dashboard.py
 
       - name: Commit Baseball data footprint
         run: |
