@@ -1,15 +1,15 @@
 {
   "CPBL": {
     "bookmakers": [],
-    "snapshots": 16
+    "snapshots": 17
   },
   "Hoofdklasse": {
     "bookmakers": [],
-    "snapshots": 2
+    "snapshots": 3
   },
   "IL": {
     "bookmakers": [],
-    "snapshots": 80
+    "snapshots": 100
   },
   "KBO": {
     "bookmakers": [
@@ -27,11 +27,11 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 29
+    "snapshots": 33
   },
   "LMB": {
     "bookmakers": [],
-    "snapshots": 5
+    "snapshots": 6
   },
   "MLB": {
     "bookmakers": [
@@ -49,7 +49,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 107
+    "snapshots": 127
   },
   "NPB": {
     "bookmakers": [
@@ -67,10 +67,10 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 36
+    "snapshots": 42
   },
   "PCL": {
     "bookmakers": [],
-    "snapshots": 29
+    "snapshots": 35
   }
 }
