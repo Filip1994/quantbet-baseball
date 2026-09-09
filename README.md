@@ -2,23 +2,32 @@
 
 Standalone Baseball data, modelling and paper-trading engine for QuantBet.
 
-## Current phase
+## Current architecture
 
-- API-Sports Baseball ingestion
-- persistent response cache
-- bounded API request budget and retry/backoff
-- 30-minute scheduled snapshots during the active day
-- bookmaker and market coverage inventory
-- intraday paper-signal plumbing
-- paper-only operation
+- **Observe first:** event universe is discovered independently from betting qualification.
+- **Adaptive observation lifecycle:** cadence increases as first pitch approaches; the 15-minute workflow clock is the production upper bound.
+- **Canonical evidence:** every retained bookmaker / market / selection observation is written to `data/baseball/market_observations.jsonl` with event identity, capture time, source and validation metadata.
+- **Raw evidence:** uncached API envelopes are archived under `data/baseball/raw_api/` for parser auditing.
+- **Opening integrity:** opening price is only reported when an earlier observation actually exists; otherwise it remains unavailable.
+- **Lifecycle states:** discovered → observing → modelled → eligible → signal → pick → closing → settled → evaluated, with explicit skip/block/error states and reason codes.
+- **API economics:** 15-minute runs, 74 hard attempts/run and 72 odds slots produce a theoretical ceiling of 7,104 API attempts/day, leaving 396/day headroom below a 7,500/day subscription.
+- **Presentation contract:** `data/baseball/dashboard.json` is the single frontend data contract; the website does not create a second betting truth.
+- **Mobile-first control dashboard:** `docs/index.html` exposes overview, watchlist, production, signals, market intelligence and system health.
+- **Paper-only operation:** no real-money staking.
 
-The prediction model is intentionally not considered production-ready yet. The next stages are live schema validation, feature normalization, Baseball-specific probability models, calibration, walk-forward validation, CLV capture and settlement.
+## Baseball-specific modelling roadmap
 
-## Architecture
+The prediction model is intentionally not considered production-ready. The next stages are historical time-series construction, point-in-time feature engineering, Baseball-specific probability models, calibration, walk-forward validation, CLV capture and settlement.
 
-Baseball follows the proven QuantBet operating pattern where appropriate, but uses Baseball-specific modelling features such as starting pitcher, handedness, lineup, batter/pitcher splits, bullpen workload, park, weather, rest/travel, team rates and market state.
+Candidate features include starting pitcher and handedness, workload, bullpen availability, confirmed/expected lineup, batter/pitcher splits, park/weather, rest/travel, offense/defense and market state.
 
-Entry decisions will eventually be `WAIT`, `UPLATI SADA` or `SKIP`. Signals are immutable once issued.
+Primary market tiers will be validated empirically rather than assumed. The initial candidates are moneyline, run line and full-game total, followed by F5 and only later player props when settlement semantics and feed coverage are reliable.
+
+## Operating philosophy
+
+> **Observe first. Preserve evidence. Decide second. Evaluate third. Optimize last.**
+
+Collection is deliberately broader than production qualification. A market observation is evidence, not a bet. Missing evidence is represented as unavailable rather than reconstructed or guessed.
 
 ## Safety
 
