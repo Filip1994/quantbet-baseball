@@ -48,6 +48,9 @@ jobs:
       - name: Validate API key presence
         run: test -n "$API_BASEBALL_KEY"
 
+      - name: Synchronize with latest main before collection
+        run: git pull --rebase origin main
+
       - name: Collect Baseball snapshots and market coverage
         run: |
           python -c "from pathlib import Path; from quantbot.baseball.collector import collect_once; print(collect_once(Path('.'), max_odds_requests=72))"
@@ -73,4 +76,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "Collect Baseball market snapshots"
+          git pull --rebase origin main
           git push origin main
