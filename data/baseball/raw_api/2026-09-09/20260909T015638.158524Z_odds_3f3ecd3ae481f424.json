@@ -1,0 +1,16 @@
+{
+  "captured_at": "2026-09-09T01:56:38.158731+00:00",
+  "endpoint": "odds",
+  "params": {
+    "game": 186756
+  },
+  "payload": {
+    "get": "odds",
+    "parameters": {
+      "game": "186756"
+    },
+    "errors": [],
+    "results": 0,
+    "response": []
+  }
+}

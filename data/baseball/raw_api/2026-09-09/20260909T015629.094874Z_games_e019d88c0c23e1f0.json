@@ -1,0 +1,2499 @@
+{
+  "captured_at": "2026-09-09T01:56:29.095038+00:00",
+  "endpoint": "games",
+  "params": {
+    "date": "2026-09-10"
+  },
+  "payload": {
+    "get": "games",
+    "parameters": {
+      "date": "2026-09-10"
+    },
+    "errors": [],
+    "results": 34,
+    "response": [
+      {
+        "id": 175964,
+        "date": "2026-09-10T00:35:00+00:00",
+        "time": "00:35",
+        "timestamp": 1789000500,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 4,
+          "name": "PCL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/4.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 84,
+            "name": "Salt Lake Bees",
+            "logo": "https://media.api-sports.io/baseball/teams/84.png"
+          },
+          "away": {
+            "id": 83,
+            "name": "Round Rock Express",
+            "logo": "https://media.api-sports.io/baseball/teams/83.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 175963,
+        "date": "2026-09-10T01:05:00+00:00",
+        "time": "01:05",
+        "timestamp": 1789002300,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 4,
+          "name": "PCL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/4.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 82,
+            "name": "Reno Aces",
+            "logo": "https://media.api-sports.io/baseball/teams/82.png"
+          },
+          "away": {
+            "id": 38,
+            "name": "Albuquerque Isotopes",
+            "logo": "https://media.api-sports.io/baseball/teams/38.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 175965,
+        "date": "2026-09-10T01:05:00+00:00",
+        "time": "01:05",
+        "timestamp": 1789002300,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 4,
+          "name": "PCL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/4.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 86,
+            "name": "Tacoma Rainiers",
+            "logo": "https://media.api-sports.io/baseball/teams/86.png"
+          },
+          "away": {
+            "id": 49,
+            "name": "El Paso Chihuahuas",
+            "logo": "https://media.api-sports.io/baseball/teams/49.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 175961,
+        "date": "2026-09-10T02:05:00+00:00",
+        "time": "02:05",
+        "timestamp": 1789005900,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 4,
+          "name": "PCL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/4.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 80,
+            "name": "Las Vegas Aviators",
+            "logo": "https://media.api-sports.io/baseball/teams/80.png"
+          },
+          "away": {
+            "id": 54,
+            "name": "Sacramento River Cats",
+            "logo": "https://media.api-sports.io/baseball/teams/54.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 185710,
+        "date": "2026-09-10T02:10:00+00:00",
+        "time": "02:10",
+        "timestamp": 1789006200,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 1,
+          "name": "MLB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/1.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 18,
+            "name": "Los Angeles Dodgers",
+            "logo": "https://media.api-sports.io/baseball/teams/18.png"
+          },
+          "away": {
+            "id": 8,
+            "name": "Cincinnati Reds",
+            "logo": "https://media.api-sports.io/baseball/teams/8.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186833,
+        "date": "2026-09-10T02:35:00+00:00",
+        "time": "02:35",
+        "timestamp": 1789007700,
+        "timezone": "UTC",
+        "week": "Final",
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 15,
+          "name": "Mexico",
+          "code": "MX",
+          "flag": "https://media.api-sports.io/flags/mx.svg"
+        },
+        "league": {
+          "id": 21,
+          "name": "LMB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/21.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 297,
+            "name": "Toros de Tijuana",
+            "logo": "https://media.api-sports.io/baseball/teams/297.png"
+          },
+          "away": {
+            "id": 296,
+            "name": "Tabasco",
+            "logo": "https://media.api-sports.io/baseball/teams/296.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181386,
+        "date": "2026-09-10T09:00:00+00:00",
+        "time": "09:00",
+        "timestamp": 1789030800,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 55,
+            "name": "Chiba Lotte Marines",
+            "logo": "https://media.api-sports.io/baseball/teams/55.png"
+          },
+          "away": {
+            "id": 62,
+            "name": "Rakuten Gold. Eagles",
+            "logo": "https://media.api-sports.io/baseball/teams/62.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181387,
+        "date": "2026-09-10T09:00:00+00:00",
+        "time": "09:00",
+        "timestamp": 1789030800,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 57,
+            "name": "Fukuoka S. Hawks",
+            "logo": "https://media.api-sports.io/baseball/teams/57.png"
+          },
+          "away": {
+            "id": 60,
+            "name": "Nippon Ham Fighters",
+            "logo": "https://media.api-sports.io/baseball/teams/60.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181388,
+        "date": "2026-09-10T09:00:00+00:00",
+        "time": "09:00",
+        "timestamp": 1789030800,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 58,
+            "name": "Hanshin Tigers",
+            "logo": "https://media.api-sports.io/baseball/teams/58.png"
+          },
+          "away": {
+            "id": 59,
+            "name": "Hiroshima Carp",
+            "logo": "https://media.api-sports.io/baseball/teams/59.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181389,
+        "date": "2026-09-10T09:00:00+00:00",
+        "time": "09:00",
+        "timestamp": 1789030800,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 61,
+            "name": "Orix Buffaloes",
+            "logo": "https://media.api-sports.io/baseball/teams/61.png"
+          },
+          "away": {
+            "id": 63,
+            "name": "Seibu Lions",
+            "logo": "https://media.api-sports.io/baseball/teams/63.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181390,
+        "date": "2026-09-10T09:00:00+00:00",
+        "time": "09:00",
+        "timestamp": 1789030800,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 65,
+            "name": "Yokohama BayStars",
+            "logo": "https://media.api-sports.io/baseball/teams/65.png"
+          },
+          "away": {
+            "id": 64,
+            "name": "Yakult Swallows",
+            "logo": "https://media.api-sports.io/baseball/teams/64.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181391,
+        "date": "2026-09-10T09:00:00+00:00",
+        "time": "09:00",
+        "timestamp": 1789030800,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 2,
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://media.api-sports.io/flags/jp.svg"
+        },
+        "league": {
+          "id": 2,
+          "name": "NPB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/2.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 66,
+            "name": "Yomiuri Giants",
+            "logo": "https://media.api-sports.io/baseball/teams/66.png"
+          },
+          "away": {
+            "id": 56,
+            "name": "Chunichi Dragons",
+            "logo": "https://media.api-sports.io/baseball/teams/56.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181457,
+        "date": "2026-09-10T09:30:00+00:00",
+        "time": "09:30",
+        "timestamp": 1789032600,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 3,
+          "name": "South-Korea",
+          "code": "KR",
+          "flag": "https://media.api-sports.io/flags/kr.svg"
+        },
+        "league": {
+          "id": 5,
+          "name": "KBO",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/5.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 647,
+            "name": "SSG Landers",
+            "logo": "https://media.api-sports.io/baseball/teams/647.png"
+          },
+          "away": {
+            "id": 89,
+            "name": "Hanwha Eagles",
+            "logo": "https://media.api-sports.io/baseball/teams/89.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 181459,
+        "date": "2026-09-10T09:30:00+00:00",
+        "time": "09:30",
+        "timestamp": 1789032600,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 3,
+          "name": "South-Korea",
+          "code": "KR",
+          "flag": "https://media.api-sports.io/flags/kr.svg"
+        },
+        "league": {
+          "id": 5,
+          "name": "KBO",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/5.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 94,
+            "name": "Lotte Giants",
+            "logo": "https://media.api-sports.io/baseball/teams/94.png"
+          },
+          "away": {
+            "id": 91,
+            "name": "KT Wiz Suwon",
+            "logo": "https://media.api-sports.io/baseball/teams/91.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 182040,
+        "date": "2026-09-10T09:30:00+00:00",
+        "time": "09:30",
+        "timestamp": 1789032600,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 3,
+          "name": "South-Korea",
+          "code": "KR",
+          "flag": "https://media.api-sports.io/flags/kr.svg"
+        },
+        "league": {
+          "id": 5,
+          "name": "KBO",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/5.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 88,
+            "name": "Doosan Bears",
+            "logo": "https://media.api-sports.io/baseball/teams/88.png"
+          },
+          "away": {
+            "id": 92,
+            "name": "Kiwoom Heroes",
+            "logo": "https://media.api-sports.io/baseball/teams/92.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186697,
+        "date": "2026-09-10T09:30:00+00:00",
+        "time": "09:30",
+        "timestamp": 1789032600,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 3,
+          "name": "South-Korea",
+          "code": "KR",
+          "flag": "https://media.api-sports.io/flags/kr.svg"
+        },
+        "league": {
+          "id": 5,
+          "name": "KBO",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/5.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 90,
+            "name": "KIA Tigers",
+            "logo": "https://media.api-sports.io/baseball/teams/90.png"
+          },
+          "away": {
+            "id": 95,
+            "name": "NC Dinos",
+            "logo": "https://media.api-sports.io/baseball/teams/95.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 184276,
+        "date": "2026-09-10T10:35:00+00:00",
+        "time": "10:35",
+        "timestamp": 1789036500,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 22,
+          "name": "Taiwan",
+          "code": "TW",
+          "flag": "https://media.api-sports.io/flags/tw.svg"
+        },
+        "league": {
+          "id": 29,
+          "name": "CPBL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/29.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 348,
+            "name": "Chinatrust Brothers",
+            "logo": "https://media.api-sports.io/baseball/teams/348.png"
+          },
+          "away": {
+            "id": 351,
+            "name": "Uni Lions",
+            "logo": "https://media.api-sports.io/baseball/teams/351.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 185711,
+        "date": "2026-09-10T16:15:00+00:00",
+        "time": "16:15",
+        "timestamp": 1789056900,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 1,
+          "name": "MLB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/1.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 3,
+            "name": "Atlanta Braves",
+            "logo": "https://media.api-sports.io/baseball/teams/3.png"
+          },
+          "away": {
+            "id": 34,
+            "name": "Tampa Bay Rays",
+            "logo": "https://media.api-sports.io/baseball/teams/34.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 185712,
+        "date": "2026-09-10T17:05:00+00:00",
+        "time": "17:05",
+        "timestamp": 1789059900,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 1,
+          "name": "MLB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/1.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 27,
+            "name": "Philadelphia Phillies",
+            "logo": "https://media.api-sports.io/baseball/teams/27.png"
+          },
+          "away": {
+            "id": 15,
+            "name": "Houston Astros",
+            "logo": "https://media.api-sports.io/baseball/teams/15.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186739,
+        "date": "2026-09-10T17:30:00+00:00",
+        "time": "17:30",
+        "timestamp": 1789061400,
+        "timezone": "UTC",
+        "week": "Final",
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 16,
+          "name": "Netherlands",
+          "code": "NL",
+          "flag": "https://media.api-sports.io/flags/nl.svg"
+        },
+        "league": {
+          "id": 23,
+          "name": "Hoofdklasse",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/23.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 1032,
+            "name": "Neptunus",
+            "logo": "https://media.api-sports.io/baseball/teams/1032.png"
+          },
+          "away": {
+            "id": 312,
+            "name": "L&D Amsterdam",
+            "logo": "https://media.api-sports.io/baseball/teams/312.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 185713,
+        "date": "2026-09-10T20:10:00+00:00",
+        "time": "20:10",
+        "timestamp": 1789071000,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 1,
+          "name": "MLB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/1.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 32,
+            "name": "Seattle Mariners",
+            "logo": "https://media.api-sports.io/baseball/teams/32.png"
+          },
+          "away": {
+            "id": 35,
+            "name": "Texas Rangers",
+            "logo": "https://media.api-sports.io/baseball/teams/35.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186770,
+        "date": "2026-09-10T22:05:00+00:00",
+        "time": "22:05",
+        "timestamp": 1789077900,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 29,
+            "name": "Rochester Red Wings",
+            "logo": "https://media.api-sports.io/baseball/teams/29.png"
+          },
+          "away": {
+            "id": 75,
+            "name": "Scranton/WB",
+            "logo": "https://media.api-sports.io/baseball/teams/75.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186771,
+        "date": "2026-09-10T22:35:00+00:00",
+        "time": "22:35",
+        "timestamp": 1789079700,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 71,
+            "name": "Indianapolis Indians",
+            "logo": "https://media.api-sports.io/baseball/teams/71.png"
+          },
+          "away": {
+            "id": 44,
+            "name": "Omaha Storm Chasers",
+            "logo": "https://media.api-sports.io/baseball/teams/44.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186772,
+        "date": "2026-09-10T22:35:00+00:00",
+        "time": "22:35",
+        "timestamp": 1789079700,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 73,
+            "name": "Louisville Bats",
+            "logo": "https://media.api-sports.io/baseball/teams/73.png"
+          },
+          "away": {
+            "id": 68,
+            "name": "Columbus Clippers",
+            "logo": "https://media.api-sports.io/baseball/teams/68.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186773,
+        "date": "2026-09-10T22:45:00+00:00",
+        "time": "22:45",
+        "timestamp": 1789080300,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 69,
+            "name": "Durham Bulls",
+            "logo": "https://media.api-sports.io/baseball/teams/69.png"
+          },
+          "away": {
+            "id": 42,
+            "name": "Nashville Sounds",
+            "logo": "https://media.api-sports.io/baseball/teams/42.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186774,
+        "date": "2026-09-10T22:45:00+00:00",
+        "time": "22:45",
+        "timestamp": 1789080300,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 72,
+            "name": "Lehigh Valley IronPigs",
+            "logo": "https://media.api-sports.io/baseball/teams/72.png"
+          },
+          "away": {
+            "id": 596,
+            "name": "Worcester",
+            "logo": "https://media.api-sports.io/baseball/teams/596.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186775,
+        "date": "2026-09-10T23:04:00+00:00",
+        "time": "23:04",
+        "timestamp": 1789081440,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 48,
+            "name": "Charlotte Knights",
+            "logo": "https://media.api-sports.io/baseball/teams/48.png"
+          },
+          "away": {
+            "id": 67,
+            "name": "Buffalo Bisons",
+            "logo": "https://media.api-sports.io/baseball/teams/67.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 185714,
+        "date": "2026-09-10T23:05:00+00:00",
+        "time": "23:05",
+        "timestamp": 1789081500,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 1,
+          "name": "MLB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/1.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 25,
+            "name": "New York Yankees",
+            "logo": "https://media.api-sports.io/baseball/teams/25.png"
+          },
+          "away": {
+            "id": 10,
+            "name": "Colorado Rockies",
+            "logo": "https://media.api-sports.io/baseball/teams/10.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186776,
+        "date": "2026-09-10T23:05:00+00:00",
+        "time": "23:05",
+        "timestamp": 1789081500,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 775,
+            "name": "Jacksonville Jumbo Shrimp",
+            "logo": "https://media.api-sports.io/baseball/teams/775.png"
+          },
+          "away": {
+            "id": 70,
+            "name": "Gwinnett Stripers",
+            "logo": "https://media.api-sports.io/baseball/teams/70.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 175969,
+        "date": "2026-09-10T23:35:00+00:00",
+        "time": "23:35",
+        "timestamp": 1789083300,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 4,
+          "name": "PCL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/4.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 81,
+            "name": "Oklahoma City Dodgers",
+            "logo": "https://media.api-sports.io/baseball/teams/81.png"
+          },
+          "away": {
+            "id": 593,
+            "name": "Sugar Land",
+            "logo": "https://media.api-sports.io/baseball/teams/593.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186777,
+        "date": "2026-09-10T23:37:00+00:00",
+        "time": "23:37",
+        "timestamp": 1789083420,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 595,
+            "name": "St. Paul",
+            "logo": "https://media.api-sports.io/baseball/teams/595.png"
+          },
+          "away": {
+            "id": 76,
+            "name": "Syracuse Mets",
+            "logo": "https://media.api-sports.io/baseball/teams/76.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186778,
+        "date": "2026-09-10T23:38:00+00:00",
+        "time": "23:38",
+        "timestamp": 1789083480,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 79,
+            "name": "Iowa Cubs",
+            "logo": "https://media.api-sports.io/baseball/teams/79.png"
+          },
+          "away": {
+            "id": 77,
+            "name": "Toledo Mud Hens",
+            "logo": "https://media.api-sports.io/baseball/teams/77.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 185715,
+        "date": "2026-09-10T23:40:00+00:00",
+        "time": "23:40",
+        "timestamp": 1789083600,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 1,
+          "name": "MLB",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/1.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 7,
+            "name": "Chicago White Sox",
+            "logo": "https://media.api-sports.io/baseball/teams/7.png"
+          },
+          "away": {
+            "id": 28,
+            "name": "Pittsburgh Pirates",
+            "logo": "https://media.api-sports.io/baseball/teams/28.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      },
+      {
+        "id": 186779,
+        "date": "2026-09-10T23:45:00+00:00",
+        "time": "23:45",
+        "timestamp": 1789083900,
+        "timezone": "UTC",
+        "week": null,
+        "status": {
+          "long": "Not Started",
+          "short": "NS"
+        },
+        "country": {
+          "id": 1,
+          "name": "USA",
+          "code": "US",
+          "flag": "https://media.api-sports.io/flags/us.svg"
+        },
+        "league": {
+          "id": 3,
+          "name": "IL",
+          "type": "League",
+          "logo": "https://media.api-sports.io/baseball/leagues/3.png",
+          "season": 2026
+        },
+        "teams": {
+          "home": {
+            "id": 41,
+            "name": "Memphis Redbirds",
+            "logo": "https://media.api-sports.io/baseball/teams/41.png"
+          },
+          "away": {
+            "id": 53,
+            "name": "Norfolk Tides",
+            "logo": "https://media.api-sports.io/baseball/teams/53.png"
+          }
+        },
+        "scores": {
+          "home": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          },
+          "away": {
+            "hits": null,
+            "errors": null,
+            "innings": {
+              "1": null,
+              "2": null,
+              "3": null,
+              "4": null,
+              "5": null,
+              "6": null,
+              "7": null,
+              "8": null,
+              "9": null,
+              "extra": null
+            },
+            "total": null
+          }
+        }
+      }
+    ]
+  }
+}
