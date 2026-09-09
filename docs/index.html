@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuantBet Baseball · Control Dashboard</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;background:#0b0d10;color:#eef1f4}*{box-sizing:border-box}body{margin:0;max-width:1200px;margin:auto;padding:18px}h1,h2{margin:0 0 12px}.muted{color:#8f9aa6}.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.card{background:#14181d;border:1px solid #252c34;border-radius:12px;padding:14px}.value{font-size:28px;font-weight:750}.status{font-weight:800}.green{color:#69d18a}.red{color:#ff7373}.white{color:#eef1f4}.section{margin-top:18px}.list{display:grid;gap:8px}.event{display:flex;justify-content:space-between;gap:12px;align-items:center}.badge{padding:4px 8px;border-radius:999px;background:#20262d;font-size:12px;font-weight:700}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:8px;border-bottom:1px solid #252c34}.fresh{margin-top:8px}.error{padding:12px;background:#28181b;border:1px solid #5a292e;border-radius:10px}@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}body{padding:12px}.event{align-items:flex-start;flex-direction:column}.hide-mobile{display:none}}
+</style></head>
+<body>
+<header><h1>⚾ QuantBet Baseball</h1><div class="muted">Control Dashboard · canonical data only</div></header>
+<section class="section grid" id="overview"></section>
+<section class="section card"><h2>System Health</h2><div id="health" class="muted">Loading…</div></section>
+<section class="section card"><h2>Live / Watchlist</h2><div id="watchlist" class="list"></div></section>
+<section class="section card"><h2>Production</h2><div id="production" class="list"></div></section>
+<section class="section card"><h2>Strong Signals</h2><div id="signals" class="list"></div></section>
+<section class="section card"><h2>Market Intelligence</h2><div id="markets"></div></section>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=t=>t?new Date(t).toLocaleString():"UNAVAILABLE";
+const eventCard=x=>`<div class="event"><div><b>${esc(x.match||x.event_id)}</b><div class="muted">${esc(x.league||'')} · ${fmt(x.kickoff)}</div></div><span class="badge">${esc(x.priority||x.status||'OBSERVED')}</span></div>`;
+fetch('../data/baseball/dashboard.json?ts='+Date.now()).then(r=>{if(!r.ok)throw Error('Dashboard data unavailable');return r.json()}).then(d=>{
+const o=d.overview||{};document.getElementById('overview').innerHTML=[['EVENTS',o.events_observed],['ACTIVE',o.active_events],['OBSERVATIONS',o.observations],['STRONG SIGNALS',o.strong_signals],['PRODUCTION',o.production],['BOOKMAKERS',o.bookmakers]].map(x=>`<div class="card"><div class="muted">${x[0]}</div><div class="value">${x[1]??0}</div></div>`).join('');
+const f=d.freshness||{},a=d.api||{};document.getElementById('health').innerHTML=`<div class="status ${d.system?.status==='HEALTHY'?'green':'red'}">● ${esc(d.system?.status||'UNKNOWN')}</div><div class="fresh">Last successful collection: <b>${fmt(f.last_successful_collection)}</b></div><div class="fresh">API ceiling: <b>${a.daily_ceiling||0}</b>/day · subscription: <b>${a.daily_subscription||0}</b> · reserved headroom: <b>${a.headroom||0}</b></div><div class="fresh">Paper mode: <b>${d.system?.paper_mode?'ON':'OFF'}</b></div>`;
+document.getElementById('watchlist').innerHTML=(d.live_watchlist||[]).map(eventCard).join('')||'<span class="muted">No active events in the current observation window.</span>';
+document.getElementById('production').innerHTML=(d.production||[]).map(eventCard).join('')||'<span class="muted">No production paper picks.</span>';
+document.getElementById('signals').innerHTML=(d.strong_signals||[]).map(eventCard).join('')||'<span class="muted">No validated strong signals.</span>';
+const bi=d.market_intelligence||{};document.getElementById('markets').innerHTML=`<h3>Bookmakers</h3><table class="table"><tbody>${(bi.top_bookmakers||[]).slice(0,10).map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td></tr>`).join('')}</tbody></table><h3>Markets</h3><table class="table"><tbody>${(bi.top_markets||[]).slice(0,15).map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td></tr>`).join('')}</tbody></table>`;
+}).catch(e=>document.body.insertAdjacentHTML('beforeend',`<div class="section error">${esc(e.message)}. The dashboard renders only from the generated presentation contract.</div>`));
+</script></body></html>
