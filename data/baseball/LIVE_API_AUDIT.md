@@ -1,12 +1,12 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-09T23:55:21.978496+00:00`
+Generated: `2026-09-10T03:07:04.053493+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **550**
-- Unique games observed: **121**
-- Leagues observed: **8**
+- Snapshot rows collected: **599**
+- Unique games observed: **136**
+- Leagues observed: **9**
 - Bookmakers observed: **13**
 - Distinct market names observed: **45**
 - Odds/API errors recorded: **0**
@@ -15,63 +15,64 @@ Generated: `2026-09-09T23:55:21.978496+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 195 |
-| IL | 160 |
-| NPB | 60 |
-| PCL | 55 |
-| KBO | 45 |
-| CPBL | 20 |
-| LMB | 9 |
-| Hoofdklasse | 6 |
+| MLB | 201 |
+| IL | 170 |
+| NPB | 69 |
+| PCL | 64 |
+| KBO | 53 |
+| CPBL | 24 |
+| LMB | 10 |
+| Hoofdklasse | 7 |
+| Extraliga | 1 |
 
 ## Bookmakers returned by API
 
 | Bookmaker | Snapshot appearances |
 |---|---:|
-| 10Bet | 167 |
-| 1xbet | 167 |
-| BetVictor | 167 |
-| Betano | 167 |
-| Marathon | 167 |
-| Superbet | 167 |
-| Unibet | 167 |
-| WilliamHill | 167 |
-| Bet365 | 166 |
-| SBO | 166 |
-| Pinnacle | 154 |
-| 888Sport | 139 |
+| 10Bet | 168 |
+| 1xbet | 168 |
+| BetVictor | 168 |
+| Betano | 168 |
+| Marathon | 168 |
+| Superbet | 168 |
+| Unibet | 168 |
+| WilliamHill | 168 |
+| Bet365 | 167 |
+| SBO | 167 |
+| Pinnacle | 155 |
+| 888Sport | 140 |
 | Betfair | 93 |
 
 ## Markets returned by API
 
 | Market | Snapshot appearances |
 |---|---:|
-| 1x2 (1st 5 Innings) | 167 |
-| 1x2 (1st Inning) | 167 |
-| Asian Handicap | 167 |
-| Asian Handicap (1st 5 Innings) | 167 |
-| Asian Handicap (1st 7 Innings) | 167 |
-| Asian Handicap (1st Inning) | 167 |
-| Away Team Total Goals (Including OT) | 167 |
-| Correct Score | 167 |
-| Extra Innings | 167 |
-| First Team To Score | 167 |
-| Home Team Total Goals (Including OT) | 167 |
-| Home/Away | 167 |
-| Last Team To Score | 167 |
-| Match Winner | 167 |
-| Odd/Even (Including OT) | 167 |
-| Over/Under | 167 |
-| Over/Under (1st 5 Innings) | 167 |
-| Over/Under (1st Inning) | 167 |
-| Result/Total Goals | 165 |
+| 1x2 (1st 5 Innings) | 168 |
+| 1x2 (1st Inning) | 168 |
+| Asian Handicap | 168 |
+| Asian Handicap (1st 5 Innings) | 168 |
+| Asian Handicap (1st 7 Innings) | 168 |
+| Asian Handicap (1st Inning) | 168 |
+| Away Team Total Goals (Including OT) | 168 |
+| Correct Score | 168 |
+| Extra Innings | 168 |
+| First Team To Score | 168 |
+| Home Team Total Goals (Including OT) | 168 |
+| Home/Away | 168 |
+| Last Team To Score | 168 |
+| Match Winner | 168 |
+| Odd/Even (Including OT) | 168 |
+| Over/Under | 168 |
+| Over/Under (1st 5 Innings) | 168 |
+| Over/Under (1st Inning) | 168 |
+| Result/Total Goals | 166 |
 | A Run (1st Inning) | 157 |
 | Asian Handicap (1st 3 Innings) | 156 |
 | Over/Under (1st 3 Innings) | 156 |
-| Asian Handicap First Half | 154 |
-| Away Team Total Goals(1st Half) | 154 |
-| Goals Over/Under 1st Half | 154 |
-| Home Team Total Goals(1st Half) | 154 |
+| Asian Handicap First Half | 155 |
+| Away Team Total Goals(1st Half) | 155 |
+| Goals Over/Under 1st Half | 155 |
+| Home Team Total Goals(1st Half) | 155 |
 | Over/Under (1st 7 Innings) | 154 |
 | Player Runs | 134 |
 | Total Hits | 133 |
@@ -81,8 +82,8 @@ Generated: `2026-09-09T23:55:21.978496+00:00`
 | Home Odd/Even (OT) | 121 |
 | Team With Highest Scoring | 121 |
 | HT/FT (Including OT) | 115 |
-| Asian Handicap (4.5 Innings) | 114 |
-| Over/Under (4.5 Innings) | 114 |
+| Asian Handicap (4.5 Innings) | 115 |
+| Over/Under (4.5 Innings) | 115 |
 | First Home Run | 109 |
 | Pitcher Strikeouts | 9 |
 | Player Total Bases | 7 |
@@ -99,6 +100,7 @@ Generated: `2026-09-09T23:55:21.978496+00:00`
 | 2026-09-07 | 9 |
 | 2026-09-08 | 98 |
 | 2026-09-09 | 443 |
+| 2026-09-10 | 49 |
 
 ## API errors
 
