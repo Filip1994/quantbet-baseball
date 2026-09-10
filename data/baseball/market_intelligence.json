@@ -1,23 +1,36 @@
 {
-  "generated_at": "2026-09-10T15:17:57.915591+00:00",
+  "generated_at": "2026-09-10T15:19:15.635513+00:00",
   "dataset": {
-    "observations": 77059,
+    "observations": 75463,
     "events": 40,
     "leagues": 3,
     "bookmakers": 12,
-    "markets": 38
+    "markets": 35
+  },
+  "excluded_from_model": {
+    "player_props": true,
+    "market_tokens": [
+      "player runs",
+      "player hits",
+      "player total bases",
+      "pitcher strikeouts",
+      "pitcher hits allowed",
+      "player doubles",
+      "player stolen bases",
+      "pitcher outs",
+      "first home run"
+    ]
   },
   "market_family_observations": {
-    "winner": 2775,
-    "run_line": 12038,
-    "totals": 41314,
-    "hits": 5237,
-    "player_props": 3444
+    "winner": 2855,
+    "run_line": 12386,
+    "totals": 42381,
+    "hits": 5472
   },
   "top_leagues_by_observations": [
     [
       "MLB",
-      66461
+      64865
     ],
     [
       "NPB",
@@ -31,23 +44,19 @@
   "top_bookmakers_by_observations": [
     [
       "Bet365",
-      31830
+      32665
     ],
     [
       "1xbet",
-      17798
-    ],
-    [
-      "Betano",
-      5784
+      18406
     ],
     [
       "Pinnacle",
-      5622
+      5798
     ],
     [
       "Marathon",
-      5070
+      5224
     ],
     [
       "Superbet",
@@ -58,16 +67,20 @@
       2904
     ],
     [
+      "Betano",
+      2368
+    ],
+    [
       "SBO",
       1646
     ],
     [
       "BetVictor",
-      956
+      988
     ],
     [
       "WilliamHill",
-      441
+      456
     ],
     [
       "10Bet",
@@ -81,143 +94,143 @@
   "top_markets_by_observations": [
     [
       "Over/Under",
-      17398
-    ],
-    [
-      "Asian Handicap",
-      7784
+      17756
     ],
     [
       "Correct Score",
-      7632
+      7992
+    ],
+    [
+      "Asian Handicap",
+      7988
     ],
     [
       "Home Team Total Goals (Including OT)",
-      7386
+      7603
     ],
     [
       "Away Team Total Goals (Including OT)",
-      7368
-    ],
-    [
-      "Player Runs",
-      3416
+      7590
     ],
     [
       "Over/Under (1st 5 Innings)",
-      3124
+      3176
     ],
     [
       "Over/Under (1st Inning)",
-      2478
+      2566
     ],
     [
       "Total Hits",
-      2141
+      2237
     ],
     [
       "Asian Handicap (1st 5 Innings)",
-      1720
+      1756
     ],
     [
       "Home Total Hits",
-      1556
+      1624
     ],
     [
       "Away Total Hits",
-      1540
+      1611
     ],
     [
       "Goals Over/Under 1st Half",
-      1368
+      1408
     ],
     [
       "Result/Total Goals",
-      1346
+      1402
     ],
     [
       "Asian Handicap (1st 3 Innings)",
-      1204
+      1264
     ],
     [
       "Over/Under (1st 3 Innings)",
-      1182
+      1244
     ],
     [
       "Asian Handicap (1st Inning)",
-      878
-    ],
-    [
-      "Home/Away",
-      840
+      908
     ],
     [
       "1x2 (1st Inning)",
-      837
+      867
+    ],
+    [
+      "Home/Away",
+      860
     ],
     [
       "Match Winner",
-      585
+      600
     ],
     [
       "HT/FT (Including OT)",
-      534
+      558
     ],
     [
       "1x2 (1st 5 Innings)",
-      513
+      528
     ],
     [
       "Odd/Even (Including OT)",
-      490
-    ],
-    [
-      "First Home Run",
-      415
+      508
     ],
     [
       "Team With Highest Scoring",
-      312
-    ],
-    [
-      "Over/Under (1st 7 Innings)",
-      308
+      327
     ],
     [
       "Asian Handicap (1st 7 Innings)",
-      304
+      322
+    ],
+    [
+      "Over/Under (1st 7 Innings)",
+      320
     ],
     [
       "Home Team Total Goals(1st Half)",
-      284
+      292
     ],
     [
       "First Team To Score",
-      280
+      290
     ],
     [
       "Last Team To Score",
-      280
+      290
+    ],
+    [
+      "Extra Innings",
+      284
+    ],
+    [
+      "A Run (1st Inning)",
+      282
     ]
   ],
   "event_density": {
-    "median_observations_per_event": 1356.0,
-    "max": 4580,
+    "median_observations_per_event": 1266.0,
+    "max": 4284,
     "min": 428
   },
   "cross_bookmaker_dispersion": {
-    "groups": 7940,
+    "groups": 7348,
     "largest_ranges": [
       {
         "game_id": "185712",
         "market": "Correct Score",
         "selection": "0:7",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 151.0,
         "max_odds": 201.0,
-        "mean_odds": 191.0,
-        "stdev": 20.0,
+        "mean_odds": 192.6667,
+        "stdev": 18.6339,
         "range": 50.0
       },
       {
@@ -225,11 +238,11 @@
         "market": "Correct Score",
         "selection": "1:8",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 101.0,
         "max_odds": 151.0,
-        "mean_odds": 141.0,
-        "stdev": 20.0,
+        "mean_odds": 142.6667,
+        "stdev": 18.6339,
         "range": 50.0
       },
       {
@@ -333,11 +346,11 @@
         "market": "Correct Score",
         "selection": "0:1",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 101.0,
         "max_odds": 126.0,
-        "mean_odds": 121.0,
-        "stdev": 10.0,
+        "mean_odds": 121.8333,
+        "stdev": 9.3169,
         "range": 25.0
       },
       {
@@ -345,11 +358,11 @@
         "market": "Correct Score",
         "selection": "0:5",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 101.0,
         "max_odds": 126.0,
-        "mean_odds": 121.0,
-        "stdev": 10.0,
+        "mean_odds": 121.8333,
+        "stdev": 9.3169,
         "range": 25.0
       },
       {
@@ -357,11 +370,11 @@
         "market": "Correct Score",
         "selection": "0:6",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 126.0,
         "max_odds": 151.0,
-        "mean_odds": 146.0,
-        "stdev": 10.0,
+        "mean_odds": 146.8333,
+        "stdev": 9.3169,
         "range": 25.0
       },
       {
@@ -369,11 +382,11 @@
         "market": "Correct Score",
         "selection": "8:0",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 101.0,
         "max_odds": 126.0,
-        "mean_odds": 106.0,
-        "stdev": 10.0,
+        "mean_odds": 105.1667,
+        "stdev": 9.3169,
         "range": 25.0
       },
       {
@@ -381,11 +394,11 @@
         "market": "Correct Score",
         "selection": "8:0",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 126.0,
         "max_odds": 151.0,
-        "mean_odds": 131.0,
-        "stdev": 10.0,
+        "mean_odds": 130.1667,
+        "stdev": 9.3169,
         "range": 25.0
       },
       {
@@ -393,11 +406,11 @@
         "market": "Correct Score",
         "selection": "8:5",
         "handicap": null,
-        "books": 5,
+        "books": 6,
         "min_odds": 126.0,
         "max_odds": 151.0,
-        "mean_odds": 146.0,
-        "stdev": 10.0,
+        "mean_odds": 146.8333,
+        "stdev": 9.3169,
         "range": 25.0
       },
       {
@@ -511,7 +524,7 @@
     ]
   },
   "price_movement": {
-    "series": 12897,
+    "series": 12305,
     "largest_absolute_moves": [
       {
         "game_id": "185649",
@@ -561,13 +574,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 3.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 6.25,
         "last_odds": 13.0,
         "delta": 6.75,
         "pct_change": 108.0,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185714",
@@ -575,13 +588,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 2.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 2.8,
         "last_odds": 5.75,
         "delta": 2.95,
         "pct_change": 105.357,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185713",
@@ -589,13 +602,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 1.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 1.95,
         "last_odds": 3.9,
         "delta": 1.95,
         "pct_change": 100.0,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185651",
@@ -631,13 +644,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 0.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 1.25,
         "last_odds": 2.3,
         "delta": 1.05,
         "pct_change": 84.0,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185651",
@@ -729,13 +742,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Under 0.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 5.25,
         "last_odds": 1.95,
         "delta": -3.3,
         "pct_change": -62.857,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185654",
@@ -841,13 +854,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 3.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 10.0,
         "last_odds": 4.0,
         "delta": -6.0,
         "pct_change": -60.0,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185651",
@@ -883,13 +896,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Under 0.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 3.9,
         "last_odds": 1.6,
         "delta": -2.3,
         "pct_change": -58.974,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185654",
@@ -911,13 +924,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 0.5",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 1.15,
         "last_odds": 1.8,
         "delta": 0.65,
         "pct_change": 56.522,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185656",
@@ -995,13 +1008,13 @@
         "market": "Correct Score",
         "selection": "1:8",
         "handicap": null,
-        "observations": 5,
+        "observations": 6,
         "first_odds": 101.0,
         "last_odds": 151.0,
         "delta": 50.0,
         "pct_change": 49.505,
         "first_at": "2026-09-10T08:07:27.097734+00:00",
-        "last_at": "2026-09-10T15:17:42.383446+00:00"
+        "last_at": "2026-09-10T15:19:03.149338+00:00"
       },
       {
         "game_id": "185651",
@@ -1076,7 +1089,7 @@
     ]
   },
   "closing_60m": {
-    "rows": 8654,
+    "rows": 8787,
     "largest_moves": [
       {
         "game_id": "185711",
@@ -1087,7 +1100,7 @@
         "last_60m_odds": 1.91,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1098,7 +1111,7 @@
         "last_60m_odds": 9.0,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1109,7 +1122,7 @@
         "last_60m_odds": 2.1,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1120,7 +1133,7 @@
         "last_60m_odds": 1.83,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1131,7 +1144,7 @@
         "last_60m_odds": 2.0,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1142,7 +1155,7 @@
         "last_60m_odds": 2.65,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1153,7 +1166,7 @@
         "last_60m_odds": 1.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1164,7 +1177,7 @@
         "last_60m_odds": 1.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1175,7 +1188,7 @@
         "last_60m_odds": 2.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1186,7 +1199,7 @@
         "last_60m_odds": 3.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1197,7 +1210,7 @@
         "last_60m_odds": 1.28,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1208,7 +1221,7 @@
         "last_60m_odds": 1.29,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1219,7 +1232,7 @@
         "last_60m_odds": 3.4,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1230,7 +1243,7 @@
         "last_60m_odds": 4.75,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1241,7 +1254,7 @@
         "last_60m_odds": 1.16,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1252,7 +1265,7 @@
         "last_60m_odds": 6.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1263,7 +1276,7 @@
         "last_60m_odds": 1.1,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1274,7 +1287,7 @@
         "last_60m_odds": 8.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1285,7 +1298,7 @@
         "last_60m_odds": 1.06,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1296,7 +1309,7 @@
         "last_60m_odds": 1.18,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1307,7 +1320,7 @@
         "last_60m_odds": 4.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1318,7 +1331,7 @@
         "last_60m_odds": 1.11,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1329,7 +1342,7 @@
         "last_60m_odds": 6.25,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1340,7 +1353,7 @@
         "last_60m_odds": 1.05,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1351,7 +1364,7 @@
         "last_60m_odds": 9.0,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1362,7 +1375,7 @@
         "last_60m_odds": 1.8,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1373,7 +1386,7 @@
         "last_60m_odds": 1.86,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1384,7 +1397,7 @@
         "last_60m_odds": 2.0,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1395,7 +1408,7 @@
         "last_60m_odds": 1.83,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1406,7 +1419,7 @@
         "last_60m_odds": 2.25,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1417,7 +1430,7 @@
         "last_60m_odds": 1.6,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1428,7 +1441,7 @@
         "last_60m_odds": 2.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1439,7 +1452,7 @@
         "last_60m_odds": 1.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1450,7 +1463,7 @@
         "last_60m_odds": 2.82,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1461,7 +1474,7 @@
         "last_60m_odds": 1.4,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1472,7 +1485,7 @@
         "last_60m_odds": 2.95,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1483,7 +1496,7 @@
         "last_60m_odds": 1.37,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1494,7 +1507,7 @@
         "last_60m_odds": 1.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1505,7 +1518,7 @@
         "last_60m_odds": 2.5,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       },
       {
         "game_id": "185711",
@@ -1516,7 +1529,7 @@
         "last_60m_odds": 1.68,
         "delta": 0.0,
         "pct_change": 0.0,
-        "observations": 2
+        "observations": 3
       }
     ]
   },
