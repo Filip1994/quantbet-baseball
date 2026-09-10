@@ -10,6 +10,14 @@ from typing import Any
 OBS = Path('data/baseball/market_observations.jsonl')
 OUT = Path('data/baseball/market_intelligence.json')
 
+# Production intelligence is intentionally limited to team/game markets.
+# Player props are excluded entirely from model discovery, intelligence and qualification.
+EXCLUDED_MARKET_TOKENS = (
+    'player runs', 'player hits', 'player total bases', 'pitcher strikeouts',
+    'pitcher hits allowed', 'player doubles', 'player stolen bases',
+    'pitcher outs', 'first home run',
+)
+
 
 def num(x: Any) -> float | None:
     try:
@@ -26,6 +34,11 @@ def dt(x: Any) -> datetime | None:
         return None
 
 
+def is_excluded_market(market: Any) -> bool:
+    text = str(market or '').casefold()
+    return any(token in text for token in EXCLUDED_MARKET_TOKENS)
+
+
 def main() -> None:
     rows: list[dict[str, Any]] = []
     if OBS.exists():
@@ -34,6 +47,8 @@ def main() -> None:
                 try:
                     r = json.loads(line)
                 except json.JSONDecodeError:
+                    continue
+                if is_excluded_market(r.get('market')):
                     continue
                 if num(r.get('odds')) is not None and r.get('game_id') is not None:
                     rows.append(r)
@@ -104,8 +119,8 @@ def main() -> None:
         if a and b:
             late_moves.append({
                 'game_id': key[0], 'bookmaker': key[1], 'market': key[2], 'selection': key[3],
-                'first_60m_odds': a, 'last_60m_odds': b, 'delta': round(b-a, 4),
-                'pct_change': round((b/a-1)*100, 3), 'observations': len(vals),
+                'first_60m_odds': a, 'last_60m_odds': b, 'delta': round(b-a,4),
+                'pct_change': round((b/a-1)*100,3), 'observations': len(vals),
             })
     late_moves.sort(key=lambda x: abs(x['pct_change']), reverse=True)
 
@@ -114,13 +129,13 @@ def main() -> None:
         'run_line': ('asian handicap',),
         'totals': ('over/under', 'team total', 'goals over/under'),
         'hits': ('total hits', 'home total hits', 'away total hits'),
-        'player_props': ('player runs', 'player hits', 'player total bases', 'pitcher strikeouts', 'pitcher hits allowed', 'player doubles', 'player stolen bases'),
     }
     family_counts = {fam: sum(c for m, c in market_counts.items() if any(t in m.casefold() for t in toks)) for fam, toks in family_tokens.items()}
 
     result = {
         'generated_at': datetime.now(UTC).isoformat(),
         'dataset': {'observations': len(rows), 'events': len(event_counts), 'leagues': len(league_counts), 'bookmakers': len(book_counts), 'markets': len(market_counts)},
+        'excluded_from_model': {'player_props': True, 'market_tokens': list(EXCLUDED_MARKET_TOKENS)},
         'market_family_observations': family_counts,
         'top_leagues_by_observations': league_counts.most_common(15),
         'top_bookmakers_by_observations': book_counts.most_common(15),
@@ -133,7 +148,7 @@ def main() -> None:
     }
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    print(json.dumps({'observations': len(rows), 'events': len(event_counts), 'dispersion_groups': len(dispersion), 'movement_series': len(movements), 'closing_rows': len(late)}))
+    print(json.dumps({'observations': len(rows), 'events': len(event_counts), 'dispersion_groups': len(dispersion), 'movement_series': len(movements), 'closing_rows': len(late), 'player_props_excluded': True}))
 
 
 if __name__ == '__main__':
