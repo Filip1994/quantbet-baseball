@@ -1,15 +1,15 @@
 {
   "Bundesliga": {
     "bookmakers": [],
-    "snapshots": 8
+    "snapshots": 9
   },
   "CPBL": {
     "bookmakers": [],
-    "snapshots": 50
+    "snapshots": 53
   },
   "Extraliga": {
     "bookmakers": [],
-    "snapshots": 25
+    "snapshots": 28
   },
   "Hoofdklasse": {
     "bookmakers": [],
@@ -17,7 +17,7 @@
   },
   "IL": {
     "bookmakers": [],
-    "snapshots": 306
+    "snapshots": 324
   },
   "KBO": {
     "bookmakers": [
@@ -35,7 +35,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 89
+    "snapshots": 93
   },
   "LMB": {
     "bookmakers": [],
@@ -57,7 +57,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 311
+    "snapshots": 324
   },
   "NPB": {
     "bookmakers": [
@@ -75,10 +75,10 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 99
+    "snapshots": 102
   },
   "PCL": {
     "bookmakers": [],
-    "snapshots": 104
+    "snapshots": 109
   }
 }
