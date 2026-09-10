@@ -55,6 +55,9 @@ jobs:
         run: |
           python -c "from pathlib import Path; from quantbot.baseball.collector import collect_once; print(collect_once(Path('.'), max_odds_requests=76))"
 
+      - name: Build Baseball market intelligence
+        run: python scripts/baseball_intelligence.py
+
       - name: Scan Baseball intraday paper signals
         run: |
           python -c "from pathlib import Path; from quantbot.baseball.signals import scan_once, send_alerts; from quantbot.baseball.config import BaseballSettings; root=Path('.'); print(scan_once(root)); print({'alerts_sent': send_alerts(root, BaseballSettings.from_env(root))})"
