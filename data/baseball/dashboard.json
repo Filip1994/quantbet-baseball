@@ -1,21 +1,21 @@
 {
   "contract_version": "1.0",
-  "generated_at": "2026-09-11T01:29:56.757199+00:00",
+  "generated_at": "2026-09-11T06:35:41.132561+00:00",
   "system": {
     "status": "HEALTHY",
     "paper_mode": true
   },
   "overview": {
-    "events_observed": 194,
-    "active_events": 80,
-    "observations": 88348,
+    "events_observed": 201,
+    "active_events": 76,
+    "observations": 93583,
     "strong_signals": 0,
     "production": 0,
     "bookmakers": 12,
     "markets": 39
   },
   "freshness": {
-    "last_successful_collection": "2026-09-11T01:29:41.871404+00:00",
+    "last_successful_collection": "2026-09-11T06:35:14.540589+00:00",
     "current_observation_age_seconds": null
   },
   "api": {
@@ -25,156 +25,12 @@
   },
   "live_watchlist": [
     {
-      "game_id": 186771,
-      "league": "IL",
-      "match": "Omaha Storm Chasers @ Indianapolis Indians",
-      "kickoff": "2026-09-10T22:35:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186772,
-      "league": "IL",
-      "match": "Columbus Clippers @ Louisville Bats",
-      "kickoff": "2026-09-10T22:35:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186773,
-      "league": "IL",
-      "match": "Nashville Sounds @ Durham Bulls",
-      "kickoff": "2026-09-10T22:45:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186774,
-      "league": "IL",
-      "match": "Worcester @ Lehigh Valley IronPigs",
-      "kickoff": "2026-09-10T22:45:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186775,
-      "league": "IL",
-      "match": "Buffalo Bisons @ Charlotte Knights",
-      "kickoff": "2026-09-10T23:04:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 185714,
-      "league": "MLB",
-      "match": "Colorado Rockies @ New York Yankees",
-      "kickoff": "2026-09-10T23:05:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186776,
-      "league": "IL",
-      "match": "Gwinnett Stripers @ Jacksonville Jumbo Shrimp",
-      "kickoff": "2026-09-10T23:05:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 175969,
-      "league": "PCL",
-      "match": "Sugar Land @ Oklahoma City Dodgers",
-      "kickoff": "2026-09-10T23:35:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186777,
-      "league": "IL",
-      "match": "Syracuse Mets @ St. Paul",
-      "kickoff": "2026-09-10T23:37:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186778,
-      "league": "IL",
-      "match": "Toledo Mud Hens @ Iowa Cubs",
-      "kickoff": "2026-09-10T23:38:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 185715,
-      "league": "MLB",
-      "match": "Pittsburgh Pirates @ Chicago White Sox",
-      "kickoff": "2026-09-10T23:40:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 186779,
-      "league": "IL",
-      "match": "Norfolk Tides @ Memphis Redbirds",
-      "kickoff": "2026-09-10T23:45:00+00:00",
-      "last_observation_at": "2026-09-10T23:43:13.315352+00:00",
-      "cadence_minutes": null,
-      "priority": null
-    },
-    {
-      "game_id": 175966,
-      "league": "PCL",
-      "match": "Round Rock Express @ Salt Lake Bees",
-      "kickoff": "2026-09-11T00:35:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 15,
-      "priority": "CLOSING"
-    },
-    {
-      "game_id": 175968,
-      "league": "PCL",
-      "match": "Albuquerque Isotopes @ Reno Aces",
-      "kickoff": "2026-09-11T01:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 15,
-      "priority": "CLOSING"
-    },
-    {
-      "game_id": 175967,
-      "league": "PCL",
-      "match": "El Paso Chihuahuas @ Tacoma Rainiers",
-      "kickoff": "2026-09-11T02:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 15,
-      "priority": "CLOSING"
-    },
-    {
-      "game_id": 175970,
-      "league": "PCL",
-      "match": "Sacramento River Cats @ Las Vegas Aviators",
-      "kickoff": "2026-09-11T02:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 15,
-      "priority": "CLOSING"
-    },
-    {
       "game_id": 180758,
       "league": "NPB",
       "match": "Chiba Lotte Marines @ Fukuoka S. Hawks",
       "kickoff": "2026-09-11T09:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -182,8 +38,8 @@
       "league": "NPB",
       "match": "Seibu Lions @ Orix Buffaloes",
       "kickoff": "2026-09-11T09:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -191,8 +47,8 @@
       "league": "NPB",
       "match": "Yokohama BayStars @ Hiroshima Carp",
       "kickoff": "2026-09-11T09:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -200,8 +56,8 @@
       "league": "KBO",
       "match": "NC Dinos @ Hanwha Eagles",
       "kickoff": "2026-09-11T09:30:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -209,8 +65,8 @@
       "league": "KBO",
       "match": "SSG Landers @ KIA Tigers",
       "kickoff": "2026-09-11T09:30:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -218,8 +74,8 @@
       "league": "KBO",
       "match": "KT Wiz Suwon @ Lotte Giants",
       "kickoff": "2026-09-11T09:30:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -227,8 +83,8 @@
       "league": "KBO",
       "match": "Kiwoom Heroes @ Samsung Lions",
       "kickoff": "2026-09-11T09:30:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 15,
       "priority": "ACTIVE"
     },
     {
@@ -236,8 +92,8 @@
       "league": "CPBL",
       "match": "Chinatrust Brothers @ Rakuten Monkeys",
       "kickoff": "2026-09-11T10:35:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 30,
       "priority": "ACTIVE"
     },
     {
@@ -245,8 +101,8 @@
       "league": "CPBL",
       "match": "Fubon Guardians @ TSG Hawks",
       "kickoff": "2026-09-11T10:35:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 30,
       "priority": "ACTIVE"
     },
     {
@@ -254,8 +110,8 @@
       "league": "CPBL",
       "match": "Uni Lions @ Wei Chuan Dragons",
       "kickoff": "2026-09-11T10:35:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
-      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 30,
       "priority": "ACTIVE"
     },
     {
@@ -263,7 +119,7 @@
       "league": "Extraliga",
       "match": "Kotlarka Prague @ Hrosi Brno",
       "kickoff": "2026-09-11T14:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -272,7 +128,7 @@
       "league": "Bundesliga",
       "match": "Traiskirchen @ Wr. Neustadt",
       "kickoff": "2026-09-11T17:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -281,7 +137,7 @@
       "league": "Extraliga",
       "match": "Hluboka @ Ostrava",
       "kickoff": "2026-09-11T17:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -290,7 +146,7 @@
       "league": "Extraliga",
       "match": "Technika Brno @ Trebic",
       "kickoff": "2026-09-11T17:00:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -299,7 +155,7 @@
       "league": "MLB",
       "match": "Pittsburgh Pirates @ Chicago Cubs",
       "kickoff": "2026-09-11T18:20:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -308,7 +164,7 @@
       "league": "IL",
       "match": "Scranton/WB @ Rochester Red Wings",
       "kickoff": "2026-09-11T22:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -317,7 +173,7 @@
       "league": "IL",
       "match": "Omaha Storm Chasers @ Indianapolis Indians",
       "kickoff": "2026-09-11T22:35:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -326,7 +182,7 @@
       "league": "MLB",
       "match": "Colorado Rockies @ Detroit Tigers",
       "kickoff": "2026-09-11T22:40:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -335,7 +191,7 @@
       "league": "MLB",
       "match": "Los Angeles Angels @ Washington Nationals",
       "kickoff": "2026-09-11T22:45:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -344,7 +200,7 @@
       "league": "IL",
       "match": "Nashville Sounds @ Durham Bulls",
       "kickoff": "2026-09-11T22:45:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -353,7 +209,7 @@
       "league": "IL",
       "match": "Worcester @ Lehigh Valley IronPigs",
       "kickoff": "2026-09-11T22:45:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -362,7 +218,7 @@
       "league": "IL",
       "match": "Buffalo Bisons @ Charlotte Knights",
       "kickoff": "2026-09-11T23:04:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -371,7 +227,7 @@
       "league": "MLB",
       "match": "New York Mets @ New York Yankees",
       "kickoff": "2026-09-11T23:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -380,7 +236,7 @@
       "league": "IL",
       "match": "Gwinnett Stripers @ Jacksonville Jumbo Shrimp",
       "kickoff": "2026-09-11T23:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -389,7 +245,7 @@
       "league": "MLB",
       "match": "Baltimore Orioles @ Toronto Blue Jays",
       "kickoff": "2026-09-11T23:07:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -398,7 +254,7 @@
       "league": "MLB",
       "match": "Kansas City Royals @ Boston Red Sox",
       "kickoff": "2026-09-11T23:10:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -407,7 +263,7 @@
       "league": "MLB",
       "match": "Los Angeles Dodgers @ Miami Marlins",
       "kickoff": "2026-09-11T23:10:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -416,7 +272,7 @@
       "league": "MLB",
       "match": "Houston Astros @ Tampa Bay Rays",
       "kickoff": "2026-09-11T23:10:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -425,7 +281,7 @@
       "league": "MLB",
       "match": "Philadelphia Phillies @ Atlanta Braves",
       "kickoff": "2026-09-11T23:15:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -434,7 +290,7 @@
       "league": "IL",
       "match": "Columbus Clippers @ Louisville Bats",
       "kickoff": "2026-09-11T23:15:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -443,7 +299,7 @@
       "league": "IL",
       "match": "Syracuse Mets @ St. Paul",
       "kickoff": "2026-09-11T23:37:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -452,7 +308,7 @@
       "league": "MLB",
       "match": "Cincinnati Reds @ Milwaukee Brewers",
       "kickoff": "2026-09-11T23:45:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -461,7 +317,16 @@
       "league": "PCL",
       "match": "Sugar Land @ Oklahoma City Dodgers",
       "kickoff": "2026-09-12T00:05:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 186797,
+      "league": "IL",
+      "match": "Norfolk Tides @ Memphis Redbirds",
+      "kickoff": "2026-09-12T00:05:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     },
@@ -470,7 +335,142 @@
       "league": "IL",
       "match": "Toledo Mud Hens @ Iowa Cubs",
       "kickoff": "2026-09-12T00:08:00+00:00",
-      "last_observation_at": "2026-09-11T01:29:41.871404+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 185726,
+      "league": "MLB",
+      "match": "Cleveland Guardians @ Minnesota Twins",
+      "kickoff": "2026-09-12T00:10:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 185727,
+      "league": "MLB",
+      "match": "Chicago White Sox @ St.Louis Cardinals",
+      "kickoff": "2026-09-12T00:15:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 175974,
+      "league": "PCL",
+      "match": "Round Rock Express @ Salt Lake Bees",
+      "kickoff": "2026-09-12T00:35:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 175973,
+      "league": "PCL",
+      "match": "Albuquerque Isotopes @ Reno Aces",
+      "kickoff": "2026-09-12T01:05:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 186834,
+      "league": "LMB",
+      "match": "Toros de Tijuana @ Tabasco",
+      "kickoff": "2026-09-12T01:30:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 185728,
+      "league": "MLB",
+      "match": "Texas Rangers @ Arizona Diamondbacks",
+      "kickoff": "2026-09-12T01:40:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 185729,
+      "league": "MLB",
+      "match": "Seattle Mariners @ Athletics",
+      "kickoff": "2026-09-12T01:40:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 175971,
+      "league": "PCL",
+      "match": "Sacramento River Cats @ Las Vegas Aviators",
+      "kickoff": "2026-09-12T02:05:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 175975,
+      "league": "PCL",
+      "match": "El Paso Chihuahuas @ Tacoma Rainiers",
+      "kickoff": "2026-09-12T02:05:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 185730,
+      "league": "MLB",
+      "match": "San Diego Padres @ San Francisco Giants",
+      "kickoff": "2026-09-12T02:15:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 181393,
+      "league": "NPB",
+      "match": "Hanshin Tigers @ Yomiuri Giants",
+      "kickoff": "2026-09-12T05:00:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 181395,
+      "league": "NPB",
+      "match": "Yokohama BayStars @ Hiroshima Carp",
+      "kickoff": "2026-09-12T05:00:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 181396,
+      "league": "NPB",
+      "match": "Rakuten Gold. Eagles @ Orix Buffaloes",
+      "kickoff": "2026-09-12T05:00:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 181397,
+      "league": "NPB",
+      "match": "Chiba Lotte Marines @ Fukuoka S. Hawks",
+      "kickoff": "2026-09-12T05:00:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
+      "cadence_minutes": 60,
+      "priority": "ACTIVE"
+    },
+    {
+      "game_id": 181398,
+      "league": "NPB",
+      "match": "Yakult Swallows @ Chunichi Dragons",
+      "kickoff": "2026-09-12T05:00:00+00:00",
+      "last_observation_at": "2026-09-11T06:35:14.540589+00:00",
       "cadence_minutes": 60,
       "priority": "ACTIVE"
     }
@@ -481,23 +481,23 @@
     "top_bookmakers": [
       [
         "Bet365",
-        36868
+        39596
       ],
       [
         "1xbet",
-        20124
+        21394
+      ],
+      [
+        "Pinnacle",
+        7058
       ],
       [
         "Betano",
         6652
       ],
       [
-        "Pinnacle",
-        6426
-      ],
-      [
         "Marathon",
-        5712
+        6178
       ],
       [
         "Superbet",
@@ -513,11 +513,11 @@
       ],
       [
         "BetVictor",
-        1078
+        1172
       ],
       [
         "WilliamHill",
-        498
+        543
       ],
       [
         "10Bet",
@@ -531,23 +531,23 @@
     "top_markets": [
       [
         "Over/Under",
-        19830
+        20860
       ],
       [
         "Correct Score",
-        9000
+        9864
       ],
       [
         "Asian Handicap",
-        8708
+        9236
       ],
       [
         "Home Team Total Goals (Including OT)",
-        8407
+        9030
       ],
       [
         "Away Team Total Goals (Including OT)",
-        8398
+        9007
       ],
       [
         "Player Runs",
@@ -555,99 +555,99 @@
       ],
       [
         "Over/Under (1st 5 Innings)",
-        3508
+        3680
       ],
       [
         "Over/Under (1st Inning)",
-        2842
+        3042
       ],
       [
         "Total Hits",
-        2582
+        2621
       ],
       [
         "Asian Handicap (1st 5 Innings)",
-        1868
+        1944
       ],
       [
         "Away Total Hits",
-        1813
+        1828
       ],
       [
         "Home Total Hits",
-        1809
-      ],
-      [
-        "Result/Total Goals",
-        1576
+        1824
       ],
       [
         "Goals Over/Under 1st Half",
-        1556
+        1712
+      ],
+      [
+        "Result/Total Goals",
+        1708
       ],
       [
         "Asian Handicap (1st 3 Innings)",
-        1464
+        1478
       ],
       [
         "Over/Under (1st 3 Innings)",
-        1418
+        1442
       ],
       [
         "Asian Handicap (1st Inning)",
-        992
+        1082
       ],
       [
         "1x2 (1st Inning)",
-        951
+        1017
       ],
       [
         "Home/Away",
-        944
-      ],
-      [
-        "Match Winner",
-        642
+        1004
       ],
       [
         "HT/FT (Including OT)",
-        642
+        714
+      ],
+      [
+        "Match Winner",
+        708
       ],
       [
         "1x2 (1st 5 Innings)",
-        570
+        615
       ],
       [
         "Odd/Even (Including OT)",
-        564
+        614
       ],
       [
         "First Home Run",
-        505
+        510
       ],
       [
         "Team With Highest Scoring",
-        369
+        393
       ],
       [
         "Asian Handicap (1st 7 Innings)",
-        366
+        380
       ],
       [
         "Over/Under (1st 7 Innings)",
-        354
+        376
       ],
       [
         "Home Team Total Goals(1st Half)",
-        328
+        358
       ],
       [
         "First Team To Score",
-        318
+        348
       ],
       [
         "Last Team To Score",
-        318
+        348
       ]
     ]
   }
