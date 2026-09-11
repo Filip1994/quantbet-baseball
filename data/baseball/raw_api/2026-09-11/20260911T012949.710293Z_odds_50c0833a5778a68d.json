@@ -1,0 +1,20 @@
+{
+  "captured_at": "2026-09-11T01:29:49.710445+00:00",
+  "endpoint": "odds",
+  "params": {
+    "game": 175973
+  },
+  "payload": {
+    "get": "",
+    "parameters": [],
+    "errors": {
+      "rateLimit": "Too many requests. You have exceeded the limit of requests per minute of your subscription."
+    },
+    "results": 0,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": []
+  }
+}
