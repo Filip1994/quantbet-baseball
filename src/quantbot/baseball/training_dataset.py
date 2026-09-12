@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 import math
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 
 def _load_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -85,11 +86,7 @@ def build_moneyline_rows(
     observations: Iterable[dict[str, Any]],
     results: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    """Build pregame moneyline examples; final scores are labels only.
-
-    The function deliberately uses each observation's own captured_at timestamp
-    and never derives features from observations captured after kickoff.
-    """
+    """Build pregame moneyline examples; final scores are labels only."""
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for row in observations:
         game_id = str(row.get("game_id", row.get("event_id", "")))
@@ -111,8 +108,6 @@ def build_moneyline_rows(
 
     output: list[dict[str, Any]] = []
     for rows in grouped.values():
-        # One bookmaker row is retained per selection/time; duplicate evidence
-        # is not silently aggregated into a target.
         for row in rows:
             output.append(
                 {
