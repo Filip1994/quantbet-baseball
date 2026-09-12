@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from quantbot.baseball.training_dataset import build_moneyline_rows, _result_map
+from quantbot.baseball.training_dataset import _result_map, build_moneyline_rows
 
 
 class TrainingDatasetTests(unittest.TestCase):
