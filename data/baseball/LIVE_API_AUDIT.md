@@ -1,11 +1,11 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-11T23:32:22.079137+00:00`
+Generated: `2026-09-12T01:34:12.049753+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **1645**
-- Unique games observed: **216**
+- Snapshot rows collected: **1721**
+- Unique games observed: **233**
 - Leagues observed: **15**
 - Bookmakers observed: **13**
 - Distinct market names observed: **49**
@@ -15,20 +15,20 @@ Generated: `2026-09-11T23:32:22.079137+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 481 |
-| IL | 437 |
-| NPB | 156 |
-| PCL | 152 |
-| KBO | 136 |
-| CPBL | 86 |
-| Extraliga | 78 |
-| Bundesliga | 29 |
-| Hoofdklasse | 22 |
-| LMB | 17 |
-| Elitserien | 14 |
-| SM-sarja | 13 |
-| Division 1 | 12 |
-| NBL | 7 |
+| MLB | 501 |
+| IL | 450 |
+| NPB | 164 |
+| PCL | 162 |
+| KBO | 141 |
+| CPBL | 89 |
+| Extraliga | 83 |
+| Bundesliga | 31 |
+| Hoofdklasse | 23 |
+| LMB | 19 |
+| Elitserien | 16 |
+| SM-sarja | 15 |
+| Division 1 | 14 |
+| NBL | 8 |
 | UNKNOWN | 5 |
 
 ## Bookmakers returned by API
@@ -112,6 +112,7 @@ Generated: `2026-09-11T23:32:22.079137+00:00`
 | 2026-09-09 | 443 |
 | 2026-09-10 | 566 |
 | 2026-09-11 | 529 |
+| 2026-09-12 | 76 |
 
 ## API errors
 
