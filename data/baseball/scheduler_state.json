@@ -1,201 +1,138 @@
 {
-  "generated_at": "2026-09-13T21:18:50.690672+00:00",
+  "generated_at": "2026-09-13T23:18:32.796420+00:00",
   "events": {
-    "175985": {
-      "event_id": "175985",
-      "kickoff": "2026-09-13T20:35:00+00:00",
-      "minutes_to_kickoff": -43.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "CLOSING"
-    },
-    "185831": {
-      "event_id": "185831",
-      "kickoff": "2026-09-13T20:10:00+00:00",
-      "minutes_to_kickoff": -68.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "CLOSING"
-    },
-    "175983": {
-      "event_id": "175983",
-      "kickoff": "2026-09-13T20:05:00+00:00",
-      "minutes_to_kickoff": -73.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "CLOSING"
-    },
-    "185830": {
-      "event_id": "185830",
-      "kickoff": "2026-09-13T20:05:00+00:00",
-      "minutes_to_kickoff": -73.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "CLOSING"
-    },
     "185832": {
       "event_id": "185832",
       "kickoff": "2026-09-13T23:20:00+00:00",
-      "minutes_to_kickoff": 121.2,
+      "minutes_to_kickoff": 1.5,
       "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "ACTIVE"
-    },
-    "175981": {
-      "event_id": "175981",
-      "kickoff": "2026-09-13T19:05:00+00:00",
-      "minutes_to_kickoff": -133.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "CLOSING"
-    },
-    "175982": {
-      "event_id": "175982",
-      "kickoff": "2026-09-13T19:05:00+00:00",
-      "minutes_to_kickoff": -133.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
-      "observation_due": false,
-      "priority": "CLOSING"
-    },
-    "185820": {
-      "event_id": "185820",
-      "kickoff": "2026-09-13T19:05:00+00:00",
-      "minutes_to_kickoff": -133.8,
-      "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "CLOSING"
     },
     "187324": {
       "event_id": "187324",
       "kickoff": "2026-09-14T00:00:00+00:00",
-      "minutes_to_kickoff": 161.2,
+      "minutes_to_kickoff": 41.5,
       "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
-      "priority": "ACTIVE"
+      "priority": "CLOSING"
     },
     "175984": {
       "event_id": "175984",
       "kickoff": "2026-09-14T00:05:00+00:00",
-      "minutes_to_kickoff": 166.2,
+      "minutes_to_kickoff": 46.5,
       "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
-      "priority": "ACTIVE"
+      "priority": "CLOSING"
     },
-    "185829": {
-      "event_id": "185829",
-      "kickoff": "2026-09-13T18:20:00+00:00",
-      "minutes_to_kickoff": -178.8,
+    "175985": {
+      "event_id": "175985",
+      "kickoff": "2026-09-13T20:35:00+00:00",
+      "minutes_to_kickoff": -163.5,
       "cadence_minutes": 15,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "CLOSING"
     },
     "180630": {
       "event_id": "180630",
       "kickoff": "2026-09-14T09:00:00+00:00",
-      "minutes_to_kickoff": 701.2,
+      "minutes_to_kickoff": 581.5,
       "cadence_minutes": 60,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "180872": {
       "event_id": "180872",
       "kickoff": "2026-09-14T09:00:00+00:00",
-      "minutes_to_kickoff": 701.2,
+      "minutes_to_kickoff": 581.5,
       "cadence_minutes": 60,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "181035": {
       "event_id": "181035",
       "kickoff": "2026-09-14T09:00:00+00:00",
-      "minutes_to_kickoff": 701.2,
+      "minutes_to_kickoff": 581.5,
       "cadence_minutes": 60,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "184235": {
       "event_id": "184235",
       "kickoff": "2026-09-14T10:35:00+00:00",
-      "minutes_to_kickoff": 796.2,
+      "minutes_to_kickoff": 676.5,
       "cadence_minutes": 60,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185833": {
       "event_id": "185833",
       "kickoff": "2026-09-14T22:40:00+00:00",
-      "minutes_to_kickoff": 1521.2,
-      "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "minutes_to_kickoff": 1401.5,
+      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185834": {
       "event_id": "185834",
       "kickoff": "2026-09-14T22:40:00+00:00",
-      "minutes_to_kickoff": 1521.2,
-      "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "minutes_to_kickoff": 1401.5,
+      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185835": {
       "event_id": "185835",
       "kickoff": "2026-09-14T23:07:00+00:00",
-      "minutes_to_kickoff": 1548.2,
-      "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "minutes_to_kickoff": 1428.5,
+      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185836": {
       "event_id": "185836",
       "kickoff": "2026-09-14T23:10:00+00:00",
-      "minutes_to_kickoff": 1551.2,
-      "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "minutes_to_kickoff": 1431.5,
+      "cadence_minutes": 60,
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185837": {
       "event_id": "185837",
       "kickoff": "2026-09-14T23:40:00+00:00",
-      "minutes_to_kickoff": 1581.2,
+      "minutes_to_kickoff": 1461.5,
       "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185838": {
       "event_id": "185838",
       "kickoff": "2026-09-14T23:40:00+00:00",
-      "minutes_to_kickoff": 1581.2,
+      "minutes_to_kickoff": 1461.5,
       "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     },
     "185839": {
       "event_id": "185839",
       "kickoff": "2026-09-14T23:45:00+00:00",
-      "minutes_to_kickoff": 1586.2,
+      "minutes_to_kickoff": 1466.5,
       "cadence_minutes": 120,
-      "last_observation_at": "2026-09-13T21:18:50.690672+00:00",
+      "last_observation_at": "2026-09-13T23:18:32.796420+00:00",
       "observation_due": false,
       "priority": "ACTIVE"
     }
