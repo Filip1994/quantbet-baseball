@@ -1,11 +1,11 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-13T07:02:09.348167+00:00`
+Generated: `2026-09-13T12:17:41.555347+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **2423**
-- Unique games observed: **286**
+- Snapshot rows collected: **2471**
+- Unique games observed: **293**
 - Leagues observed: **15**
 - Bookmakers observed: **13**
 - Distinct market names observed: **51**
@@ -15,19 +15,19 @@ Generated: `2026-09-13T07:02:09.348167+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 702 |
-| IL | 588 |
-| NPB | 230 |
-| PCL | 222 |
+| MLB | 724 |
+| IL | 596 |
+| NPB | 233 |
+| PCL | 227 |
 | KBO | 185 |
-| Extraliga | 134 |
-| CPBL | 127 |
-| Division 1 | 58 |
-| Bundesliga | 46 |
-| LMB | 30 |
+| Extraliga | 138 |
+| CPBL | 128 |
+| Division 1 | 60 |
+| Bundesliga | 47 |
+| LMB | 31 |
 | SM-sarja | 30 |
 | Hoofdklasse | 26 |
-| NBL | 20 |
+| NBL | 21 |
 | Elitserien | 20 |
 | UNKNOWN | 5 |
 
@@ -35,15 +35,15 @@ Generated: `2026-09-13T07:02:09.348167+00:00`
 
 | Bookmaker | Snapshot appearances |
 |---|---:|
-| 1xbet | 385 |
-| BetVictor | 385 |
-| WilliamHill | 385 |
-| Bet365 | 384 |
-| Marathon | 383 |
-| Pinnacle | 360 |
-| Betano | 290 |
-| SBO | 289 |
-| Betfair | 215 |
+| 1xbet | 400 |
+| BetVictor | 400 |
+| WilliamHill | 400 |
+| Marathon | 398 |
+| Bet365 | 397 |
+| Pinnacle | 371 |
+| Betano | 305 |
+| SBO | 302 |
+| Betfair | 230 |
 | Superbet | 197 |
 | Unibet | 197 |
 | 10Bet | 187 |
@@ -53,45 +53,45 @@ Generated: `2026-09-13T07:02:09.348167+00:00`
 
 | Market | Snapshot appearances |
 |---|---:|
-| 1x2 (1st 5 Innings) | 385 |
-| 1x2 (1st Inning) | 385 |
-| Asian Handicap | 385 |
-| Asian Handicap (1st 5 Innings) | 385 |
-| Asian Handicap (1st Inning) | 385 |
-| Away Team Total Goals (Including OT) | 385 |
-| First Team To Score | 385 |
-| Home Team Total Goals (Including OT) | 385 |
-| Home/Away | 385 |
-| Last Team To Score | 385 |
-| Match Winner | 385 |
-| Odd/Even (Including OT) | 385 |
-| Over/Under | 385 |
-| Over/Under (1st 5 Innings) | 385 |
-| Over/Under (1st Inning) | 385 |
-| Extra Innings | 383 |
-| Result/Total Goals | 381 |
-| Correct Score | 377 |
-| Asian Handicap (1st 7 Innings) | 375 |
-| A Run (1st Inning) | 363 |
-| Asian Handicap First Half | 357 |
-| Away Team Total Goals(1st Half) | 357 |
-| Goals Over/Under 1st Half | 357 |
-| Home Team Total Goals(1st Half) | 357 |
-| Asian Handicap (1st 3 Innings) | 355 |
-| Over/Under (1st 3 Innings) | 354 |
-| Over/Under (1st 7 Innings) | 352 |
-| Total Hits | 297 |
-| Team With Highest Scoring | 293 |
-| Away Total Hits | 291 |
-| Home Total Hits | 291 |
-| HT/FT (Including OT) | 285 |
-| Away Odd/Even (OT) | 276 |
-| Home Odd/Even (OT) | 276 |
-| First Home Run | 234 |
-| Player Runs | 220 |
-| Asian Handicap (4.5 Innings) | 214 |
-| Over/Under (4.5 Innings) | 214 |
-| Pitcher Strikeouts | 18 |
+| 1x2 (1st 5 Innings) | 400 |
+| 1x2 (1st Inning) | 400 |
+| Asian Handicap | 400 |
+| Asian Handicap (1st 5 Innings) | 400 |
+| Asian Handicap (1st Inning) | 400 |
+| Away Team Total Goals (Including OT) | 400 |
+| First Team To Score | 400 |
+| Home Team Total Goals (Including OT) | 400 |
+| Home/Away | 400 |
+| Last Team To Score | 400 |
+| Match Winner | 400 |
+| Odd/Even (Including OT) | 400 |
+| Over/Under | 400 |
+| Over/Under (1st 5 Innings) | 400 |
+| Over/Under (1st Inning) | 400 |
+| Extra Innings | 398 |
+| Result/Total Goals | 394 |
+| Correct Score | 392 |
+| Asian Handicap (1st 7 Innings) | 390 |
+| A Run (1st Inning) | 376 |
+| Asian Handicap (1st 3 Innings) | 368 |
+| Asian Handicap First Half | 368 |
+| Away Team Total Goals(1st Half) | 368 |
+| Goals Over/Under 1st Half | 368 |
+| Home Team Total Goals(1st Half) | 368 |
+| Over/Under (1st 3 Innings) | 367 |
+| Over/Under (1st 7 Innings) | 365 |
+| Total Hits | 311 |
+| Away Total Hits | 304 |
+| Home Total Hits | 304 |
+| Team With Highest Scoring | 304 |
+| HT/FT (Including OT) | 295 |
+| Away Odd/Even (OT) | 288 |
+| Home Odd/Even (OT) | 288 |
+| First Home Run | 246 |
+| Player Runs | 235 |
+| Asian Handicap (4.5 Innings) | 224 |
+| Over/Under (4.5 Innings) | 224 |
+| Pitcher Strikeouts | 19 |
 | Pitcher Outs | 15 |
 | Player Total Bases | 7 |
 | Player Doubles | 6 |
@@ -115,7 +115,7 @@ Generated: `2026-09-13T07:02:09.348167+00:00`
 | 2026-09-10 | 566 |
 | 2026-09-11 | 529 |
 | 2026-09-12 | 603 |
-| 2026-09-13 | 175 |
+| 2026-09-13 | 223 |
 
 ## API errors
 
