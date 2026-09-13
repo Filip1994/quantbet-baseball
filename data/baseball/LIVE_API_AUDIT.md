@@ -1,10 +1,10 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-13T01:17:18.599511+00:00`
+Generated: `2026-09-13T06:32:29.820418+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **2311**
+- Snapshot rows collected: **2367**
 - Unique games observed: **286**
 - Leagues observed: **15**
 - Bookmakers observed: **13**
@@ -15,82 +15,82 @@ Generated: `2026-09-13T01:17:18.599511+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 672 |
-| IL | 572 |
-| NPB | 214 |
-| PCL | 212 |
-| KBO | 177 |
-| Extraliga | 126 |
-| CPBL | 119 |
-| Division 1 | 50 |
-| Bundesliga | 44 |
-| LMB | 28 |
-| SM-sarja | 28 |
+| MLB | 687 |
+| IL | 580 |
+| NPB | 222 |
+| PCL | 217 |
+| KBO | 181 |
+| Extraliga | 130 |
+| CPBL | 123 |
+| Division 1 | 54 |
+| Bundesliga | 45 |
+| LMB | 29 |
+| SM-sarja | 29 |
 | Hoofdklasse | 26 |
 | Elitserien | 20 |
-| NBL | 18 |
+| NBL | 19 |
 | UNKNOWN | 5 |
 
 ## Bookmakers returned by API
 
 | Bookmaker | Snapshot appearances |
 |---|---:|
-| 1xbet | 345 |
-| BetVictor | 345 |
-| Marathon | 345 |
-| WilliamHill | 345 |
-| Bet365 | 344 |
-| Pinnacle | 320 |
-| Betano | 250 |
-| SBO | 249 |
+| 1xbet | 365 |
+| BetVictor | 365 |
+| WilliamHill | 365 |
+| Bet365 | 364 |
+| Marathon | 364 |
+| Pinnacle | 340 |
+| Betano | 270 |
+| SBO | 269 |
 | Superbet | 197 |
 | Unibet | 197 |
+| Betfair | 195 |
 | 10Bet | 187 |
-| Betfair | 175 |
 | 888Sport | 169 |
 
 ## Markets returned by API
 
 | Market | Snapshot appearances |
 |---|---:|
-| 1x2 (1st 5 Innings) | 345 |
-| 1x2 (1st Inning) | 345 |
-| Asian Handicap | 345 |
-| Asian Handicap (1st 5 Innings) | 345 |
-| Asian Handicap (1st Inning) | 345 |
-| Away Team Total Goals (Including OT) | 345 |
-| Extra Innings | 345 |
-| First Team To Score | 345 |
-| Home Team Total Goals (Including OT) | 345 |
-| Home/Away | 345 |
-| Last Team To Score | 345 |
-| Match Winner | 345 |
-| Odd/Even (Including OT) | 345 |
-| Over/Under | 345 |
-| Over/Under (1st 5 Innings) | 345 |
-| Over/Under (1st Inning) | 345 |
-| Result/Total Goals | 341 |
-| Correct Score | 337 |
-| Asian Handicap (1st 7 Innings) | 335 |
-| A Run (1st Inning) | 325 |
-| Asian Handicap (1st 3 Innings) | 323 |
-| Over/Under (1st 3 Innings) | 322 |
-| Over/Under (1st 7 Innings) | 320 |
-| Asian Handicap First Half | 319 |
-| Away Team Total Goals(1st Half) | 319 |
-| Goals Over/Under 1st Half | 319 |
-| Home Team Total Goals(1st Half) | 319 |
-| Total Hits | 279 |
-| Team With Highest Scoring | 275 |
-| Away Total Hits | 271 |
-| Home Total Hits | 271 |
-| HT/FT (Including OT) | 267 |
-| Away Odd/Even (OT) | 258 |
-| Home Odd/Even (OT) | 258 |
-| First Home Run | 230 |
-| Player Runs | 206 |
-| Asian Handicap (4.5 Innings) | 196 |
-| Over/Under (4.5 Innings) | 196 |
+| 1x2 (1st 5 Innings) | 365 |
+| 1x2 (1st Inning) | 365 |
+| Asian Handicap | 365 |
+| Asian Handicap (1st 5 Innings) | 365 |
+| Asian Handicap (1st Inning) | 365 |
+| Away Team Total Goals (Including OT) | 365 |
+| First Team To Score | 365 |
+| Home Team Total Goals (Including OT) | 365 |
+| Home/Away | 365 |
+| Last Team To Score | 365 |
+| Match Winner | 365 |
+| Odd/Even (Including OT) | 365 |
+| Over/Under | 365 |
+| Over/Under (1st 5 Innings) | 365 |
+| Over/Under (1st Inning) | 365 |
+| Extra Innings | 364 |
+| Result/Total Goals | 361 |
+| Correct Score | 357 |
+| Asian Handicap (1st 7 Innings) | 355 |
+| A Run (1st Inning) | 344 |
+| Asian Handicap (1st 3 Innings) | 339 |
+| Asian Handicap First Half | 338 |
+| Away Team Total Goals(1st Half) | 338 |
+| Goals Over/Under 1st Half | 338 |
+| Home Team Total Goals(1st Half) | 338 |
+| Over/Under (1st 3 Innings) | 338 |
+| Over/Under (1st 7 Innings) | 336 |
+| Total Hits | 288 |
+| Team With Highest Scoring | 284 |
+| Away Total Hits | 281 |
+| Home Total Hits | 281 |
+| HT/FT (Including OT) | 276 |
+| Away Odd/Even (OT) | 267 |
+| Home Odd/Even (OT) | 267 |
+| First Home Run | 232 |
+| Player Runs | 213 |
+| Asian Handicap (4.5 Innings) | 205 |
+| Over/Under (4.5 Innings) | 205 |
 | Pitcher Strikeouts | 18 |
 | Pitcher Outs | 15 |
 | Player Total Bases | 7 |
@@ -115,7 +115,7 @@ Generated: `2026-09-13T01:17:18.599511+00:00`
 | 2026-09-10 | 566 |
 | 2026-09-11 | 529 |
 | 2026-09-12 | 603 |
-| 2026-09-13 | 63 |
+| 2026-09-13 | 119 |
 
 ## API errors
 
