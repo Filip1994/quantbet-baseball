@@ -63,8 +63,6 @@ The builder validates game identity and normalized two-way model probabilities, 
 
 It does not place bets or calculate stake sizes.
 
-Commits: `4142f7e`, `a97930c`.
-
 Test execution has not been independently confirmed in a local runtime.
 
 ## 23. Auditable signal record envelope milestone — 2026-09-15
@@ -74,8 +72,6 @@ Added `signal_record.py` with a minimal validation and serialization boundary fo
 The envelope requires a non-empty `game_id`, a timezone-aware `generated_at`, a valid `decision` (`BET` or `PASS`), and a non-empty `reason`. It rejects malformed timestamps and non-finite numeric audit metrics, and serializes validated records deterministically as compact JSON suitable for JSON Lines storage.
 
 This boundary does not persist records, execute bets, or imply model validity.
-
-Commits: `64ea996`, `f91b59d`.
 
 Test execution has not been independently confirmed in a local runtime.
 
@@ -139,3 +135,26 @@ Commit:
 - `accf02b` — define odds timeline and immutable pick event contract.
 
 No production code was added in this milestone. Runtime tests were not executed.
+
+## 26. Canonical evidence contracts — 2026-09-15
+
+Added `src/quantbot/baseball/evidence.py` as the first implementation boundary for the evidence lifecycle.
+
+Implemented:
+
+- immutable `OddsObservation` contract for moneyline and full-game total observations;
+- immutable `PickEvent` contract for both `BET` and retained `PASS` decisions;
+- strict timezone-aware timestamp validation;
+- rejection of post-kickoff pre-game observations;
+- decimal-odds, probability, finite-number, market-family, line, and status validation;
+- explicit null metrics for `PASS` events rather than fabricated values;
+- deterministic compact JSON serialization;
+- deterministic SHA-256 hashing helper for source payloads.
+
+The module is storage-agnostic and is not yet connected to persistence, timeline reconstruction, settlement, or Railway.
+
+Commit:
+
+- `ccbe8d4` — add canonical odds and pick evidence contracts.
+
+Runtime tests were not independently executed in this environment.
