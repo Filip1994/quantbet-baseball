@@ -22,3 +22,26 @@ Commits:
 - `7bc82c6` — expanded market snapshot contract tests.
 
 Test execution has not been independently confirmed in a local runtime.
+
+## 19. Poisson run-to-moneyline baseline milestone — 2026-09-14
+
+Added `src/quantbot/baseball/run_model.py` with a first mathematical baseline for converting expected home and away runs into two-way moneyline probabilities.
+
+The baseline:
+
+- assumes independent Poisson scoring for the two teams;
+- calculates home-win and away-win probability mass over a bounded run range;
+- excludes equal-score mass and renormalizes the remaining two-way outcome mass;
+- validates finite, strictly positive expected runs;
+- fails closed for invalid numerical inputs or unsafe run bounds;
+- does not yet estimate expected runs from real baseball features;
+- is not connected to training, market snapshots, betting signals, or production services.
+
+Added contract tests for symmetry, directional behavior, normalization, finite two-way outputs, and invalid inputs.
+
+Commits:
+
+- `538fcc3` — Poisson run-to-moneyline baseline;
+- `a331eb2` — Poisson run model contract tests.
+
+Test execution has not been independently confirmed in a local runtime.
