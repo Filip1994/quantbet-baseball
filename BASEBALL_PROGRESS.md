@@ -113,3 +113,20 @@ Commits:
 - `921ad25` — document PostgreSQL evidence schema foundation.
 
 Runtime tests and live database migration verification were not executed.
+
+## 32. Database invariant hardening — 2026-09-15
+
+Hardened `migrations/001_create_evidence_tables.sql` with explicit checks for:
+
+- valid decimal odds for pick events;
+- valid fair decimal odds;
+- required metrics for `BET` events;
+- null metrics for `PASS` events.
+
+This prevents incomplete or semantically contradictory pick records from entering the future PostgreSQL evidence store.
+
+Commit:
+
+- `fb9d80f` — tighten pick event database invariants.
+
+Runtime tests and live database migration verification were not executed.
