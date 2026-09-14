@@ -41,10 +41,10 @@ def _number(value: Any) -> float | None:
 
 
 def _is_moneyline(market: Any) -> bool:
-    text = str(market or "").lower()
-    return any(token in text for token in ("moneyline", "match winner", "game winner", "winner")) and not any(
-        token in text for token in ("run line", "spread", "total", "inning", "player", "strikeout", "hits")
-    )
+    """Accept only explicitly identified full-game, two-way winner markets."""
+    text = " ".join(str(market or "").casefold().replace("-", " ").split())
+    accepted = {"moneyline", "match winner", "game winner", "match result", "game result"}
+    return text in accepted
 
 
 def _selection_side(selection: str, home: str, away: str) -> str | None:
@@ -74,19 +74,13 @@ def _result_map(results: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         if any(token in status for token in ("post", "cancel", "suspend", "abort")):
             continue
         mapped[str(game_id)] = {
-            "home": home_name,
-            "away": away_name,
-            "home_score": home_score,
-            "away_score": away_score,
-            "status": status,
+            "home": home_name, "away": away_name, "home_score": home_score,
+            "away_score": away_score, "status": status,
         }
     return mapped
 
 
-def build_moneyline_rows(
-    observations: Iterable[dict[str, Any]],
-    results: dict[str, dict[str, Any]],
-) -> list[dict[str, Any]]:
+def build_moneyline_rows(observations: Iterable[dict[str, Any]], results: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     """Build pregame moneyline examples; final scores are labels only."""
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for row in observations:
@@ -110,25 +104,14 @@ def build_moneyline_rows(
     output: list[dict[str, Any]] = []
     for rows in grouped.values():
         for row in rows:
-            output.append(
-                {
-                    "game_id": str(row.get("game_id", row.get("event_id"))),
-                    "captured_at": row["captured_at"],
-                    "kickoff": row["kickoff"],
-                    "league": row.get("league"),
-                    "home": row.get("home"),
-                    "away": row.get("away"),
-                    "market": row.get("market"),
-                    "selection": row.get("selection"),
-                    "side": row["_side"],
-                    "bookmaker_name": row.get("bookmaker_name"),
-                    "odds": row["_odds"],
-                    "implied_probability": 1.0 / row["_odds"],
-                    "target": int(row["_side"] == row["_winner"]),
-                    "result": row["_winner"],
-                    "source_observation_id": row.get("observation_id"),
-                }
-            )
+            output.append({
+                "game_id": str(row.get("game_id", row.get("event_id"))), "captured_at": row["captured_at"],
+                "kickoff": row["kickoff"], "league": row.get("league"), "home": row.get("home"),
+                "away": row.get("away"), "market": row.get("market"), "selection": row.get("selection"),
+                "side": row["_side"], "bookmaker_name": row.get("bookmaker_name"), "odds": row["_odds"],
+                "implied_probability": 1.0 / row["_odds"], "target": int(row["_side"] == row["_winner"]),
+                "result": row["_winner"], "source_observation_id": row.get("observation_id"),
+            })
     return sorted(output, key=lambda item: (item["captured_at"], item["game_id"], item["selection"]))
 
 
