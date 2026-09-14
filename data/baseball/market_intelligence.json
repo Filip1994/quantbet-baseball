@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-14T18:48:30.607808+00:00",
+  "generated_at": "2026-09-14T20:22:35.306685+00:00",
   "dataset": {
-    "observations": 190774,
+    "observations": 194370,
     "events": 104,
     "leagues": 3,
     "bookmakers": 12,
@@ -22,15 +22,15 @@
     ]
   },
   "market_family_observations": {
-    "winner": 7082,
-    "run_line": 29196,
-    "totals": 105435,
-    "hits": 15493
+    "winner": 7194,
+    "run_line": 29694,
+    "totals": 107255,
+    "hits": 15879
   },
   "top_leagues_by_observations": [
     [
       "MLB",
-      165937
+      169533
     ],
     [
       "NPB",
@@ -44,23 +44,23 @@
   "top_bookmakers_by_observations": [
     [
       "Bet365",
-      89164
+      91067
     ],
     [
       "1xbet",
-      47236
+      48058
     ],
     [
       "Pinnacle",
-      16322
+      16626
     ],
     [
       "Marathon",
-      14222
+      14490
     ],
     [
       "Betano",
-      6398
+      6546
     ],
     [
       "Superbet",
@@ -68,7 +68,7 @@
     ],
     [
       "SBO",
-      4014
+      4082
     ],
     [
       "Unibet",
@@ -76,15 +76,15 @@
     ],
     [
       "BetVictor",
-      2714
+      2762
     ],
     [
       "WilliamHill",
-      1224
+      1245
     ],
     [
       "Betfair",
-      440
+      454
     ],
     [
       "10Bet",
@@ -94,132 +94,132 @@
   "top_markets_by_observations": [
     [
       "Over/Under",
-      41168
+      41844
     ],
     [
       "Correct Score",
-      21024
+      21528
     ],
     [
       "Home Team Total Goals (Including OT)",
-      19311
+      19619
     ],
     [
       "Away Team Total Goals (Including OT)",
-      19144
+      19460
     ],
     [
       "Asian Handicap",
-      18388
+      18668
     ],
     [
       "Over/Under (1st 5 Innings)",
-      8276
+      8438
     ],
     [
       "Over/Under (1st Inning)",
-      7134
+      7260
     ],
     [
       "Total Hits",
-      6392
+      6572
     ],
     [
       "Home Total Hits",
-      4552
+      4655
     ],
     [
       "Away Total Hits",
-      4549
+      4652
     ],
     [
       "Goals Over/Under 1st Half",
-      3956
+      4030
     ],
     [
       "Result/Total Goals",
-      3880
+      3970
     ],
     [
       "Asian Handicap (1st 3 Innings)",
-      3596
+      3688
     ],
     [
       "Over/Under (1st 3 Innings)",
-      3484
+      3574
     ],
     [
       "Asian Handicap (1st 5 Innings)",
-      3452
+      3502
     ],
     [
       "Asian Handicap (1st Inning)",
-      2480
+      2522
     ],
     [
       "1x2 (1st Inning)",
-      2358
+      2400
     ],
     [
       "Home/Away",
-      1928
+      1956
     ],
     [
       "HT/FT (Including OT)",
-      1764
+      1806
     ],
     [
       "Match Winner",
-      1482
+      1503
     ],
     [
       "Odd/Even (Including OT)",
-      1422
+      1450
     ],
     [
       "1x2 (1st 5 Innings)",
-      1314
+      1335
     ],
     [
       "Team With Highest Scoring",
-      930
+      951
     ],
     [
       "Over/Under (1st 7 Innings)",
-      916
+      942
     ],
     [
       "Asian Handicap (1st 7 Innings)",
-      816
+      838
     ],
     [
       "Home Team Total Goals(1st Half)",
-      810
+      826
     ],
     [
       "First Team To Score",
-      802
+      816
     ],
     [
       "Last Team To Score",
-      802
+      816
     ],
     [
       "Away Team Total Goals(1st Half)",
-      784
+      798
     ],
     [
       "Extra Innings",
-      768
+      782
     ]
   ],
   "event_density": {
-    "median_observations_per_event": 1809.5,
+    "median_observations_per_event": 1906.0,
     "max": 5292,
     "min": 428
   },
   "cross_bookmaker_dispersion": {
-    "groups": 21991,
+    "groups": 22135,
     "largest_ranges": [
       {
         "game_id": "185712",
@@ -282,6 +282,30 @@
         "range": 50.0
       },
       {
+        "game_id": "185837",
+        "market": "Correct Score",
+        "selection": "0:1",
+        "handicap": null,
+        "books": 5,
+        "min_odds": 151.0,
+        "max_odds": 201.0,
+        "mean_odds": 171.0,
+        "stdev": 24.4949,
+        "range": 50.0
+      },
+      {
+        "game_id": "185837",
+        "market": "Correct Score",
+        "selection": "8:0",
+        "handicap": null,
+        "books": 5,
+        "min_odds": 151.0,
+        "max_odds": 201.0,
+        "mean_odds": 171.0,
+        "stdev": 24.4949,
+        "range": 50.0
+      },
+      {
         "game_id": "185737",
         "market": "Correct Score",
         "selection": "0:7",
@@ -306,39 +330,15 @@
         "range": 50.0
       },
       {
-        "game_id": "185837",
-        "market": "Correct Score",
-        "selection": "0:1",
-        "handicap": null,
-        "books": 4,
-        "min_odds": 151.0,
-        "max_odds": 201.0,
-        "mean_odds": 176.0,
-        "stdev": 25.0,
-        "range": 50.0
-      },
-      {
-        "game_id": "185837",
-        "market": "Correct Score",
-        "selection": "8:0",
-        "handicap": null,
-        "books": 4,
-        "min_odds": 151.0,
-        "max_odds": 201.0,
-        "mean_odds": 176.0,
-        "stdev": 25.0,
-        "range": 50.0
-      },
-      {
         "game_id": "185839",
         "market": "Correct Score",
         "selection": "0:8",
         "handicap": null,
-        "books": 3,
+        "books": 4,
         "min_odds": 151.0,
         "max_odds": 201.0,
-        "mean_odds": 167.6667,
-        "stdev": 23.5702,
+        "mean_odds": 163.5,
+        "stdev": 21.6506,
         "range": 50.0
       },
       {
@@ -524,7 +524,7 @@
     ]
   },
   "price_movement": {
-    "series": 41501,
+    "series": 41669,
     "largest_absolute_moves": [
       {
         "game_id": "185649",
@@ -728,13 +728,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 3.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 5.75,
         "last_odds": 13.0,
         "delta": 7.25,
         "pct_change": 126.087,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       },
       {
         "game_id": "185711",
@@ -868,13 +868,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 3.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 5.0,
         "last_odds": 10.5,
         "delta": 5.5,
         "pct_change": 110.0,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       },
       {
         "game_id": "185836",
@@ -882,13 +882,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 3.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 5.25,
         "last_odds": 11.0,
         "delta": 5.75,
         "pct_change": 109.524,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       },
       {
         "game_id": "185830",
@@ -910,13 +910,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 1.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 1.86,
         "last_odds": 3.8,
         "delta": 1.94,
         "pct_change": 104.301,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       },
       {
         "game_id": "185713",
@@ -952,13 +952,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 2.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 3.5,
         "last_odds": 7.0,
         "delta": 3.5,
         "pct_change": 100.0,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       },
       {
         "game_id": "185831",
@@ -1008,13 +1008,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 0.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 1.22,
         "last_odds": 2.35,
         "delta": 1.13,
         "pct_change": 92.623,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       },
       {
         "game_id": "185651",
@@ -1078,13 +1078,13 @@
         "market": "Over/Under (1st Inning)",
         "selection": "Over 1.5",
         "handicap": null,
-        "observations": 3,
+        "observations": 4,
         "first_odds": 1.8,
         "last_odds": 3.35,
         "delta": 1.55,
         "pct_change": 86.111,
         "first_at": "2026-09-14T06:43:19.367664+00:00",
-        "last_at": "2026-09-14T18:48:15.958156+00:00"
+        "last_at": "2026-09-14T20:22:20.103784+00:00"
       }
     ]
   },
