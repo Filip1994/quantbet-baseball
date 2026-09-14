@@ -87,8 +87,6 @@ Key findings:
 - the largest gap is the complete evidence-to-pick-to-closing-line-to-settlement lifecycle;
 - model expansion is paused until evidence architecture is implemented.
 
-Revised `docs/BASEBALL_MASTER_PLAN.md` to revision 3.0 and permanently removed player props from all active scope and roadmap sections. Player props are now explicitly `OUT OF SCOPE`, not postponed.
-
 New execution order:
 
 1. canonical odds-observation/evidence contract;
@@ -156,5 +154,27 @@ The module is storage-agnostic and is not yet connected to persistence, timeline
 Commit:
 
 - `ccbe8d4` — add canonical odds and pick evidence contracts.
+
+Runtime tests were not independently executed in this environment.
+
+## 27. Deterministic odds timeline reconstruction — 2026-09-15
+
+Added `src/quantbot/baseball/timeline.py` and `tests/test_timeline_contract.py`.
+
+Implemented:
+
+- deterministic ordering of validated observations;
+- grouping by market family and exact line, with line changes represented as separate epochs;
+- rejection of mixed games or kickoff times;
+- exact duplicate ID collapse only for identical records;
+- rejection of conflicting same-time bookmaker/selection quotes;
+- observed-only opening and closing selectors;
+- latest-observed-price-at-cutoff selection without interpolation or invented prices;
+- tests for line changes, opening/closing selection, cutoff selection, conflicting quotes, and post-kickoff rejection.
+
+Commits:
+
+- `3c285d9` — add deterministic odds timeline reconstruction;
+- `af9767d` — cover odds timeline reconstruction and conflicts.
 
 Runtime tests were not independently executed in this environment.
