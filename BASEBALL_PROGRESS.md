@@ -130,3 +130,28 @@ Commit:
 - `fb9d80f` — tighten pick event database invariants.
 
 Runtime tests and live database migration verification were not executed.
+
+## 33. PostgreSQL contract alignment and atomic batch boundary — 2026-09-15
+
+Aligned the PostgreSQL schema with the canonical Python evidence contracts:
+
+- standardized market families to `moneyline` and `total`;
+- allowed `NULL` lines for moneyline records;
+- required `kickoff_at` for odds observations;
+- enforced pre-kickoff observation timestamps;
+- aligned supported market statuses;
+- added line-family consistency checks.
+
+Updated `src/quantbot/baseball/postgres_repository.py` to:
+
+- persist `kickoff_at`;
+- use the aligned market contract;
+- preserve exact canonical JSON for duplicate comparison;
+- provide an atomic observation batch boundary with one final commit and rollback on failure.
+
+Commits:
+
+- `1e66e417` — align PostgreSQL schema with evidence contracts;
+- `749ad3b2` — align PostgreSQL adapter and add atomic observation batches.
+
+Runtime tests, PostgreSQL migration execution, and live Railway verification were not performed.
