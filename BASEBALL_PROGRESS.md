@@ -55,3 +55,29 @@ Commits:
 - `aae3040` — align master plan with Railway-first persistence.
 
 Documentation-only change. Runtime tests were not executed.
+
+## 30. Storage-neutral repository contract — 2026-09-15
+
+Added `src/quantbot/baseball/evidence_repository.py` defining the minimal repository protocol for canonical odds observations and immutable pick events.
+
+Added `docs/BASEBALL_REPOSITORY_CONTRACT.md` documenting adapter obligations:
+
+- immutable identities;
+- idempotent exact duplicates;
+- fail-closed conflicts;
+- no silent overwrite;
+- canonical equality;
+- deterministic reads;
+- schema visibility;
+- transaction boundaries;
+- replay safety;
+- auditability.
+
+The contract remains independent of Railway and PostgreSQL, while PostgreSQL on Railway is the intended production implementation. Settlement, archival jobs, retention deletion, and provider ingestion remain separate future slices.
+
+Commits:
+
+- `5d0564c` — define storage-neutral evidence repository contract;
+- `ac54e80` — specify evidence repository contract and adapter obligations.
+
+Runtime tests were not executed.
