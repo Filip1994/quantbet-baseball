@@ -1,231 +1,154 @@
-# QuantBet Baseball — Master Plan, Audit Baseline and Execution Layout
+# QuantBet Baseball — Master Plan and Execution Layout
 
 **Repository:** `Filip1994/quantbet-baseball`  
 **Legacy reference:** `Filip1994/h2h` — read-only reference only  
-**Document status:** Revised master plan after scope and learning audit  
-**Last updated:** 2026-09-15 00:35 Europe/Belgrade (UTC+02:00)  
-**Revision:** 2.0
+**Created at:** 2026-09-15 01:05 Europe/Belgrade (UTC+02:00)  
+**Last updated:** 2026-09-15 01:05 Europe/Belgrade (UTC+02:00)  
+**Revision:** 3.0  
+**Status:** ACTIVE PLAN — audit baseline established; evidence architecture is next
 
-## 0. Executive finding
+## 0. Operating rule
 
-The previously defined first phase was **not completed in a verifiable sense**.
+The project is not considered complete because code, collected data, or research notes exist. A phase is complete only when its acceptance criteria, evidence, tests, timestamps, and review decision are documented.
 
-A model being allowed to collect information or “learn” does not, by itself, establish that it learned anything useful. We currently do not have an auditable learning report containing:
-
-- sources consulted;
-- facts and concepts extracted;
-- market definitions learned;
-- assumptions accepted or rejected;
-- source quality and conflicts;
-- implemented changes attributable to research;
-- tests proving the changes;
-- evidence that the resulting knowledge improves prediction or betting decisions.
-
-Therefore, the project must treat the earlier research period as **unverified exploratory activity**, not as a completed Phase 1. The next step is a formal audit and reconstruction of the knowledge base and system specification.
+All material work must be recorded in `BASEBALL_PROGRESS.md` or a related MDU with an exact timestamp. No work may be claimed as verified without runtime or source evidence.
 
 ## 1. Objective
 
-Build a closed, reproducible, auditable baseball betting research and decision system that can determine whether a measurable betting edge exists. The goal is not merely to predict winners or maximize hit rate. The goal is to estimate probabilities accurately enough to compare them with timestamped market prices after accounting for vig, uncertainty, timing, market rules, and execution friction.
+Build a closed, reproducible, auditable baseball betting research and decision system that tests whether a measurable edge exists after vig, uncertainty, timing, market rules, slippage, and execution constraints.
 
-The system must never invent teams, markets, odds, timestamps, statistics, results, or source evidence. Unknown or contradictory information must cause a controlled abstention or an explicit data-quality failure.
+The system must fail closed on unknown, missing, contradictory, post-kickoff, or unverifiable information. It must never invent teams, markets, odds, timestamps, statistics, results, or source evidence.
 
-## 2. Scope boundary
+## 2. Hard boundaries
 
-- New production work belongs only in `quantbet-baseball`.
-- `h2h` remains read-only legacy reference material.
-- No live betting, automated staking, or production claims before chronological out-of-sample validation.
-- Every material artifact must contain a date and time.
-- Every prediction and market observation must be traceable to source evidence and a data snapshot.
+- All new production work belongs in `quantbet-baseball`.
+- `h2h` is read-only legacy reference material and must not be modified.
+- No live betting, automated staking, or profitability claim before chronological out-of-sample validation.
+- Every market observation, prediction, pick, result, and material document must be traceable to evidence and timestamps.
 
-## 3. Phase 1 — Baseball education, market specification and research audit
+## 3. Scope
 
-### Status: REOPENED — not yet verifiably complete
+### V1 — in scope
 
-This phase has two deliverables:
+1. Full-game moneyline: home/away winner.
+2. Full-game totals with an explicit line, beginning only with lines actually present and sufficiently covered in the data, such as 8.5 and 9.5.
+3. Timestamped market observations.
+4. Immutable pick events.
+5. Opening/decision/closing price timeline research.
+6. Settlement and post-game evaluation.
+7. Chronological backtesting, calibration, CLV, and timing analysis.
 
-1. **Knowledge audit:** establish what was actually learned from the prior research period.
-2. **System specification:** convert verified knowledge into implementable, testable requirements.
+### Postponed
 
-The audit must classify every prior conclusion as:
+- Run line.
+- First-five-innings markets.
+- Team totals.
+- NRFI/YRFI and inning markets.
+- Alternate lines.
+- Futures.
+- Parlays and same-game parlays.
+- Live betting.
+- Automated staking.
 
-- verified fact;
-- source-dependent fact;
-- modeling assumption;
-- unresolved question;
-- rejected or obsolete idea;
-- implemented requirement;
-- postponed feature.
+### Explicitly excluded — permanent project boundary
 
-The output must include source URLs or provider identifiers, retrieval timestamps, notes on conflicts, and links to the code or documentation affected. “The model knows this” is not an acceptable evidence standard.
+- **Player props.** This project will not research, model, implement, backtest, or deploy player-prop markets.
 
-### Required market curriculum
+No excluded market may reappear in the curriculum, roadmap, implementation backlog, or future-phase scope without an explicit scope revision decision.
 
-The system must explicitly distinguish market families and settlement rules:
-
-1. Full-game moneyline — home/away winner.
-2. Full-game run line — usually -1.5/+1.5; requires run-difference modeling.
-3. Full-game total — Over/Under a specific line such as 8.5 or 9.5; each line is a separate market.
-4. Team totals — one team’s runs over/under a specified line.
-5. First-five-innings markets — F5 moneyline, F5 run line, F5 total; separate from full-game markets.
-6. Player props — pitcher strikeouts/outs and batter outcomes; postponed until data and settlement quality are sufficient.
-7. NRFI/YRFI, inning markets, alternate lines, futures, parlays, same-game parlays, and live betting — explicitly postponed.
-
-No market may be implemented without a precise market identity, line, settlement rule, timestamp semantics, and historical odds availability.
-
-## 4. Revised execution phases
+## 4. Phase execution order
 
 ### Phase 1 — Audit and specification
 
-- Audit the existing repository, prior documents, commits, and implemented modules.
-- Produce a verified baseball knowledge ledger.
-- Define V1 markets, settlement rules, data requirements, and exclusions.
-- Separate inherited ideas from `h2h`, football-derived patterns, and genuinely baseball-specific design.
-- Approve the end-to-end data and decision flow before adding more modeling code.
+**Status:** PARTIALLY COMPLETE; audit baseline created.
 
-### Phase 2 — Odds and market-timeline foundation
+Required outputs:
 
-This is a first-class requirement, not an optional enhancement.
+- repository audit;
+- knowledge ledger with source, retrieval timestamp, classification, limitations, and implementation consequence;
+- canonical V1 market and settlement specification;
+- explicit exclusions and postponed-market register;
+- separation of baseball-specific requirements from inherited/football-derived ideas.
 
-For every market observation, store at minimum:
+Acceptance gate: all active documents agree on scope and the next implementation package is explicit.
 
-- game identifier;
-- market family;
-- selection;
-- line, where applicable;
-- bookmaker/provider;
-- decimal odds and raw quoted price;
-- observed timestamp;
-- retrieval timestamp;
-- source payload/checksum;
-- market status and suspension state where available.
+### Phase 2 — Evidence and odds-timeline foundation
 
-For every candidate pick, store a separate immutable **pick event**:
+**Next major implementation phase.**
 
-- selection and exact market/line;
-- odds available at decision time;
-- decision timestamp;
-- model version;
-- feature/data snapshot timestamp;
-- market snapshot identifier;
-- fair probability and fair odds;
-- edge, EV, uncertainty, and decision reason;
-- later price observations and closing price when available.
+Implement and test:
 
-The system must support research into opening price, price at model decision, subsequent movement, closing line, stale odds, slippage, and the relationship between decision timing and realized value.
+- canonical game, market, selection, line, bookmaker, and observation identities;
+- observed time, provider event time, retrieval time, ingestion time, kickoff time, decision time, and closing-observation time semantics;
+- immutable raw payload references and checksums;
+- duplicate and conflict handling;
+- stale, suspended, incomplete, post-kickoff, and contradictory observation rules;
+- opening, decision-time, subsequent, and closing observation linkage;
+- immutable pick-event records containing exact price, market snapshot, model version, feature snapshot, probability, fair price, edge, EV, uncertainty, and reason.
 
-### Phase 3 — Reliable baseball data
+Acceptance gate: a historical market can be replayed from raw evidence into a decision-time pick and later closing/settlement evaluation without hidden data.
 
-Collect only timestamp-valid information on:
+### Phase 3 — Reliable baseball data contracts
 
-- schedules and game status;
-- teams and identities;
-- starting/probable pitchers;
-- lineups and player availability;
-- team and player performance;
-- bullpen quality and availability;
-- park and venue factors;
-- weather and roof status;
-- rest, travel, doubleheaders, injuries, and roster changes;
-- results and official settlement data.
+Define and validate source-backed contracts for schedules, game status, teams, probable/starting pitchers, lineups, availability, team performance, bullpen state, park factors, weather/roof, rest/travel/doubleheaders, injuries/roster changes, results, and official settlement.
 
-Raw provider responses are immutable evidence. Normalized data must preserve source lineage and schema version.
+Raw provider responses remain immutable. Normalized records preserve source lineage, schema version, and timestamps.
 
-### Phase 4 — Baselines and market-specific mathematics
+### Phase 4 — Baselines and market mathematics
 
-Build simple, testable baselines first:
+Only after evidence contracts are stable:
 
 - market-implied and de-vigged probabilities;
-- Elo-style team strength;
-- pitcher- and environment-adjusted run expectations;
-- Poisson/Skellam-style run models where assumptions are justified;
-- calibrated classifiers where appropriate.
-
-V1 modeling priority:
-
-- full-game moneyline;
-- full-game totals for explicitly observed lines such as 8.5 and 9.5.
-
-Run line and F5 markets follow only after their data, modeling, and settlement requirements are specified. Totals must model the distribution of total runs, not use a binary heuristic.
+- Elo-style team baseline;
+- pitcher/environment-adjusted run expectations;
+- justified Poisson/Skellam-style baselines;
+- calibrated models where data supports them;
+- full-game moneyline first;
+- full-game totals as distributions of total runs, never binary heuristics.
 
 ### Phase 5 — Backtesting and timing research
 
-Use strictly chronological train/validation/holdout splits. Evaluate:
+Use chronological train/validation/holdout splits. Measure log loss, Brier score, calibration, ROI, yield, drawdown, turnover, coverage, CLV, price movement, time-to-start, stale-odds sensitivity, slippage, rejected signals, and abstentions.
 
-- log loss and Brier score;
-- calibration and reliability by probability bucket;
-- ROI, yield, drawdown, turnover, and coverage;
-- performance by market, line, bookmaker, odds range, and time-to-start;
-- closing-line value and price movement;
-- stale-odds and missing-data sensitivity;
-- selection bias, rejected signals, and abstentions;
-- slippage and realistic execution assumptions.
+Reject any result contaminated by post-kickoff data, future lineups, future odds, leakage, or unobservable prices.
 
-A profitable backtest is not accepted if it depends on post-kickoff data, future lineups, future odds, leakage, or unobservable prices.
+### Phase 6 — Closed replayable pipeline
 
-### Phase 6 — Closed end-to-end pipeline
-
-Providers → immutable raw evidence → validation/normalization → canonical database → timestamped feature snapshots → versioned models → probabilities/fair prices → market comparison → decision/pick event → later odds timeline → settlement → evaluation/reporting.
+`providers → immutable raw evidence → validation/normalization → canonical storage → timestamped feature snapshots → versioned models → probabilities/fair prices → market comparison → immutable pick event → odds timeline → settlement → evaluation/reporting`
 
 Every stage must be replayable from stored evidence.
 
-### Phase 7 — Railway deployment and operational controls
+### Phase 7 — Railway and operations
 
-Railway PostgreSQL is the operational source of truth. Persistent storage is used for raw archives, Parquet/DuckDB research artifacts, exports, and backups where appropriate.
-
-Add idempotency, retries, rate-limit handling, freshness checks, health checks, audit logs, backup/restore procedures, and safe migration practices. No destructive cutover is allowed without verified rollback capability.
+Only after local contracts and tests are credible: PostgreSQL schema, idempotency, retries, rate limits, freshness checks, health checks, audit logs, backups, restore tests, migrations, and rollback procedures.
 
 ### Phase 8 — Paper mode and launch gate
 
-Run in shadow/paper mode first. Require documented evidence for:
+Require reproducibility, data completeness, calibration, stable operations, realistic timing behavior, untouched chronological holdout performance, and tested restore/redeploy/rollback before any limited production consideration.
 
-- reproducibility;
-- data freshness and completeness;
-- calibrated probabilities;
-- stable operations;
-- realistic market-timing behavior;
-- acceptable performance on an untouched chronological holdout;
-- tested restore, redeploy, and rollback procedures.
+## 5. Current decision
 
-Only then may limited production output be considered.
+**STOP model expansion. GO on evidence architecture.**
 
-## 5. V1 decision
+The next concrete work package is the canonical odds-observation schema plus immutable pick-event and timeline contracts. Railway is not the next task.
 
-The initial V1 will support:
+## 6. Documentation protocol
 
-- full-game moneyline;
-- full-game totals with an explicit total line, beginning with commonly observed lines such as 8.5 and 9.5;
-- timestamped odds observations and immutable pick events;
-- settlement and post-game evaluation.
+Every new or modified MDU must include:
 
-The following are postponed: run line, F5 markets, team totals, player props, NRFI/YRFI, alternate lines, futures, parlays, same-game parlays, live betting, and automated staking.
-
-This is a sequencing decision, not a claim that those markets are unimportant.
-
-## 6. Definition of “learned”
-
-A baseball concept is considered learned by the project only when it has:
-
-1. a written definition;
-2. a source and retrieval timestamp;
-3. explicit assumptions and limitations;
-4. a mapped data contract or implementation requirement;
-5. a test, fixture, or validation method where applicable;
-6. a decision on whether it belongs in V1, later, or nowhere.
-
-## 7. Documentation and timestamp protocol
-
-Every new or modified document must include:
-
-- `Created at: YYYY-MM-DD HH:MM TZ`;
-- `Last updated: YYYY-MM-DD HH:MM TZ`;
-- revision number;
+- `Created at`;
+- `Last updated`;
+- revision;
 - status;
-- links to relevant commits, tests, source evidence, and decision records.
+- relevant commit/test/source references.
 
-Every progress entry must include an exact timestamp. If a source has no reliable publication or retrieval time, that uncertainty must be recorded rather than guessed.
+Every progress entry must include an exact timestamp. Unknown source time must be recorded as unknown, not guessed.
+
+## 7. Related MDUs
+
+- `docs/BASEBALL_REPOSITORY_AUDIT.md` — repository findings, component status, limitations, and execution order.
+- `BASEBALL_PROGRESS.md` — chronological material-change log.
 
 ## 8. Completion rule
 
-A phase is not complete because code exists or because information was collected. It is complete only when its documented acceptance criteria, evidence, tests, and review decision are present.
-
-**Immediate next action:** perform the formal repository and research audit, then create the knowledge ledger, market specification, and odds-timeline design before further expanding model functionality.
+The project advances only through large, reviewable work packages. No isolated model feature should be added while the evidence, timeline, settlement, and replay foundations remain incomplete.
