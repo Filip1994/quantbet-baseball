@@ -113,3 +113,29 @@ Commits:
 - `d5da992` — master-plan revision and permanent player-props exclusion.
 
 Runtime tests were not executed by this audit package.
+
+## 25. Odds timeline and pick-event specification — 2026-09-15 01:00 Europe/Belgrade (UTC+02:00)
+
+Created `docs/ODDS_TIMELINE_AND_PICK_EVENT_SPEC.md`, revision 1.0.
+
+This is the design baseline for the next implementation package. It defines:
+
+- immutable market observations;
+- exact market identity and line handling;
+- provider versus retrieval timestamps;
+- source payload references and checksums;
+- immutable `BET` and `PASS` pick events;
+- opening, decision, and observed closing semantics;
+- stale-price and line-change handling;
+- CLV requirements;
+- separate settlement records;
+- replay and leakage rejection rules;
+- implementation order and acceptance criteria.
+
+Player props are explicitly marked `OUT OF SCOPE` in this specification.
+
+Commit:
+
+- `accf02b` — define odds timeline and immutable pick event contract.
+
+No production code was added in this milestone. Runtime tests were not executed.
