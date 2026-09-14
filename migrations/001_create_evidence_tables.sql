@@ -69,6 +69,12 @@ CREATE TABLE IF NOT EXISTS pick_events (
     CONSTRAINT pick_events_market_probability_valid CHECK (
         market_implied_probability IS NULL OR (market_implied_probability >= 0 AND market_implied_probability <= 1)
     ),
+    CONSTRAINT pick_events_odds_valid CHECK (
+        decision_decimal_odds IS NULL OR decision_decimal_odds > 1.0
+    ),
+    CONSTRAINT pick_events_fair_odds_valid CHECK (
+        fair_decimal_odds IS NULL OR fair_decimal_odds > 1.0
+    ),
     CONSTRAINT pick_events_uncertainty_valid CHECK (
         uncertainty_metric IS NULL OR uncertainty_metric >= 0
     ),
@@ -78,6 +84,13 @@ CREATE TABLE IF NOT EXISTS pick_events (
             decision_decimal_odds IS NULL AND model_probability IS NULL AND fair_decimal_odds IS NULL
             AND market_implied_probability IS NULL AND edge IS NULL AND expected_value_per_unit IS NULL
             AND uncertainty_metric IS NULL
+        )
+    ),
+    CONSTRAINT pick_events_bet_metrics_valid CHECK (
+        decision <> 'BET' OR (
+            decision_decimal_odds IS NOT NULL AND model_probability IS NOT NULL AND fair_decimal_odds IS NOT NULL
+            AND market_implied_probability IS NOT NULL AND edge IS NOT NULL AND expected_value_per_unit IS NOT NULL
+            AND uncertainty_metric IS NOT NULL
         )
     )
 );
