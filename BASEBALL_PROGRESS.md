@@ -73,3 +73,22 @@ Commits:
 - `56e2f7a2365f2f5b5df53755f51251b6a2311f2b` — market contract tests.
 
 Test execution has not been independently confirmed in a local runtime.
+
+## 15. Team identity and result integrity milestone — 2026-09-14
+
+Implemented conservative team-name normalization for matching observations to home/away sides. The normalization is limited to case, whitespace, punctuation, hyphen, and underscore differences; it does not invent provider aliases.
+
+Hardened `_result_map()` to fail closed when the same game ID has conflicting settled result records. Identical duplicate records remain idempotent; conflicting records are removed from the usable result map instead of allowing last-write-wins behavior.
+
+Added `tests/test_identity_and_result_contracts.py` covering:
+
+- punctuation/case/spacing normalization for team matching;
+- conflicting duplicate results being excluded;
+- identical duplicate results remaining idempotent.
+
+Commits:
+
+- `cf3437767767f3e0fdf9d9e32163182c0f62a95e` — identity normalization and conflict-safe result mapping;
+- `511c9177df156d9b2930e5ec962253df4ae9003f` — identity/result contract tests.
+
+Test execution has not been independently confirmed in a local runtime.
