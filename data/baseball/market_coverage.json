@@ -5,7 +5,7 @@
   },
   "CPBL": {
     "bookmakers": [],
-    "snapshots": 140
+    "snapshots": 144
   },
   "Division 1": {
     "bookmakers": [],
@@ -25,7 +25,7 @@
   },
   "IL": {
     "bookmakers": [],
-    "snapshots": 612
+    "snapshots": 622
   },
   "KBO": {
     "bookmakers": [
@@ -43,7 +43,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 193
+    "snapshots": 197
   },
   "LMB": {
     "bookmakers": [],
@@ -65,7 +65,7 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 808
+    "snapshots": 828
   },
   "NBL": {
     "bookmakers": [],
@@ -87,11 +87,11 @@
       "Unibet",
       "WilliamHill"
     ],
-    "snapshots": 263
+    "snapshots": 269
   },
   "PCL": {
     "bookmakers": [],
-    "snapshots": 245
+    "snapshots": 246
   },
   "SM-sarja": {
     "bookmakers": [],
