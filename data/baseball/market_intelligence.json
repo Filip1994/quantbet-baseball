@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-09-13T23:18:42.900478+00:00",
+  "generated_at": "2026-09-14T01:21:31.180966+00:00",
   "dataset": {
-    "observations": 176255,
-    "events": 94,
+    "observations": 179316,
+    "events": 104,
     "leagues": 3,
     "bookmakers": 12,
     "markets": 40
@@ -22,45 +22,45 @@
     ]
   },
   "market_family_observations": {
-    "winner": 6563,
-    "run_line": 27170,
-    "totals": 97747,
+    "winner": 6689,
+    "run_line": 27620,
+    "totals": 99669,
     "hits": 14406
   },
   "top_leagues_by_observations": [
     [
       "MLB",
-      153836
+      155703
+    ],
+    [
+      "NPB",
+      12397
     ],
     [
       "KBO",
       11216
-    ],
-    [
-      "NPB",
-      11203
     ]
   ],
   "top_bookmakers_by_observations": [
     [
       "Bet365",
-      81749
+      82942
     ],
     [
       "1xbet",
-      43706
+      44606
     ],
     [
       "Pinnacle",
-      15266
+      15556
     ],
     [
       "Marathon",
-      13070
+      13378
     ],
     [
       "Betano",
-      5762
+      5932
     ],
     [
       "Superbet",
@@ -68,7 +68,7 @@
     ],
     [
       "SBO",
-      3666
+      3768
     ],
     [
       "Unibet",
@@ -76,15 +76,15 @@
     ],
     [
       "BetVictor",
-      2484
+      2550
     ],
     [
       "WilliamHill",
-      1140
+      1152
     ],
     [
       "Betfair",
-      372
+      392
     ],
     [
       "10Bet",
@@ -94,31 +94,31 @@
   "top_markets_by_observations": [
     [
       "Over/Under",
-      38252
+      39012
     ],
     [
       "Correct Score",
-      18936
+      19296
     ],
     [
       "Home Team Total Goals (Including OT)",
-      17903
+      18285
     ],
     [
       "Away Team Total Goals (Including OT)",
-      17732
+      18108
     ],
     [
       "Asian Handicap",
-      17116
+      17452
     ],
     [
       "Over/Under (1st 5 Innings)",
-      7596
+      7766
     ],
     [
       "Over/Under (1st Inning)",
-      6608
+      6720
     ],
     [
       "Total Hits",
@@ -134,92 +134,92 @@
     ],
     [
       "Goals Over/Under 1st Half",
-      3696
+      3768
     ],
     [
       "Result/Total Goals",
-      3514
+      3582
     ],
     [
       "Asian Handicap (1st 3 Innings)",
-      3340
+      3346
     ],
     [
       "Asian Handicap (1st 5 Innings)",
-      3258
+      3298
     ],
     [
       "Over/Under (1st 3 Innings)",
-      3242
+      3248
     ],
     [
       "Asian Handicap (1st Inning)",
-      2276
+      2336
     ],
     [
       "1x2 (1st Inning)",
-      2175
+      2214
     ],
     [
       "Home/Away",
-      1796
+      1832
     ],
     [
       "HT/FT (Including OT)",
-      1602
+      1626
     ],
     [
       "Match Winner",
-      1380
+      1401
     ],
     [
       "Odd/Even (Including OT)",
-      1300
+      1328
     ],
     [
       "1x2 (1st 5 Innings)",
-      1212
+      1242
     ],
     [
       "Team With Highest Scoring",
-      843
+      858
     ],
     [
       "Over/Under (1st 7 Innings)",
-      812
+      826
     ],
     [
       "Home Team Total Goals(1st Half)",
-      758
+      772
     ],
     [
       "Asian Handicap (1st 7 Innings)",
-      754
+      760
     ],
     [
       "First Team To Score",
-      738
+      754
     ],
     [
       "Last Team To Score",
-      738
+      754
     ],
     [
       "Away Team Total Goals(1st Half)",
-      734
+      748
     ],
     [
       "Extra Innings",
-      714
+      720
     ]
   ],
   "event_density": {
-    "median_observations_per_event": 1852.0,
+    "median_observations_per_event": 1489.5,
     "max": 5292,
-    "min": 428
+    "min": 180
   },
   "cross_bookmaker_dispersion": {
-    "groups": 19578,
+    "groups": 19834,
     "largest_ranges": [
       {
         "game_id": "185712",
