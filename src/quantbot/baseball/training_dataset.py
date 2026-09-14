@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections import defaultdict
 from collections.abc import Iterable
 from datetime import datetime
@@ -24,12 +25,16 @@ def _load_jsonl(path: Path) -> list[dict[str, Any]]:
 def _parse_time(value: Any) -> datetime | None:
     if not value:
         return None
-    text = str(value).strip().replace("Z", "+00:00")
+    text = str(value).strip()
+    if text.endswith(("Z", "z")):
+        text = text[:-1] + "+00:00"
     try:
         parsed = datetime.fromisoformat(text)
     except ValueError:
         return None
-    return parsed if parsed.tzinfo is not None and parsed.utcoffset() is not None else None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        return None
+    return parsed
 
 
 def _number(value: Any) -> float | None:
@@ -41,26 +46,32 @@ def _number(value: Any) -> float | None:
 
 
 def _is_moneyline(market: Any) -> bool:
-    """Accept only explicitly identified full-game, two-way winner markets."""
     text = " ".join(str(market or "").casefold().replace("-", " ").split())
-    accepted = {"moneyline", "match winner", "game winner", "match result", "game result"}
-    return text in accepted
+    return text in {"moneyline", "match winner", "game winner", "match result", "game result"}
+
+
+def _team_key(value: Any) -> str:
+    text = str(value or "").casefold()
+    return re.sub(r"[^a-z0-9]+", "", text)
 
 
 def _selection_side(selection: str, home: str, away: str) -> str | None:
-    if selection.strip().casefold() == home.strip().casefold():
+    selection_key = _team_key(selection)
+    if selection_key and selection_key == _team_key(home):
         return "home"
-    if selection.strip().casefold() == away.strip().casefold():
+    if selection_key and selection_key == _team_key(away):
         return "away"
     return None
 
 
 def _result_map(results: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     mapped: dict[str, dict[str, Any]] = {}
+    conflicted: set[str] = set()
     for game in results:
         game_id = game.get("game_id", game.get("id"))
         if game_id is None:
             continue
+        key = str(game_id)
         home = game.get("home") or game.get("teams", {}).get("home", {})
         away = game.get("away") or game.get("teams", {}).get("away", {})
         scores = game.get("scores", {})
@@ -68,15 +79,19 @@ def _result_map(results: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         away_name = away.get("name") if isinstance(away, dict) else away
         home_score = scores.get("home") if isinstance(scores, dict) else None
         away_score = scores.get("away") if isinstance(scores, dict) else None
-        status = str(game.get("status") or game.get("game", {}).get("status", {}).get("short") or "").lower()
+        status = str(game.get("status") or game.get("game", {}).get("status", {}).get("short") or "").casefold()
         if home_score is None or away_score is None or home_score == away_score:
             continue
         if any(token in status for token in ("post", "cancel", "suspend", "abort")):
             continue
-        mapped[str(game_id)] = {
-            "home": home_name, "away": away_name, "home_score": home_score,
-            "away_score": away_score, "status": status,
-        }
+        candidate = {"home": home_name, "away": away_name, "home_score": home_score, "away_score": away_score, "status": status}
+        if key in conflicted:
+            continue
+        if key in mapped and mapped[key] != candidate:
+            mapped.pop(key, None)
+            conflicted.add(key)
+            continue
+        mapped[key] = candidate
     return mapped
 
 
@@ -104,14 +119,7 @@ def build_moneyline_rows(observations: Iterable[dict[str, Any]], results: dict[s
     output: list[dict[str, Any]] = []
     for rows in grouped.values():
         for row in rows:
-            output.append({
-                "game_id": str(row.get("game_id", row.get("event_id"))), "captured_at": row["captured_at"],
-                "kickoff": row["kickoff"], "league": row.get("league"), "home": row.get("home"),
-                "away": row.get("away"), "market": row.get("market"), "selection": row.get("selection"),
-                "side": row["_side"], "bookmaker_name": row.get("bookmaker_name"), "odds": row["_odds"],
-                "implied_probability": 1.0 / row["_odds"], "target": int(row["_side"] == row["_winner"]),
-                "result": row["_winner"], "source_observation_id": row.get("observation_id"),
-            })
+            output.append({"game_id": str(row.get("game_id", row.get("event_id"))), "captured_at": row["captured_at"], "kickoff": row["kickoff"], "league": row.get("league"), "home": row.get("home"), "away": row.get("away"), "market": row.get("market"), "selection": row.get("selection"), "side": row["_side"], "bookmaker_name": row.get("bookmaker_name"), "odds": row["_odds"], "implied_probability": 1.0 / row["_odds"], "target": int(row["_side"] == row["_winner"]), "result": row["_winner"], "source_observation_id": row.get("observation_id")})
     return sorted(output, key=lambda item: (item["captured_at"], item["game_id"], item["selection"]))
 
 
