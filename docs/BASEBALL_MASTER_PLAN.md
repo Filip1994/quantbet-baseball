@@ -3,9 +3,9 @@
 **Repository:** `Filip1994/quantbet-baseball`  
 **Legacy reference:** `Filip1994/h2h` — read-only reference only  
 **Created at:** 2026-09-15 01:05 Europe/Belgrade (UTC+02:00)  
-**Last updated:** 2026-09-15 01:05 Europe/Belgrade (UTC+02:00)  
-**Revision:** 3.0  
-**Status:** ACTIVE PLAN — audit baseline established; evidence architecture is next
+**Last updated:** 2026-09-15  
+**Revision:** 3.1  
+**Status:** ACTIVE PLAN — evidence architecture and Railway-first persistence direction established
 
 ## 0. Operating rule
 
@@ -25,6 +25,7 @@ The system must fail closed on unknown, missing, contradictory, post-kickoff, or
 - `h2h` is read-only legacy reference material and must not be modified.
 - No live betting, automated staking, or profitability claim before chronological out-of-sample validation.
 - Every market observation, prediction, pick, result, and material document must be traceable to evidence and timestamps.
+- Player props are permanently out of scope.
 
 ## 3. Scope
 
@@ -74,7 +75,7 @@ Acceptance gate: all active documents agree on scope and the next implementation
 
 ### Phase 2 — Evidence and odds-timeline foundation
 
-**Next major implementation phase.**
+**Status:** CONTRACTS AND IN-MEMORY BOUNDARY IMPLEMENTED; durable persistence pending.
 
 Implement and test:
 
@@ -84,7 +85,10 @@ Implement and test:
 - duplicate and conflict handling;
 - stale, suspended, incomplete, post-kickoff, and contradictory observation rules;
 - opening, decision-time, subsequent, and closing observation linkage;
-- immutable pick-event records containing exact price, market snapshot, model version, feature snapshot, probability, fair price, edge, EV, uncertainty, and reason.
+- immutable pick-event records containing exact price, market snapshot, model version, feature snapshot, probability, fair price, edge, EV, uncertainty, and reason;
+- database-neutral repository boundary;
+- PostgreSQL-backed transactional persistence;
+- deterministic reads, migrations, and conflict-safe append semantics.
 
 Acceptance gate: a historical market can be replayed from raw evidence into a decision-time pick and later closing/settlement evaluation without hidden data.
 
@@ -118,9 +122,23 @@ Reject any result contaminated by post-kickoff data, future lineups, future odds
 
 Every stage must be replayable from stored evidence.
 
-### Phase 7 — Railway and operations
+### Phase 7 — Railway operations and data lifecycle
 
-Only after local contracts and tests are credible: PostgreSQL schema, idempotency, retries, rate limits, freshness checks, health checks, audit logs, backups, restore tests, migrations, and rollback procedures.
+Railway is the intended operational platform. PostgreSQL is the transactional datastore; SQLite is not part of the intended production architecture.
+
+Implement only after contracts are credible:
+
+- Railway service layout;
+- PostgreSQL migrations and idempotency;
+- ingestion/evaluation workers;
+- retries, rate limits, freshness checks, health checks, and audit logs;
+- automated backups and restore tests;
+- archive exports with manifests and checksums;
+- hot/warm/cold retention classes;
+- reference-aware archival and deletion;
+- rollback procedures.
+
+Long-term cold archives may be exported to external offline storage. No data may be deleted merely because it is old; export verification and restore procedures are prerequisites.
 
 ### Phase 8 — Paper mode and launch gate
 
@@ -130,7 +148,7 @@ Require reproducibility, data completeness, calibration, stable operations, real
 
 **STOP model expansion. GO on evidence architecture.**
 
-The next concrete work package is the canonical odds-observation schema plus immutable pick-event and timeline contracts. Railway is not the next task.
+The next concrete work package is the database-neutral repository contract followed by PostgreSQL schema, migrations, and transactional append-only persistence. Do not build the full Railway deployment yet.
 
 ## 6. Documentation protocol
 
@@ -147,6 +165,7 @@ Every progress entry must include an exact timestamp. Unknown source time must b
 ## 7. Related MDUs
 
 - `docs/BASEBALL_REPOSITORY_AUDIT.md` — repository findings, component status, limitations, and execution order.
+- `docs/BASEBALL_DATA_LIFECYCLE_AND_RAILWAY.md` — Railway-first infrastructure, retention, backup, and archival baseline.
 - `BASEBALL_PROGRESS.md` — chronological material-change log.
 
 ## 8. Completion rule
