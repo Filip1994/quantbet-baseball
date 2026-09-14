@@ -19,7 +19,7 @@ Updated tests cover mixed identities, post-kickoff observations, naive timestamp
 Commits:
 
 - `d3b40cf` — strict snapshot identity and duplicate handling;
-- `7bc82c6` — expanded market snapshot contract tests.
+- `7bc82c6` — expanded snapshot contract tests.
 
 Test execution has not been independently confirmed in a local runtime.
 
@@ -27,88 +27,54 @@ Test execution has not been independently confirmed in a local runtime.
 
 Added `src/quantbot/baseball/run_model.py` with a first mathematical baseline for converting expected home and away runs into two-way moneyline probabilities.
 
-The baseline:
+The baseline assumes independent Poisson scoring, excludes equal-score mass, renormalizes the remaining two-way mass, and fails closed for invalid numerical inputs or unsafe run bounds.
 
-- assumes independent Poisson scoring for the two teams;
-- calculates home-win and away-win probability mass over a bounded run range;
-- excludes equal-score mass and renormalizes the remaining two-way outcome mass;
-- validates finite, strictly positive expected runs;
-- fails closed for invalid numerical inputs or unsafe run bounds;
-- does not yet estimate expected runs from real baseball features;
-- is not connected to training, market snapshots, betting signals, or production services.
+It is not connected to training, market snapshots, betting signals, or production services.
 
-Added contract tests for symmetry, directional behavior, normalization, finite two-way outputs, and invalid inputs.
-
-Commits:
-
-- `538fcc3` — Poisson run-to-moneyline baseline;
-- `a331eb2` — Poisson run model contract tests.
+Commits: `538fcc3`, `a331eb2`.
 
 Test execution has not been independently confirmed in a local runtime.
 
 ## 20. Value and pricing primitives milestone — 2026-09-15
 
-Added `src/quantbot/baseball/value.py` with conservative pricing primitives:
+Added `value.py` with fair decimal odds, model-minus-market edge, and expected net value per unit. Invalid and non-finite inputs fail closed.
 
-- `fair_decimal_odds()` converts a valid probability into fair decimal odds;
-- `edge()` calculates model probability minus market probability;
-- `expected_value_per_unit()` calculates expected net profit per unit staked;
-- invalid, non-finite, out-of-range, and unusable odds inputs fail closed.
+These are mathematical building blocks only; they are not connected to decision policy, bankroll rules, calibration, or live execution.
 
-Added contract tests for fair odds, edge direction, net expected value, and invalid inputs.
-
-These primitives are mathematical building blocks only. They are not yet connected to a betting decision policy, bankroll rules, model calibration, or live execution.
-
-Commits:
-
-- `b6d81f6` — fair odds, edge, and expected value primitives;
-- `dd4ba43` — value primitive contract tests.
+Commits: `b6d81f6`, `dd4ba43`.
 
 Test execution has not been independently confirmed in a local runtime.
 
 ## 21. Fail-closed moneyline decision policy milestone — 2026-09-15
 
-Added `src/quantbot/baseball/decision.py` with an auditable pre-game moneyline decision evaluator.
+Added `decision.py` with an auditable pre-game moneyline evaluator. It computes fair odds, edge, and EV; applies configurable thresholds; requires explicit uncertainty approval; and returns `PASS` with a machine-readable reason whenever a gate fails.
 
-The policy:
+This does not place bets, size stakes, manage bankroll, calibrate models, or establish production readiness.
 
-- computes fair decimal odds, model-minus-market edge, and expected net value;
-- returns a structured result rather than silently discarding invalid candidates;
-- fails closed for invalid probabilities, odds, thresholds, or non-finite values;
-- requires an explicit uncertainty approval gate before returning `BET`;
-- applies configurable minimum edge and expected-value thresholds;
-- returns `PASS` with a machine-readable reason when any gate fails.
-
-Added contract tests for uncertainty abstention, successful gate passage, inclusive edge threshold behavior, invalid inputs, and invalid thresholds.
-
-This is a decision-policy primitive only. It does not place bets, size stakes, manage bankroll, calibrate models, or establish that a model is production-ready.
-
-Commits:
-
-- `3b412bf` — fail-closed moneyline decision policy;
-- `ba587e4` — decision policy contract tests.
+Commits: `3b412bf`, `ba587e4`.
 
 Test execution has not been independently confirmed in a local runtime.
 
 ## 22. Two-way moneyline signal builder milestone — 2026-09-15
 
-Added `src/quantbot/baseball/signal.py` to evaluate both sides of one pre-game moneyline candidate and select at most one eligible side.
+Added `signal.py` to evaluate both sides of one pre-game moneyline and select at most one eligible side.
 
-The builder:
+The builder validates game identity and normalized two-way model probabilities, evaluates both sides through the fail-closed policy, abstains when neither side qualifies, and selects the highest-EV eligible side with edge as deterministic tie-breaker.
 
-- requires a non-empty game identity;
-- requires model probabilities to form a normalized two-way distribution;
-- evaluates home and away independently through the fail-closed decision policy;
-- abstains when neither side passes the policy;
-- selects the eligible side with the highest expected value, using edge as a deterministic tie-breaker;
-- returns both side-level audit records and the selected side;
-- does not place bets or calculate stake sizes.
+It does not place bets or calculate stake sizes.
 
-Added contract tests for side selection, uncertainty abstention, invalid two-way probabilities, and missing identity.
+Commits: `4142f7e`, `a97930c`.
 
-Commits:
+Test execution has not been independently confirmed in a local runtime.
 
-- `4142f7e` — two-way moneyline signal builder;
-- `a97930c` — signal builder contract tests.
+## 23. Auditable signal record envelope milestone — 2026-09-15
+
+Added `signal_record.py` with a minimal validation and serialization boundary for signal outputs.
+
+The envelope requires a non-empty `game_id`, a timezone-aware `generated_at`, a valid `decision` (`BET` or `PASS`), and a non-empty `reason`. It rejects malformed timestamps and non-finite numeric audit metrics, and serializes validated records deterministically as compact JSON suitable for JSON Lines storage.
+
+This boundary does not persist records, execute bets, or imply model validity.
+
+Commits: `64ea996`, `f91b59d`.
 
 Test execution has not been independently confirmed in a local runtime.
