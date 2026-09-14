@@ -81,3 +81,35 @@ Commits:
 - `ac54e80` — specify evidence repository contract and adapter obligations.
 
 Runtime tests were not executed.
+
+## 31. PostgreSQL evidence schema foundation — 2026-09-15
+
+Added:
+
+- `migrations/001_create_evidence_tables.sql`;
+- `docs/BASEBALL_POSTGRES_SCHEMA.md`.
+
+The migration defines the initial durable relational boundary for:
+
+- `odds_observations`;
+- `pick_events`.
+
+Included:
+
+- immutable UUID primary keys;
+- canonical JSONB record retention;
+- schema-version fields;
+- timestamp fields and basic temporal constraints;
+- market-family and status/decision constraints;
+- probability and odds validation;
+- indexes for game, market, line, bookmaker, and decision-time retrieval;
+- explicit PASS metric nullability rules.
+
+The migration is not connected to Railway and has not been applied to a live PostgreSQL instance. Provider ingestion, settlement, archival jobs, retention deletion, and deployment configuration remain outside this milestone.
+
+Commits:
+
+- `06ca3b3` — add PostgreSQL evidence schema foundation;
+- `921ad25` — document PostgreSQL evidence schema foundation.
+
+Runtime tests and live database migration verification were not executed.
