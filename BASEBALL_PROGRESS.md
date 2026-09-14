@@ -37,3 +37,18 @@ Commits:
 
 - `5110c19ca9e08e1835708932a1a22dee869b93ae` — training-dataset contract tests;
 - `61a597b1b00ee0bf06f69f49473de47a6a8d7ec0` — CI hardening.
+
+## 13. Timestamp contract milestone — 2026-09-14
+
+Added `tests/test_timestamp_contracts.py` covering:
+
+- `Z` timestamps are parsed as UTC-aware datetimes;
+- naive observation timestamps are rejected;
+- malformed timestamps are rejected.
+
+Updated `src/quantbot/baseball/training_dataset.py` so `_parse_time()` accepts only timezone-aware timestamps. This prevents silent interpretation of ambiguous local times in pre-kickoff leakage checks.
+
+Commits:
+
+- `b1c9d7d31fe536ce78b712a38a37cb4978d5a91e` — timestamp contract tests;
+- `d65724e9c3a3e4e1a1b79a83e0bf2170e56af3dd` — reject naive training timestamps.
