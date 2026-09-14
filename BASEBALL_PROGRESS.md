@@ -52,3 +52,24 @@ Commits:
 
 - `b1c9d7d31fe536ce78b712a38a37cb4978d5a91e` — timestamp contract tests;
 - `d65724e9c3a3e4e1a1b79a83e0bf2170e56af3dd` — reject naive training timestamps.
+
+## 14. Market contract milestone — 2026-09-14
+
+Tightened `_is_moneyline()` in `src/quantbot/baseball/training_dataset.py` to accept only explicit full-game winner/result market labels:
+
+- `moneyline`;
+- `match winner`;
+- `game winner`;
+- `match result`;
+- `game result`.
+
+Ambiguous markets such as first-five innings, player props, run line, totals, and series winner are now excluded instead of relying on broad substring matching.
+
+Added `tests/test_market_contracts.py` covering accepted labels, rejected market types, and enforcement during row creation.
+
+Commits:
+
+- `80df7e88c6b7b36132e7bf2acb5d6feca4c7767b` — strict market contract;
+- `56e2f7a2365f2f5b5df53755f51251b6a2311f2b` — market contract tests.
+
+Test execution has not been independently confirmed in a local runtime.
