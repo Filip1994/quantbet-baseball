@@ -26,9 +26,10 @@ def _parse_time(value: Any) -> datetime | None:
         return None
     text = str(value).strip().replace("Z", "+00:00")
     try:
-        return datetime.fromisoformat(text)
+        parsed = datetime.fromisoformat(text)
     except ValueError:
         return None
+    return parsed if parsed.tzinfo is not None and parsed.utcoffset() is not None else None
 
 
 def _number(value: Any) -> float | None:
