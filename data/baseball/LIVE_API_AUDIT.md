@@ -1,10 +1,10 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-14T01:21:31.950403+00:00`
+Generated: `2026-09-14T06:43:32.264960+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **2617**
+- Snapshot rows collected: **2644**
 - Unique games observed: **309**
 - Leagues observed: **15**
 - Bookmakers observed: **13**
@@ -15,13 +15,13 @@ Generated: `2026-09-14T01:21:31.950403+00:00`
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 798 |
+| MLB | 808 |
 | IL | 612 |
-| NPB | 254 |
+| NPB | 263 |
 | PCL | 245 |
-| KBO | 189 |
+| KBO | 193 |
+| CPBL | 140 |
 | Extraliga | 138 |
-| CPBL | 136 |
 | Division 1 | 60 |
 | Bundesliga | 47 |
 | LMB | 36 |
@@ -35,15 +35,15 @@ Generated: `2026-09-14T01:21:31.950403+00:00`
 
 | Bookmaker | Snapshot appearances |
 |---|---:|
-| 1xbet | 446 |
-| BetVictor | 446 |
-| WilliamHill | 446 |
-| Marathon | 444 |
-| Bet365 | 441 |
-| Pinnacle | 415 |
-| Betano | 351 |
-| SBO | 348 |
-| Betfair | 276 |
+| 1xbet | 456 |
+| BetVictor | 456 |
+| WilliamHill | 456 |
+| Marathon | 454 |
+| Bet365 | 451 |
+| Pinnacle | 423 |
+| Betano | 361 |
+| SBO | 358 |
+| Betfair | 286 |
 | Superbet | 197 |
 | Unibet | 197 |
 | 10Bet | 187 |
@@ -53,46 +53,46 @@ Generated: `2026-09-14T01:21:31.950403+00:00`
 
 | Market | Snapshot appearances |
 |---|---:|
-| 1x2 (1st 5 Innings) | 446 |
-| 1x2 (1st Inning) | 446 |
-| Asian Handicap | 446 |
-| Asian Handicap (1st 5 Innings) | 446 |
-| Asian Handicap (1st Inning) | 446 |
-| Away Team Total Goals (Including OT) | 446 |
-| First Team To Score | 446 |
-| Home Team Total Goals (Including OT) | 446 |
-| Home/Away | 446 |
-| Last Team To Score | 446 |
-| Odd/Even (Including OT) | 446 |
-| Over/Under | 446 |
-| Over/Under (1st 5 Innings) | 446 |
-| Over/Under (1st Inning) | 446 |
-| Extra Innings | 444 |
-| Match Winner | 440 |
-| Correct Score | 438 |
-| Result/Total Goals | 437 |
-| Asian Handicap (1st 7 Innings) | 436 |
-| A Run (1st Inning) | 415 |
-| Asian Handicap First Half | 411 |
-| Away Team Total Goals(1st Half) | 411 |
-| Goals Over/Under 1st Half | 411 |
-| Home Team Total Goals(1st Half) | 411 |
-| Asian Handicap (1st 3 Innings) | 407 |
-| Over/Under (1st 3 Innings) | 406 |
-| Over/Under (1st 7 Innings) | 404 |
-| Total Hits | 347 |
-| Away Total Hits | 340 |
-| Home Total Hits | 340 |
-| Team With Highest Scoring | 338 |
-| HT/FT (Including OT) | 326 |
-| Away Odd/Even (OT) | 326 |
-| Home Odd/Even (OT) | 326 |
-| First Home Run | 278 |
-| Player Runs | 273 |
-| Asian Handicap (4.5 Innings) | 249 |
-| Over/Under (4.5 Innings) | 249 |
-| Pitcher Strikeouts | 21 |
-| Pitcher Outs | 15 |
+| 1x2 (1st 5 Innings) | 456 |
+| 1x2 (1st Inning) | 456 |
+| Asian Handicap | 456 |
+| Asian Handicap (1st 5 Innings) | 456 |
+| Asian Handicap (1st Inning) | 456 |
+| Away Team Total Goals (Including OT) | 456 |
+| First Team To Score | 456 |
+| Home Team Total Goals (Including OT) | 456 |
+| Home/Away | 456 |
+| Last Team To Score | 456 |
+| Odd/Even (Including OT) | 456 |
+| Over/Under | 456 |
+| Over/Under (1st 5 Innings) | 456 |
+| Over/Under (1st Inning) | 456 |
+| Extra Innings | 454 |
+| Match Winner | 450 |
+| Correct Score | 448 |
+| Result/Total Goals | 447 |
+| Asian Handicap (1st 7 Innings) | 446 |
+| A Run (1st Inning) | 425 |
+| Asian Handicap First Half | 418 |
+| Away Team Total Goals(1st Half) | 418 |
+| Goals Over/Under 1st Half | 418 |
+| Home Team Total Goals(1st Half) | 418 |
+| Asian Handicap (1st 3 Innings) | 417 |
+| Over/Under (1st 3 Innings) | 416 |
+| Over/Under (1st 7 Innings) | 414 |
+| Total Hits | 354 |
+| Team With Highest Scoring | 348 |
+| Away Total Hits | 347 |
+| Home Total Hits | 347 |
+| HT/FT (Including OT) | 335 |
+| Away Odd/Even (OT) | 335 |
+| Home Odd/Even (OT) | 335 |
+| First Home Run | 284 |
+| Player Runs | 280 |
+| Asian Handicap (4.5 Innings) | 255 |
+| Over/Under (4.5 Innings) | 255 |
+| Pitcher Strikeouts | 22 |
+| Pitcher Outs | 16 |
 | Player Total Bases | 7 |
 | Player Doubles | 6 |
 | Pitcher Walks Issued | 5 |
@@ -116,7 +116,7 @@ Generated: `2026-09-14T01:21:31.950403+00:00`
 | 2026-09-11 | 529 |
 | 2026-09-12 | 603 |
 | 2026-09-13 | 340 |
-| 2026-09-14 | 29 |
+| 2026-09-14 | 56 |
 
 ## API errors
 
