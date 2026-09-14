@@ -66,3 +66,34 @@ Commits:
 - `f3b8ab1` — market math contract tests.
 
 Test execution has not been independently confirmed in a local runtime.
+
+## 17. Market snapshot aggregation milestone — 2026-09-14
+
+Added `src/quantbot/baseball/market_snapshot.py` as a conservative integration layer over the market math primitives.
+
+The snapshot builder:
+
+- groups prices by bookmaker;
+- requires both home and away prices from the same bookmaker;
+- converts valid decimal odds to implied probabilities;
+- removes each bookmaker's overround independently;
+- averages bookmaker-level probabilities without bookmaker weighting;
+- ignores incomplete or invalid bookmaker markets;
+- returns `None` when no complete two-way market survives;
+- records the bookmakers used and the aggregation method for auditability.
+
+Added `tests/test_market_snapshot.py` covering incomplete markets, ignoring incomplete bookmakers, duplicate side handling, and invalid odds.
+
+Important limitations:
+
+- callers must provide one game, market, and capture timestamp;
+- the builder does not infer missing sides;
+- duplicate same-bookmaker/side rows currently use deterministic last-write-wins behavior and must be replaced by explicit timestamp/observation identity before production use;
+- this is not yet connected to model training or live signal generation.
+
+Commits:
+
+- `b5ce6ef` — market snapshot builder;
+- `87822b4` — market snapshot contract tests.
+
+Test execution has not been independently confirmed in a local runtime.
