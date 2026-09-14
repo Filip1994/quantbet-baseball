@@ -23,3 +23,35 @@ Commits:
 - `88b949f` — verify append-only evidence store semantics.
 
 Runtime tests were not independently executed in this environment.
+
+## 29. Railway-first data lifecycle baseline — 2026-09-15
+
+Established the architectural direction that Railway is the intended operational platform for QuantBet Baseball.
+
+Decision:
+
+- PostgreSQL is the intended transactional datastore;
+- SQLite is not part of the intended production architecture;
+- Railway hosts the operational services, workers, scheduler, and database;
+- long-term historical data may be exported to a verified cold archive;
+- raw payloads and detailed historical observations may eventually move from hot storage to warm/cold storage;
+- pick events, settlement, CLV, model metadata, and audit lineage remain retained as the compact evidence trail.
+
+Added:
+
+- `docs/BASEBALL_DATA_LIFECYCLE_AND_RAILWAY.md` — target architecture, hot/warm/cold data classes, retention rules, backup requirements, scale principles, and implementation order;
+- updated `docs/BASEBALL_MASTER_PLAN.md` to revision 3.1 and aligned Phase 7 with Railway-first persistence and archival.
+
+Important constraints:
+
+- no automatic deletion based on age alone;
+- archive export requires manifest, checksums, read-back verification, and tested restore/import procedures;
+- monthly cold export is not the only backup;
+- storage capacity and RAM/query capacity are separate engineering concerns.
+
+Commits:
+
+- `94aabd2` — define Railway-first data lifecycle architecture;
+- `aae3040` — align master plan with Railway-first persistence.
+
+Documentation-only change. Runtime tests were not executed.
