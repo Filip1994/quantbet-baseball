@@ -65,3 +65,27 @@ Commits:
 - `dd4ba43` — value primitive contract tests.
 
 Test execution has not been independently confirmed in a local runtime.
+
+## 21. Fail-closed moneyline decision policy milestone — 2026-09-15
+
+Added `src/quantbot/baseball/decision.py` with an auditable pre-game moneyline decision evaluator.
+
+The policy:
+
+- computes fair decimal odds, model-minus-market edge, and expected net value;
+- returns a structured result rather than silently discarding invalid candidates;
+- fails closed for invalid probabilities, odds, thresholds, or non-finite values;
+- requires an explicit uncertainty approval gate before returning `BET`;
+- applies configurable minimum edge and expected-value thresholds;
+- returns `PASS` with a machine-readable reason when any gate fails.
+
+Added contract tests for uncertainty abstention, successful gate passage, inclusive edge threshold behavior, invalid inputs, and invalid thresholds.
+
+This is a decision-policy primitive only. It does not place bets, size stakes, manage bankroll, calibrate models, or establish that a model is production-ready.
+
+Commits:
+
+- `3b412bf` — fail-closed moneyline decision policy;
+- `ba587e4` — decision policy contract tests.
+
+Test execution has not been independently confirmed in a local runtime.
