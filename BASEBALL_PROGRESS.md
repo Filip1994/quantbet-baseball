@@ -89,3 +89,26 @@ Commits:
 - `ba587e4` — decision policy contract tests.
 
 Test execution has not been independently confirmed in a local runtime.
+
+## 22. Two-way moneyline signal builder milestone — 2026-09-15
+
+Added `src/quantbot/baseball/signal.py` to evaluate both sides of one pre-game moneyline candidate and select at most one eligible side.
+
+The builder:
+
+- requires a non-empty game identity;
+- requires model probabilities to form a normalized two-way distribution;
+- evaluates home and away independently through the fail-closed decision policy;
+- abstains when neither side passes the policy;
+- selects the eligible side with the highest expected value, using edge as a deterministic tie-breaker;
+- returns both side-level audit records and the selected side;
+- does not place bets or calculate stake sizes.
+
+Added contract tests for side selection, uncertainty abstention, invalid two-way probabilities, and missing identity.
+
+Commits:
+
+- `4142f7e` — two-way moneyline signal builder;
+- `a97930c` — signal builder contract tests.
+
+Test execution has not been independently confirmed in a local runtime.
