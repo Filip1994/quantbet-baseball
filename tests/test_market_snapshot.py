@@ -36,16 +36,54 @@ class MarketSnapshotContractTests(unittest.TestCase):
         self.assertEqual(snapshot["bookmaker_count"], 1)
         self.assertEqual(snapshot["bookmakers_used"], ["Complete"])
 
-    def test_duplicate_same_bookmaker_side_is_last_observation(self) -> None:
+    def test_exact_duplicate_same_bookmaker_side_is_idempotent(self) -> None:
+        rows = [
+            self._row(side="home", odds=2.0),
+            self._row(side="home", odds=2.0),
+            self._row(side="away", odds=2.0),
+        ]
+        snapshot = build_two_way_market_snapshot(rows)
+        self.assertIsNotNone(snapshot)
+
+    def test_conflicting_duplicate_same_bookmaker_side_fails_closed(self) -> None:
         rows = [
             self._row(side="home", odds=2.0),
             self._row(side="home", odds=3.0),
             self._row(side="away", odds=2.0),
         ]
-        snapshot = build_two_way_market_snapshot(rows)
-        self.assertIsNotNone(snapshot)
-        assert snapshot is not None
-        self.assertGreater(snapshot["home_probability"], snapshot["away_probability"])
+        self.assertIsNone(build_two_way_market_snapshot(rows))
+
+    def test_mixed_game_ids_fail_closed(self) -> None:
+        self.assertIsNone(
+            build_two_way_market_snapshot(
+                [
+                    self._row(side="home"),
+                    self._row(side="away", game_id="g2"),
+                ]
+            )
+        )
+
+    def test_mixed_capture_times_fail_closed(self) -> None:
+        self.assertIsNone(
+            build_two_way_market_snapshot(
+                [
+                    self._row(side="home"),
+                    self._row(side="away", captured_at="2026-09-10T10:01:00+00:00"),
+                ]
+            )
+        )
+
+    def test_post_kickoff_snapshot_fails_closed(self) -> None:
+        self.assertIsNone(
+            build_two_way_market_snapshot(
+                [self._row(captured_at="2026-09-10T12:00:00+00:00")]
+            )
+        )
+
+    def test_naive_timestamp_fails_closed(self) -> None:
+        self.assertIsNone(
+            build_two_way_market_snapshot([self._row(captured_at="2026-09-10T10:00:00")])
+        )
 
     def test_invalid_odds_fail_closed(self) -> None:
         rows = [
