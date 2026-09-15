@@ -21,7 +21,12 @@ The prediction model is intentionally not considered production-ready. The next 
 
 Candidate features include starting pitcher and handedness, workload, bullpen availability, confirmed/expected lineup, batter/pitcher splits, park/weather, rest/travel, offense/defense and market state.
 
-Primary market tiers will be validated empirically rather than assumed. The initial candidates are moneyline, run line and full-game total, followed by F5 and only later player props when settlement semantics and feed coverage are reliable.
+The initial supported market scope is deliberately constrained to:
+
+- full-game moneyline;
+- full-game totals with an explicit line, initially 8.5 and 9.5.
+
+Run line, F5 markets, team totals, alternate lines, futures, parlays/SGPs, live betting, automated staking and **player props are out of scope** for this project phase. Market expansion requires separate evidence, settlement and validation work and is not implied by this repository.
 
 ## Operating philosophy
 
