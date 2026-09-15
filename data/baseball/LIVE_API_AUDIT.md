@@ -1,35 +1,35 @@
 # QuantBet Baseball — Live API Audit
 
-Generated: `2026-09-14T20:29:13.597945+00:00`
+Generated: `2026-09-15T00:47:04.428056+00:00`
 
 ## Executive summary
 
-- Snapshot rows collected: **2865**
-- Unique games observed: **330**
+- Snapshot rows collected: **2919**
+- Unique games observed: **347**
 - Leagues observed: **15**
 - Bookmakers observed: **13**
 - Distinct market names observed: **51**
-- Odds/API errors recorded: **5**
+- Odds/API errors recorded: **6**
 
 ## Leagues
 
 | League | Snapshot rows |
 |---|---:|
-| MLB | 908 |
-| IL | 662 |
-| NPB | 293 |
-| PCL | 250 |
-| KBO | 213 |
-| CPBL | 156 |
+| MLB | 926 |
+| IL | 672 |
+| NPB | 301 |
+| PCL | 255 |
+| KBO | 220 |
+| CPBL | 160 |
 | Extraliga | 138 |
 | Division 1 | 60 |
 | Bundesliga | 47 |
-| LMB | 36 |
+| LMB | 37 |
 | SM-sarja | 30 |
 | Hoofdklasse | 26 |
 | NBL | 21 |
 | Elitserien | 20 |
-| UNKNOWN | 5 |
+| UNKNOWN | 6 |
 
 ## Bookmakers returned by API
 
@@ -117,10 +117,11 @@ Generated: `2026-09-14T20:29:13.597945+00:00`
 | 2026-09-12 | 603 |
 | 2026-09-13 | 340 |
 | 2026-09-14 | 277 |
+| 2026-09-15 | 54 |
 
 ## API errors
 
-- `API error for odds: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}` — 5
+- `API error for odds: {'rateLimit': 'Too many requests. You have exceeded the limit of requests per minute of your subscription.'}` — 6
 
 ## Interpretation
 
