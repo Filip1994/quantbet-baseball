@@ -209,3 +209,26 @@ No Railway start command was added. No deployment configuration was changed. No 
 Remaining decision gate:
 
 - determine whether Railway should host a real application process at this stage or remain reserved for the future PostgreSQL/worker architecture; do not create a placeholder start command merely to satisfy Railpack.
+
+## 36. Collection-vs-Railway boundary reconnaissance — 2026-09-15
+
+Additional review confirmed:
+
+- `baseball-collect.yml` is the current operational collection path;
+- it runs every 15 minutes in `Europe/Belgrade` and performs collection, intelligence generation, signal scanning, audit generation, and dashboard generation;
+- the workflow commits generated data back to `main`, meaning the current operational data plane is Git-based rather than PostgreSQL-backed;
+- the collection workflow uses a bounded request budget and requires `API_BASEBALL_KEY`, but this was inspected statically and not executed here;
+- `baseball-training.yml` is a validation workflow, not a production trainer or scheduler;
+- the repository's scripts expose one-shot `main()` functions and CLI arguments, but no verified daemon, HTTP health endpoint, or persistent worker loop was found in the inspected surface;
+- `pyproject.toml` has no runtime dependencies, while CI depends on `requirements-dev.txt`; the exact contents of that file and the complete dependency chain still require explicit verification before PostgreSQL integration or Railway runtime packaging.
+
+Architectural consequence:
+
+> The project currently has a GitHub Actions data-footprint pipeline and a partially prepared persistence layer, but not yet a deployable Railway application.
+
+No code or Railway configuration was changed in this slice. No runtime tests, API calls, migration execution, or live deployment verification were performed.
+
+Next gate:
+
+- inspect `requirements.txt`, `requirements-dev.txt`, the collector/configuration modules, and the complete PostgreSQL adapter/migration together;
+- then define the smallest legitimate runtime boundary rather than adding a placeholder process.
