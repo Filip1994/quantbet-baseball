@@ -155,3 +155,34 @@ Commits:
 - `749ad3b2` — align PostgreSQL adapter and add atomic observation batches.
 
 Runtime tests, PostgreSQL migration execution, and live Railway verification were not performed.
+
+## 34. Railway runtime reconnaissance — 2026-09-15T11:36+02:00
+
+Confirmed the Baseball Railway project and inspected its first deployment.
+
+Railway project:
+
+- project: `believable-contentment`;
+- service: `quantbet-baseball`;
+- environment: `production`.
+
+The first deployment failed during Railpack preparation because no start command was detected. The repository contains batch-oriented scripts such as `scripts/baseball_audit.py`, but no confirmed production service entrypoint was established during this reconnaissance.
+
+Important findings:
+
+- `pyproject.toml` declares no runtime dependencies;
+- `requirements.txt` states that the runtime uses only the Python standard library;
+- the PostgreSQL adapter imports no external driver directly and expects a DB-API connection to be supplied;
+- Railway has not been proven to run a worker, scheduler, ingestion process, or API polling loop;
+- no Railway configuration or production variable was changed;
+- the unrelated `sincere-balance` project was not used for this verification.
+
+Open issue:
+
+- README scope language still mentions player props as a later possibility, which conflicts with the project decision that player props are permanently `OUT OF SCOPE`. This must be corrected before treating the documentation as fully aligned.
+
+Next step:
+
+- perform a complete entrypoint/dependency/CI review, then introduce the smallest explicit and safe Railway start command only after the intended runtime process is confirmed.
+
+Runtime tests, PostgreSQL migration execution, and live application startup were not performed.
