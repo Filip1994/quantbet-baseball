@@ -186,3 +186,26 @@ Next step:
 - perform a complete entrypoint/dependency/CI review, then introduce the smallest explicit and safe Railway start command only after the intended runtime process is confirmed.
 
 Runtime tests, PostgreSQL migration execution, and live application startup were not performed.
+
+## 35. Scope alignment and CI reconnaissance — 2026-09-15
+
+Completed the next reconnaissance slice:
+
+- enumerated the repository's `scripts/` directory;
+- confirmed that the scripts are batch/research utilities, not a verified long-running production entrypoint;
+- inspected the scheduled collection workflow;
+- inspected the test workflow;
+- confirmed that scheduled collection currently runs through GitHub Actions every 15 minutes, not through a proven Railway worker;
+- confirmed that the collection workflow invokes the collector, intelligence build, signal scan, audit, and dashboard scripts;
+- confirmed that the test workflow installs `requirements-dev.txt`, runs compilation, Ruff formatting/lint checks, and `pytest`;
+- corrected `README.md` so the supported scope is explicitly full-game moneyline and full-game totals, while player props and other excluded market classes are explicitly out of scope.
+
+The README correction was committed as:
+
+- `a3ee228` — align README with permanent baseball market scope.
+
+No Railway start command was added. No deployment configuration was changed. No runtime tests, PostgreSQL migration execution, or live Railway startup verification were performed.
+
+Remaining decision gate:
+
+- determine whether Railway should host a real application process at this stage or remain reserved for the future PostgreSQL/worker architecture; do not create a placeholder start command merely to satisfy Railpack.
