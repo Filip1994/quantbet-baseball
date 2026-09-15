@@ -232,3 +232,27 @@ Next gate:
 
 - inspect `requirements.txt`, `requirements-dev.txt`, the collector/configuration modules, and the complete PostgreSQL adapter/migration together;
 - then define the smallest legitimate runtime boundary rather than adding a placeholder process.
+
+## 37. Railway as runtime and memory control plane — 2026-09-15
+
+The project owner explicitly selected Railway as the operational execution and persistence platform.
+
+Confirmed architectural intent:
+
+- **GitHub** is the source-code, version-control, review, and CI system;
+- **Railway** is the runtime control plane: startup, scheduled execution, workers, runtime configuration, secrets, logs, health checks, and operational orchestration;
+- **Railway PostgreSQL** is the canonical persistent memory for market evidence, immutable picks, settlement, CLV, model metadata, and audit lineage;
+- **GitHub Actions** may remain for CI and repository validation, but must not remain the production source of truth or primary ingestion engine;
+- generated operational state should be written to PostgreSQL rather than committed back into GitHub;
+- external cold archives are secondary, verified long-term storage.
+
+Updated:
+
+- `docs/BASEBALL_DATA_LIFECYCLE_AND_RAILWAY.md` to revision 1.1;
+- added explicit runtime ownership rules and Railway acceptance criteria.
+
+Commit:
+
+- `75d108b` — make Railway the explicit runtime and persistence control plane.
+
+No Railway configuration, credentials, database migration, or live deployment was changed in this slice. The next implementation step is to define and build the first legitimate Railway runtime boundary, then connect it to PostgreSQL safely.
