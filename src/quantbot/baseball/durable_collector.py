@@ -26,7 +26,6 @@ from .postgres_repository import PostgreSQLEvidenceRepository
 from .raw_archive import archive_from_env
 from .scheduler import build_scheduler_record, is_observation_due
 
-
 _ADVISORY_LOCK_KEY = 726478920260918
 
 
