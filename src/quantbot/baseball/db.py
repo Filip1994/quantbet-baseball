@@ -1,4 +1,5 @@
 """Minimal PostgreSQL migration runner for the Railway runtime."""
+
 from __future__ import annotations
 
 import os
