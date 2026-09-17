@@ -3,28 +3,62 @@ name: Railway runtime smoke
 on:
   push:
     paths:
+      - "src/quantbot/baseball/api.py"
       - "src/quantbot/baseball/db.py"
+      - "src/quantbot/baseball/durable_collector.py"
+      - "src/quantbot/baseball/ingestion.py"
+      - "src/quantbot/baseball/postgres_repository.py"
+      - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
       - "migrations/**"
       - "requirements.txt"
       - "requirements-dev.txt"
       - "pyproject.toml"
+      - "tests/test_durable_collector.py"
+      - "tests/test_ingestion.py"
+      - "tests/test_postgres_integration.py"
+      - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
       - ".github/workflows/railway-runtime-smoke.yml"
   pull_request:
     paths:
+      - "src/quantbot/baseball/api.py"
       - "src/quantbot/baseball/db.py"
+      - "src/quantbot/baseball/durable_collector.py"
+      - "src/quantbot/baseball/ingestion.py"
+      - "src/quantbot/baseball/postgres_repository.py"
+      - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
       - "migrations/**"
       - "requirements.txt"
       - "requirements-dev.txt"
       - "pyproject.toml"
+      - "tests/test_durable_collector.py"
+      - "tests/test_ingestion.py"
+      - "tests/test_postgres_integration.py"
+      - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
       - ".github/workflows/railway-runtime-smoke.yml"
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: quantbet
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/quantbet
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -33,6 +67,42 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.txt
       - run: python -m compileall -q src tests
-      - run: ruff format --check src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
-      - run: ruff check src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
-      - run: pytest tests/test_runtime_foundation.py tests/test_evidence_store.py
+      - name: Check focused formatting
+        run: >
+          ruff format --check
+          src/quantbot/baseball/api.py
+          src/quantbot/baseball/db.py
+          src/quantbot/baseball/durable_collector.py
+          src/quantbot/baseball/ingestion.py
+          src/quantbot/baseball/postgres_repository.py
+          src/quantbot/baseball/raw_archive.py
+          src/quantbot/baseball/worker.py
+          tests/test_durable_collector.py
+          tests/test_ingestion.py
+          tests/test_postgres_integration.py
+          tests/test_raw_archive.py
+          tests/test_runtime_foundation.py
+      - name: Check focused lint
+        run: >
+          ruff check
+          src/quantbot/baseball/api.py
+          src/quantbot/baseball/db.py
+          src/quantbot/baseball/durable_collector.py
+          src/quantbot/baseball/ingestion.py
+          src/quantbot/baseball/postgres_repository.py
+          src/quantbot/baseball/raw_archive.py
+          src/quantbot/baseball/worker.py
+          tests/test_durable_collector.py
+          tests/test_ingestion.py
+          tests/test_postgres_integration.py
+          tests/test_raw_archive.py
+          tests/test_runtime_foundation.py
+      - name: Run focused tests
+        run: >
+          pytest
+          tests/test_runtime_foundation.py
+          tests/test_evidence_store.py
+          tests/test_raw_archive.py
+          tests/test_ingestion.py
+          tests/test_durable_collector.py
+          tests/test_postgres_integration.py
