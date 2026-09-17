@@ -40,6 +40,8 @@ def test_migrations_and_repository_are_idempotent() -> None:
         assert repository.append_observation(record) is False
         assert repository.get_observation(record.observation_id) == record
         assert repository.stats().observations == 1
-        assert repository.latest_observation_times()["game-1"].isoformat().startswith(
-            "2026-09-20T17:00:00"
+        assert (
+            repository.latest_observation_times()["game-1"]
+            .isoformat()
+            .startswith("2026-09-20T17:00:00")
         )
