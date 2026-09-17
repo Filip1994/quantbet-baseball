@@ -1,4 +1,5 @@
 """Railway worker entrypoint for the Baseball production runtime."""
+
 from __future__ import annotations
 
 import json
