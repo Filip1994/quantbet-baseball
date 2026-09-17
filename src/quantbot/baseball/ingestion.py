@@ -11,7 +11,6 @@ from typing import Any
 from .evidence import OddsObservation
 from .raw_archive import ArchiveReceipt
 
-
 _MONEYLINE_MARKETS = {
     "moneyline",
     "match winner",
