@@ -34,5 +34,9 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: python -m compileall -q src tests
       - run: ruff format --check src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
-      - run: ruff check src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
+      - name: Show canonical Ruff import fix
+        run: |
+          ruff check --fix src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
+          git diff -- src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
+          git diff --exit-code -- src/quantbot/baseball/db.py src/quantbot/baseball/worker.py tests/test_runtime_foundation.py
       - run: pytest tests/test_runtime_foundation.py tests/test_evidence_store.py
