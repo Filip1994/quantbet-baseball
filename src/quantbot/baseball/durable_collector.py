@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 import os
 from pathlib import Path
@@ -59,10 +60,12 @@ def collect_with_dependencies(
     *,
     now: datetime,
     max_odds_requests: int,
+    clock: Callable[[], datetime] | None = None,
 ) -> dict[str, int | str]:
     """Collect one strict pregame cycle with injectable boundaries for tests."""
 
     now = now.astimezone(UTC)
+    current_time = clock or (lambda: datetime.now(UTC))
     games: list[dict[str, Any]] = []
     seen_game_ids: set[int] = set()
     errors = 0
@@ -131,7 +134,11 @@ def collect_with_dependencies(
     for game in selected:
         game_id = _game_id(game)
         kickoff = _game_time(game)
-        if game_id is None or kickoff is None or datetime.now(UTC) >= kickoff:
+        if (
+            game_id is None
+            or kickoff is None
+            or current_time().astimezone(UTC) >= kickoff
+        ):
             continue
 
         try:
