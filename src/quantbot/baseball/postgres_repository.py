@@ -130,10 +130,7 @@ class PostgreSQLEvidenceRepository:
             f"INSERT INTO {table} ({', '.join(columns)}) "
             f"VALUES ({', '.join(placeholders)}) ON CONFLICT DO NOTHING"
         )
-        compare = (
-            f"SELECT canonical_record FROM {table} "
-            f"WHERE {identity_column} = %s"
-        )
+        compare = f"SELECT canonical_record FROM {table} WHERE {identity_column} = %s"
 
         with self._connection.cursor() as cursor:
             cursor.execute(insert, values)
@@ -282,15 +279,12 @@ class PostgreSQLEvidenceRepository:
                 "ORDER BY observed_at, observation_id"
             )
             rows = cursor.fetchall()
-        return tuple(
-            OddsObservation(**_canonical_object(row[0])) for row in rows
-        )
+        return tuple(OddsObservation(**_canonical_object(row[0])) for row in rows)
 
     def pick_events(self) -> tuple[PickEvent, ...]:
         with self._connection.cursor() as cursor:
             cursor.execute(
-                "SELECT canonical_record FROM pick_events "
-                "ORDER BY decision_at, pick_id"
+                "SELECT canonical_record FROM pick_events ORDER BY decision_at, pick_id"
             )
             rows = cursor.fetchall()
         return tuple(PickEvent(**_canonical_object(row[0])) for row in rows)
