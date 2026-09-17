@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 import json
 import math
-from typing import Any
 import uuid
+from datetime import datetime
+from typing import Any
 
 from .evidence import OddsObservation
 from .raw_archive import ArchiveReceipt
@@ -31,7 +31,7 @@ def _norm(value: Any) -> str:
 
 def _parse_timestamp(value: str) -> datetime | None:
     try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value)
     except (TypeError, ValueError):
         return None
     if parsed.tzinfo is None or parsed.utcoffset() is None:
