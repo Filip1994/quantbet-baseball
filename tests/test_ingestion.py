@@ -89,7 +89,10 @@ def test_replay_is_idempotent_and_new_capture_has_new_identity() -> None:
 def test_post_kickoff_observation_is_rejected() -> None:
     late = receipt("2026-09-18T19:00:00+00:00")
 
-    assert canonical_moneyline_observations(
-        snapshot(captured=late.captured_at),
-        late,
-    ) == ()
+    assert (
+        canonical_moneyline_observations(
+            snapshot(captured=late.captured_at),
+            late,
+        )
+        == ()
+    )
