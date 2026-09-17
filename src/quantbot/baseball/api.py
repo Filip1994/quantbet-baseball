@@ -177,9 +177,7 @@ class BaseballAPIClient:
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise BaseballAPIError(
-                f"API returned invalid JSON for {endpoint}"
-            ) from exc
+            raise BaseballAPIError(f"API returned invalid JSON for {endpoint}") from exc
         if not isinstance(payload, dict):
             raise BaseballAPIError(f"Unexpected API envelope for {endpoint}")
 
