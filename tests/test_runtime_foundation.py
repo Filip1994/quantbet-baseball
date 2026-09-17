@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from quantbot.baseball import db, worker
+from quantbot.baseball import db, durable_collector, worker
 
 
 def test_migration_files_are_sorted(tmp_path: Path) -> None:
@@ -25,7 +25,8 @@ def test_database_url_is_required(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_worker_is_safe_by_default(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.delenv("BASEBALL_ENABLE_COLLECTION", raising=False)
     monkeypatch.setattr(worker, "apply_migrations", lambda root: ("001.sql",))
@@ -38,11 +39,23 @@ def test_worker_is_safe_by_default(
     assert result["migrations_applied"] == ["001.sql"]
 
 
-def test_worker_refuses_collection_before_ingestion_is_ready(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+def test_worker_runs_durable_collector_only_when_enabled(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.setenv("BASEBALL_ENABLE_COLLECTION", "true")
     monkeypatch.setattr(worker, "apply_migrations", lambda root: ())
+    monkeypatch.setattr(
+        durable_collector,
+        "collect_durable_once",
+        lambda root: {"status": "collected", "observations_inserted": 2},
+    )
 
-    with pytest.raises(RuntimeError, match="cannot be enabled"):
-        worker.run_once(tmp_path)
+    result = worker.run_once(tmp_path)
+
+    assert result["mode"] == "collection"
+    assert result["collection_enabled"] is True
+    assert result["collection"] == {
+        "status": "collected",
+        "observations_inserted": 2,
+    }

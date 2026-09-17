@@ -14,23 +14,26 @@ def _enabled(name: str) -> bool:
 
 
 def run_once(root: Path | None = None) -> dict[str, object]:
-    """Boot the durable runtime without enabling collection prematurely."""
+    """Apply migrations, then run one collection cycle when explicitly enabled."""
+
     project_root = root or Path.cwd()
     applied = apply_migrations(project_root)
+    collection_enabled = _enabled("BASEBALL_ENABLE_COLLECTION")
 
     result: dict[str, object] = {
         "status": "ready",
         "migrations_applied": list(applied),
-        "collection_enabled": _enabled("BASEBALL_ENABLE_COLLECTION"),
+        "collection_enabled": collection_enabled,
     }
 
-    if result["collection_enabled"]:
-        raise RuntimeError(
-            "BASEBALL_ENABLE_COLLECTION cannot be enabled until the canonical "
-            "PostgreSQL ingestion path lands"
-        )
+    if not collection_enabled:
+        result["mode"] = "storage-ready"
+        return result
 
-    result["mode"] = "storage-ready"
+    from .durable_collector import collect_durable_once
+
+    result["mode"] = "collection"
+    result["collection"] = collect_durable_once(project_root)
     return result
 
 
