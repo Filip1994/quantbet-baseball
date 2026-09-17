@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from datetime import datetime
-import json
-from typing import Any, Protocol
+from typing import Any, Protocol, Self
 
 from .evidence import OddsObservation, PickEvent, canonical_json
 from .evidence_repository import RepositoryStats
@@ -20,9 +20,9 @@ class CursorLike(Protocol):
 
     def fetchall(self) -> list[Any]: ...
 
-    def __enter__(self) -> "CursorLike": ...
+    def __enter__(self) -> Self: ...
 
-    def __exit__(self, *args: Any) -> None: ...
+    def __exit__(self, *args: object) -> None: ...
 
 
 class ConnectionLike(Protocol):
