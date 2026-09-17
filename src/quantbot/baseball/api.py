@@ -3,16 +3,16 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+from pathlib import Path
 import tempfile
 import time
-from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 from .config import BaseballSettings
+from .raw_archive import ArchiveReceipt, LocalRawPayloadArchive, RawPayloadArchive
 
 
 class BaseballAPIError(RuntimeError):
@@ -24,13 +24,21 @@ class BaseballAPIBudgetExceeded(BaseballAPIError):
 
 
 class BaseballAPIClient:
-    """API-Sports Baseball client with persistent cache and per-run budget."""
+    """API-Sports Baseball client with cache, archive, and per-run budget."""
 
-    def __init__(self, settings: BaseballSettings) -> None:
+    def __init__(
+        self,
+        settings: BaseballSettings,
+        *,
+        raw_archive: RawPayloadArchive | None = None,
+    ) -> None:
         settings.validate()
         self.settings = settings
         self.request_count = 0
         self.cache_hits = 0
+        self.raw_archive = raw_archive or LocalRawPayloadArchive(
+            settings.raw_archive_dir
+        )
         self.settings.cache_dir.mkdir(parents=True, exist_ok=True)
 
     @property
@@ -39,53 +47,12 @@ class BaseballAPIClient:
 
     def _cache_path(self, endpoint: str, params: dict[str, Any]) -> Path:
         canonical = json.dumps(
-            [endpoint, sorted(params.items())], ensure_ascii=True, separators=(",", ":")
+            [endpoint, sorted(params.items())],
+            ensure_ascii=True,
+            separators=(",", ":"),
         )
         digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         return self.settings.cache_dir / f"{digest}.json"
-
-    def _raw_archive_path(self, endpoint: str, params: dict[str, Any]) -> Path:
-        captured = datetime.now(UTC).strftime("%Y%m%dT%H%M%S.%fZ")
-        canonical = json.dumps(
-            [endpoint, sorted(params.items())], ensure_ascii=True, separators=(",", ":")
-        )
-        digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
-        safe_endpoint = endpoint.strip("/").replace("/", "_") or "root"
-        return (
-            self.settings.raw_archive_dir
-            / datetime.now(UTC).strftime("%Y-%m-%d")
-            / f"{captured}_{safe_endpoint}_{digest}.json"
-        )
-
-    def _archive_raw_payload(
-        self, endpoint: str, params: dict[str, Any], raw: str
-    ) -> None:
-        """Persist the decoded API envelope for exact post-hoc parser auditing."""
-        try:
-            payload = json.loads(raw)
-        except json.JSONDecodeError:
-            return
-        archive_path = self._raw_archive_path(endpoint, params)
-        archive_path.parent.mkdir(parents=True, exist_ok=True)
-        document = {
-            "captured_at": datetime.now(UTC).isoformat(),
-            "endpoint": endpoint,
-            "params": params,
-            "payload": payload,
-        }
-        fd, temp_name = tempfile.mkstemp(
-            prefix=f".{archive_path.name}.", suffix=".tmp", dir=archive_path.parent
-        )
-        try:
-            with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                json.dump(document, handle, ensure_ascii=False, indent=2)
-                handle.write("\n")
-                handle.flush()
-                os.fsync(handle.fileno())
-            os.replace(temp_name, archive_path)
-        finally:
-            if os.path.exists(temp_name):
-                os.unlink(temp_name)
 
     def _read_cache(self, path: Path) -> list[dict[str, Any]] | None:
         try:
@@ -107,18 +74,28 @@ class BaseballAPIClient:
         return None
 
     def _write_cache(
-        self, path: Path, response: list[dict[str, Any]], ttl_seconds: int
+        self,
+        path: Path,
+        response: list[dict[str, Any]],
+        ttl_seconds: int,
     ) -> None:
         if ttl_seconds <= 0:
             return
         payload = {"expires_at": time.time() + ttl_seconds, "response": response}
         path.parent.mkdir(parents=True, exist_ok=True)
         fd, temp_name = tempfile.mkstemp(
-            prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            dir=path.parent,
         )
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as handle:
-                json.dump(payload, handle, ensure_ascii=False, separators=(",", ":"))
+                json.dump(
+                    payload,
+                    handle,
+                    ensure_ascii=False,
+                    separators=(",", ":"),
+                )
                 handle.flush()
                 os.fsync(handle.fileno())
             os.replace(temp_name, path)
@@ -126,26 +103,31 @@ class BaseballAPIClient:
             if os.path.exists(temp_name):
                 os.unlink(temp_name)
 
-    def get(
+    def get_with_receipt(
         self,
         endpoint: str,
         params: dict[str, Any] | None = None,
         *,
         ttl_seconds: int = 0,
-    ) -> list[dict[str, Any]]:
+        use_cache: bool = True,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt | None]:
+        """Return API rows plus the durable archive receipt for a fresh request."""
+
         params = {
             key: value for key, value in (params or {}).items() if value is not None
         }
         cache_path = self._cache_path(endpoint, params)
-        cached = self._read_cache(cache_path)
-        if cached is not None:
-            return cached
+        if use_cache:
+            cached = self._read_cache(cache_path)
+            if cached is not None:
+                return cached, None
 
         if not self.settings.api_key:
             raise BaseballAPIError("API_BASEBALL_KEY is not configured")
         if self.request_count >= self.settings.api_request_budget:
             raise BaseballAPIBudgetExceeded(
-                f"Baseball API budget exhausted at {self.settings.api_request_budget} requests"
+                "Baseball API budget exhausted at "
+                f"{self.settings.api_request_budget} requests"
             )
 
         query = urlencode(params)
@@ -157,7 +139,8 @@ class BaseballAPIClient:
         for attempt in range(self.settings.api_max_attempts):
             if self.request_count >= self.settings.api_request_budget:
                 raise BaseballAPIBudgetExceeded(
-                    f"Baseball API budget exhausted at {self.settings.api_request_budget} requests"
+                    "Baseball API budget exhausted at "
+                    f"{self.settings.api_request_budget} requests"
                 )
             request = Request(
                 url,
@@ -191,11 +174,16 @@ class BaseballAPIClient:
                     f"API network error for {endpoint}: {reason}"
                 ) from exc
 
-        self._archive_raw_payload(endpoint, params, raw)
         try:
             payload = json.loads(raw)
         except json.JSONDecodeError as exc:
-            raise BaseballAPIError(f"API returned invalid JSON for {endpoint}") from exc
+            raise BaseballAPIError(
+                f"API returned invalid JSON for {endpoint}"
+            ) from exc
+        if not isinstance(payload, dict):
+            raise BaseballAPIError(f"Unexpected API envelope for {endpoint}")
+
+        receipt = self.raw_archive.archive(endpoint, params, payload)
 
         errors = payload.get("errors")
         if errors:
@@ -204,8 +192,23 @@ class BaseballAPIClient:
         if not isinstance(result, list):
             raise BaseballAPIError(f"Unexpected API response for {endpoint}")
 
-        self._write_cache(cache_path, result, ttl_seconds)
-        return result
+        if use_cache:
+            self._write_cache(cache_path, result, ttl_seconds)
+        return result, receipt
+
+    def get(
+        self,
+        endpoint: str,
+        params: dict[str, Any] | None = None,
+        *,
+        ttl_seconds: int = 0,
+    ) -> list[dict[str, Any]]:
+        response, _ = self.get_with_receipt(
+            endpoint,
+            params,
+            ttl_seconds=ttl_seconds,
+        )
+        return response
 
     def _retry_delay(self, attempt: int, retry_after: str | None = None) -> None:
         delay = self.settings.api_retry_base_seconds * (2**attempt)
@@ -223,19 +226,28 @@ class BaseballAPIClient:
         return self.get("games", {"id": game_id}, ttl_seconds=120)
 
     def games_by_league_season(
-        self, league_id: int, season: int
+        self,
+        league_id: int,
+        season: int,
     ) -> list[dict[str, Any]]:
         return self.get(
-            "games", {"league": league_id, "season": season}, ttl_seconds=21_600
+            "games",
+            {"league": league_id, "season": season},
+            ttl_seconds=21_600,
         )
 
     def standings(self, league_id: int, season: int) -> list[dict[str, Any]]:
         return self.get(
-            "standings", {"league": league_id, "season": season}, ttl_seconds=21_600
+            "standings",
+            {"league": league_id, "season": season},
+            ttl_seconds=21_600,
         )
 
     def team_statistics(
-        self, team_id: int, league_id: int, season: int
+        self,
+        team_id: int,
+        league_id: int,
+        season: int,
     ) -> list[dict[str, Any]]:
         return self.get(
             "teams/statistics",
@@ -243,8 +255,31 @@ class BaseballAPIClient:
             ttl_seconds=86_400,
         )
 
-    def player_statistics(self, player_id: int, season: int) -> list[dict[str, Any]]:
-        return self.get("players/statistics", {"id": player_id, "season": season}, ttl_seconds=86_400)
+    def player_statistics(
+        self,
+        player_id: int,
+        season: int,
+    ) -> list[dict[str, Any]]:
+        return self.get(
+            "players/statistics",
+            {"id": player_id, "season": season},
+            ttl_seconds=86_400,
+        )
 
     def odds(self, game_id: int) -> list[dict[str, Any]]:
         return self.get("odds", {"game": game_id}, ttl_seconds=120)
+
+    def odds_with_receipt(
+        self,
+        game_id: int,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt]:
+        """Fetch fresh odds and require a durable source receipt."""
+
+        response, receipt = self.get_with_receipt(
+            "odds",
+            {"game": game_id},
+            use_cache=False,
+        )
+        if receipt is None:
+            raise BaseballAPIError("Fresh odds response was not archived")
+        return response, receipt
