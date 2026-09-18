@@ -26,7 +26,12 @@ BASE = {
 
 
 def obs(identifier, observed_at, **changes):
-    values = dict(BASE, observation_id=identifier, observed_at=observed_at)
+    values = dict(
+        BASE,
+        observation_id=identifier,
+        observed_at=observed_at,
+        retrieved_at=observed_at,
+    )
     values.update(changes)
     return OddsObservation(**values)
 
