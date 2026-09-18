@@ -70,11 +70,24 @@ def evaluate_moneyline_decision(
         }
     )
 
+    edge_below = candidate_edge < edge_threshold and not math.isclose(
+        candidate_edge,
+        edge_threshold,
+        rel_tol=0.0,
+        abs_tol=1e-12,
+    )
+    ev_below = candidate_ev < ev_threshold and not math.isclose(
+        candidate_ev,
+        ev_threshold,
+        rel_tol=0.0,
+        abs_tol=1e-12,
+    )
+
     if not uncertainty_approved:
         result["reason"] = "uncertainty_gate_not_met"
-    elif candidate_edge < edge_threshold:
+    elif edge_below:
         result["reason"] = "edge_below_threshold"
-    elif candidate_ev < ev_threshold:
+    elif ev_below:
         result["reason"] = "expected_value_below_threshold"
     else:
         result["decision"] = "BET"
