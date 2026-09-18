@@ -23,7 +23,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements-dev.txt
       - name: Apply safe Ruff fixes
-        run: ruff check --fix .
+        run: ruff check --fix --unsafe-fixes .
       - name: Reformat after lint fixes
         run: ruff format .
       - name: Commit safe lint fixes
