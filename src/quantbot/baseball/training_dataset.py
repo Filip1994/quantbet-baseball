@@ -138,7 +138,9 @@ def build_moneyline_rows(
             continue
         winner = "home" if result["home_score"] > result["away_score"] else "away"
         key = (game_id, str(row.get("captured_at")), side)
-        grouped[key].append({**row, "_odds": odds, "_side": side, "_winner": winner})
+        candidate = {**row, "_odds": odds, "_side": side, "_winner": winner}
+        if candidate not in grouped[key]:
+            grouped[key].append(candidate)
 
     output: list[dict[str, Any]] = []
     for rows in grouped.values():
