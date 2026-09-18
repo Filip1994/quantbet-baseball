@@ -10,10 +10,29 @@ from .lifecycle import flatten_market_observations
 from .scheduler import build_scheduler_record, is_observation_due
 
 LOCAL_BOOKMAKER_TOKENS = (
-    "bet365", "1xbet", "superbet", "mozzart", "maxbet", "soccerbet", "meridian", "admiralbet", "balkanbet",
+    "bet365",
+    "1xbet",
+    "superbet",
+    "mozzart",
+    "maxbet",
+    "soccerbet",
+    "meridian",
+    "admiralbet",
+    "balkanbet",
 )
 TARGET_MARKET_TOKENS = (
-    "moneyline", "winner", "run line", "spread", "total", "over/under", "strikeout", "hits", "total bases", "runs", "rbi", "home run",
+    "moneyline",
+    "winner",
+    "run line",
+    "spread",
+    "total",
+    "over/under",
+    "strikeout",
+    "hits",
+    "total bases",
+    "runs",
+    "rbi",
+    "home run",
 )
 
 
@@ -27,23 +46,30 @@ def _norm(value: Any) -> str:
 
 def _game_time(game: dict[str, Any]) -> datetime | None:
     raw = game.get("date")
-    if isinstance(raw, dict): raw = raw.get("date")
+    if isinstance(raw, dict):
+        raw = raw.get("date")
     raw = raw or ((game.get("game") or {}).get("date"))
-    if not raw: return None
-    try: parsed = datetime.fromisoformat(_text(raw))
-    except ValueError: return None
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(_text(raw))
+    except ValueError:
+        return None
     return parsed.astimezone(UTC)
 
 
 def _game_id(game: dict[str, Any]) -> int | None:
     raw = game.get("id") or (game.get("game") or {}).get("id")
-    try: return int(raw)
-    except (TypeError, ValueError): return None
+    try:
+        return int(raw)
+    except (TypeError, ValueError):
+        return None
 
 
 def _league_name(game: dict[str, Any]) -> str:
     league = game.get("league") or (game.get("game") or {}).get("league") or {}
-    if isinstance(league, dict): return _text(league.get("name") or league.get("id"))
+    if isinstance(league, dict):
+        return _text(league.get("name") or league.get("id"))
     return _text(league)
 
 
@@ -58,26 +84,44 @@ def _bookmaker_records(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for item in payload:
         bookmakers = item.get("bookmakers") or item.get("bookmaker") or []
-        if isinstance(bookmakers, dict): bookmakers = [bookmakers]
-        if not isinstance(bookmakers, list): continue
+        if isinstance(bookmakers, dict):
+            bookmakers = [bookmakers]
+        if not isinstance(bookmakers, list):
+            continue
         for bookmaker in bookmakers:
-            if not isinstance(bookmaker, dict): continue
+            if not isinstance(bookmaker, dict):
+                continue
             name = _text(bookmaker.get("name") or bookmaker.get("bookmaker_name"))
             bets = bookmaker.get("bets") or bookmaker.get("markets") or []
-            if isinstance(bets, dict): bets = [bets]
+            if isinstance(bets, dict):
+                bets = [bets]
             market_rows: list[dict[str, Any]] = []
             if isinstance(bets, list):
                 for market in bets:
-                    if not isinstance(market, dict): continue
-                    market_name = _text(market.get("name") or market.get("label") or market.get("type"))
+                    if not isinstance(market, dict):
+                        continue
+                    market_name = _text(
+                        market.get("name") or market.get("label") or market.get("type")
+                    )
                     values = market.get("values") or market.get("outcomes") or []
-                    if isinstance(values, dict): values = [values]
+                    if isinstance(values, dict):
+                        values = [values]
                     compact_values: list[dict[str, Any]] = []
                     if isinstance(values, list):
                         for value in values:
-                            if not isinstance(value, dict): continue
-                            row = {"value": value.get("value") or value.get("label") or value.get("name"), "odd": value.get("odd") or value.get("price") or value.get("odds"), "handicap": value.get("handicap") or value.get("point")}
-                            if any(v is not None for v in row.values()): compact_values.append(row)
+                            if not isinstance(value, dict):
+                                continue
+                            row = {
+                                "value": value.get("value")
+                                or value.get("label")
+                                or value.get("name"),
+                                "odd": value.get("odd")
+                                or value.get("price")
+                                or value.get("odds"),
+                                "handicap": value.get("handicap") or value.get("point"),
+                            }
+                            if any(v is not None for v in row.values()):
+                                compact_values.append(row)
                     market_rows.append({"name": market_name, "values": compact_values})
             records.append({"name": name, "markets": market_rows})
     return records
@@ -89,70 +133,105 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
     market_names: set[str] = set()
     for record in records:
         bookmaker_name = record["name"]
-        keep_bookmaker = any(token in _norm(bookmaker_name) for token in LOCAL_BOOKMAKER_TOKENS)
+        keep_bookmaker = any(
+            token in _norm(bookmaker_name) for token in LOCAL_BOOKMAKER_TOKENS
+        )
         markets: list[dict[str, Any]] = []
         for market in record["markets"]:
             market_name = market["name"]
             market_names.add(market_name)
-            if keep_bookmaker or any(token in _norm(market_name) for token in TARGET_MARKET_TOKENS): markets.append(market)
-        if keep_bookmaker or markets: bookmakers.append({"name": bookmaker_name, "markets": markets})
-    return {"bookmakers": bookmakers, "bookmaker_names": sorted({r["name"] for r in records if r["name"]}), "market_names": sorted(market_names), "coverage_probe": True}
+            if keep_bookmaker or any(
+                token in _norm(market_name) for token in TARGET_MARKET_TOKENS
+            ):
+                markets.append(market)
+        if keep_bookmaker or markets:
+            bookmakers.append({"name": bookmaker_name, "markets": markets})
+    return {
+        "bookmakers": bookmakers,
+        "bookmaker_names": sorted({r["name"] for r in records if r["name"]}),
+        "market_names": sorted(market_names),
+        "coverage_probe": True,
+    }
 
 
 def _append_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
-    if not rows: return
+    if not rows:
+        return
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
-        for row in rows: handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+        for row in rows:
+            handle.write(
+                json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n"
+            )
 
 
 def _last_observations(root: Path) -> dict[str, datetime]:
     latest: dict[str, datetime] = {}
     path = root / "data" / "baseball" / "snapshots"
     for day_path in sorted(path.glob("*.jsonl")):
-        try: lines = day_path.read_text(encoding="utf-8").splitlines()
-        except OSError: continue
+        try:
+            lines = day_path.read_text(encoding="utf-8").splitlines()
+        except OSError:
+            continue
         for line in lines:
-            try: row = json.loads(line)
-            except json.JSONDecodeError: continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
             game_id, captured = row.get("game_id"), row.get("captured_at")
-            if game_id is None or not captured: continue
-            try: stamp = datetime.fromisoformat(str(captured)).astimezone(UTC)
-            except ValueError: continue
+            if game_id is None or not captured:
+                continue
+            try:
+                stamp = datetime.fromisoformat(str(captured)).astimezone(UTC)
+            except ValueError:
+                continue
             key = str(game_id)
-            if stamp > latest.get(key, datetime.min.replace(tzinfo=UTC)): latest[key] = stamp
+            if stamp > latest.get(key, datetime.min.replace(tzinfo=UTC)):
+                latest[key] = stamp
     return latest
 
 
-def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: int = 72) -> dict[str, int]:
+def collect_once(
+    root: Path, *, now: datetime | None = None, max_odds_requests: int = 72
+) -> dict[str, int]:
     """Collect scheduled observations first, then use spare API capacity for learning coverage."""
     now = (now or datetime.now(UTC)).astimezone(UTC)
     from .config import BaseballSettings
+
     settings = BaseballSettings.from_env(root)
     client = BaseballAPIClient(settings)
 
     games: list[dict[str, Any]] = []
     seen_game_ids: set[int] = set()
     for date_value in (now.date(), now.date() + timedelta(days=1)):
-        try: date_games = client.games_by_date(date_value.isoformat())
-        except BaseballAPIBudgetExceeded: break
+        try:
+            date_games = client.games_by_date(date_value.isoformat())
+        except BaseballAPIBudgetExceeded:
+            break
         for game in date_games:
             game_id = _game_id(game)
             if game_id is not None and game_id not in seen_game_ids:
-                games.append(game); seen_game_ids.add(game_id)
+                games.append(game)
+                seen_game_ids.add(game_id)
 
     last_seen = _last_observations(root)
     due: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
     learning: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
     for game in games:
         kickoff, game_id = _game_time(game), _game_id(game)
-        if kickoff is None or game_id is None: continue
+        if kickoff is None or game_id is None:
+            continue
         minutes = (kickoff - now).total_seconds() / 60
         if -180 <= minutes <= 36 * 60:
-            record = build_scheduler_record({"game_id": game_id, "kickoff": kickoff}, now, last_seen.get(str(game_id)))
+            record = build_scheduler_record(
+                {"game_id": game_id, "kickoff": kickoff},
+                now,
+                last_seen.get(str(game_id)),
+            )
             item = (abs(minutes), game, record)
             learning.append(item)
-            if is_observation_due(kickoff, now, last_seen.get(str(game_id))): due.append(item)
+            if is_observation_due(kickoff, now, last_seen.get(str(game_id))):
+                due.append(item)
 
     # Due observations always win. Spare capacity is deliberately used for
     # additional learning observations from the same broad event universe.
@@ -162,14 +241,26 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
     seen_ids: set[int] = set()
     for _, game, _ in due:
         gid = _game_id(game)
-        if gid is not None and gid not in seen_ids and len(selected) < max_odds_requests:
-            selected.append(game); seen_ids.add(gid)
+        if (
+            gid is not None
+            and gid not in seen_ids
+            and len(selected) < max_odds_requests
+        ):
+            selected.append(game)
+            seen_ids.add(gid)
     for _, game, _ in learning:
         gid = _game_id(game)
-        if gid is not None and gid not in seen_ids and len(selected) < max_odds_requests:
-            selected.append(game); seen_ids.add(gid)
+        if (
+            gid is not None
+            and gid not in seen_ids
+            and len(selected) < max_odds_requests
+        ):
+            selected.append(game)
+            seen_ids.add(gid)
 
-    snapshot_path = root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
+    snapshot_path = (
+        root / "data" / "baseball" / "snapshots" / f"{now.date().isoformat()}.jsonl"
+    )
     observation_path = root / "data" / "baseball" / "market_observations.jsonl"
     scheduler_path = root / "data" / "baseball" / "scheduler_state.json"
     coverage_path = root / "data" / "baseball" / "market_coverage.json"
@@ -178,31 +269,57 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
     scheduler_state = {record["event_id"]: record for _, _, record in learning}
     coverage: dict[str, Any] = {}
     if coverage_path.exists():
-        try: coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError, TypeError, json.JSONDecodeError): coverage = {}
+        try:
+            coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            coverage = {}
 
     odds_calls = 0
     errors = 0
     for game in selected:
         game_id = _game_id(game)
-        if game_id is None: continue
-        try: odds = client.odds(game_id)
-        except BaseballAPIBudgetExceeded: break
+        if game_id is None:
+            continue
+        try:
+            odds = client.odds(game_id)
+        except BaseballAPIBudgetExceeded:
+            break
         except BaseballAPIError as exc:
             errors += 1
-            rows.append({"captured_at": now.isoformat(), "game": game, "game_id": game_id, "odds_error": str(exc)})
+            rows.append(
+                {
+                    "captured_at": now.isoformat(),
+                    "game": game,
+                    "game_id": game_id,
+                    "odds_error": str(exc),
+                }
+            )
             continue
         odds_calls += 1
         compact = compact_odds(odds)
         league = _league_name(game) or "UNKNOWN"
         existing = coverage.setdefault(league, {"snapshots": 0, "bookmakers": []})
-        if not isinstance(existing, dict): existing = {"snapshots": 0, "bookmakers": []}; coverage[league] = existing
-        names = set(existing.get("bookmakers") or []); names.update(compact["bookmaker_names"])
-        existing["bookmakers"] = sorted(names); existing["snapshots"] = int(existing.get("snapshots") or 0) + 1
+        if not isinstance(existing, dict):
+            existing = {"snapshots": 0, "bookmakers": []}
+            coverage[league] = existing
+        names = set(existing.get("bookmakers") or [])
+        names.update(compact["bookmaker_names"])
+        existing["bookmakers"] = sorted(names)
+        existing["snapshots"] = int(existing.get("snapshots") or 0) + 1
         home, away = _team_names(game)
         kickoff = _game_time(game)
-        snapshot = {"captured_at": now.isoformat(), "game_id": game_id, "kickoff": kickoff.isoformat() if kickoff else None, "league": league, "home": home, "away": away, "game": game, "odds": compact}
-        rows.append(snapshot); observations.extend(flatten_market_observations(snapshot))
+        snapshot = {
+            "captured_at": now.isoformat(),
+            "game_id": game_id,
+            "kickoff": kickoff.isoformat() if kickoff else None,
+            "league": league,
+            "home": home,
+            "away": away,
+            "game": game,
+            "odds": compact,
+        }
+        rows.append(snapshot)
+        observations.extend(flatten_market_observations(snapshot))
         if str(game_id) in scheduler_state:
             scheduler_state[str(game_id)]["last_observation_at"] = now.isoformat()
             scheduler_state[str(game_id)]["observation_due"] = False
@@ -210,6 +327,27 @@ def collect_once(root: Path, *, now: datetime | None = None, max_odds_requests: 
     _append_jsonl(snapshot_path, rows)
     _append_jsonl(observation_path, observations)
     coverage_path.parent.mkdir(parents=True, exist_ok=True)
-    coverage_path.write_text(json.dumps(coverage, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    scheduler_path.write_text(json.dumps({"generated_at": now.isoformat(), "events": scheduler_state}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return {"games_seen": len(games), "due_events": len(due), "games_selected": len(selected), "odds_calls": odds_calls, "observations_written": len(observations), "api_requests": client.request_count, "api_remaining": client.remaining_budget, "errors": errors, "rows_written": len(rows)}
+    coverage_path.write_text(
+        json.dumps(coverage, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    scheduler_path.write_text(
+        json.dumps(
+            {"generated_at": now.isoformat(), "events": scheduler_state},
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    return {
+        "games_seen": len(games),
+        "due_events": len(due),
+        "games_selected": len(selected),
+        "odds_calls": odds_calls,
+        "observations_written": len(observations),
+        "api_requests": client.request_count,
+        "api_remaining": client.remaining_budget,
+        "errors": errors,
+        "rows_written": len(rows),
+    }

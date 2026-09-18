@@ -47,7 +47,13 @@ def _number(value: Any) -> float | None:
 
 def _is_moneyline(market: Any) -> bool:
     text = " ".join(str(market or "").casefold().replace("-", " ").split())
-    return text in {"moneyline", "match winner", "game winner", "match result", "game result"}
+    return text in {
+        "moneyline",
+        "match winner",
+        "game winner",
+        "match result",
+        "game result",
+    }
 
 
 def _team_key(value: Any) -> str:
@@ -79,12 +85,22 @@ def _result_map(results: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         away_name = away.get("name") if isinstance(away, dict) else away
         home_score = scores.get("home") if isinstance(scores, dict) else None
         away_score = scores.get("away") if isinstance(scores, dict) else None
-        status = str(game.get("status") or game.get("game", {}).get("status", {}).get("short") or "").casefold()
+        status = str(
+            game.get("status")
+            or game.get("game", {}).get("status", {}).get("short")
+            or ""
+        ).casefold()
         if home_score is None or away_score is None or home_score == away_score:
             continue
         if any(token in status for token in ("post", "cancel", "suspend", "abort")):
             continue
-        candidate = {"home": home_name, "away": away_name, "home_score": home_score, "away_score": away_score, "status": status}
+        candidate = {
+            "home": home_name,
+            "away": away_name,
+            "home_score": home_score,
+            "away_score": away_score,
+            "status": status,
+        }
         if key in conflicted:
             continue
         if key in mapped and mapped[key] != candidate:
@@ -95,7 +111,9 @@ def _result_map(results: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
     return mapped
 
 
-def build_moneyline_rows(observations: Iterable[dict[str, Any]], results: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+def build_moneyline_rows(
+    observations: Iterable[dict[str, Any]], results: dict[str, dict[str, Any]]
+) -> list[dict[str, Any]]:
     """Build pregame moneyline examples; final scores are labels only."""
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = defaultdict(list)
     for row in observations:
@@ -107,20 +125,49 @@ def build_moneyline_rows(observations: Iterable[dict[str, Any]], results: dict[s
         side = _selection_side(str(row.get("selection") or ""), home, away)
         captured = _parse_time(row.get("captured_at"))
         kickoff = _parse_time(row.get("kickoff"))
-        if odds is None or side is None or captured is None or kickoff is None or captured >= kickoff:
+        if (
+            odds is None
+            or side is None
+            or captured is None
+            or kickoff is None
+            or captured >= kickoff
+        ):
             continue
         result = results.get(game_id)
         if not result:
             continue
         winner = "home" if result["home_score"] > result["away_score"] else "away"
         key = (game_id, str(row.get("captured_at")), side)
-        grouped[key].append({**row, "_odds": odds, "_side": side, "_winner": winner})
+        candidate = {**row, "_odds": odds, "_side": side, "_winner": winner}
+        if candidate not in grouped[key]:
+            grouped[key].append(candidate)
 
     output: list[dict[str, Any]] = []
     for rows in grouped.values():
         for row in rows:
-            output.append({"game_id": str(row.get("game_id", row.get("event_id"))), "captured_at": row["captured_at"], "kickoff": row["kickoff"], "league": row.get("league"), "home": row.get("home"), "away": row.get("away"), "market": row.get("market"), "selection": row.get("selection"), "side": row["_side"], "bookmaker_name": row.get("bookmaker_name"), "odds": row["_odds"], "implied_probability": 1.0 / row["_odds"], "target": int(row["_side"] == row["_winner"]), "result": row["_winner"], "source_observation_id": row.get("observation_id")})
-    return sorted(output, key=lambda item: (item["captured_at"], item["game_id"], item["selection"]))
+            output.append(
+                {
+                    "game_id": str(row.get("game_id", row.get("event_id"))),
+                    "captured_at": row["captured_at"],
+                    "kickoff": row["kickoff"],
+                    "league": row.get("league"),
+                    "home": row.get("home"),
+                    "away": row.get("away"),
+                    "market": row.get("market"),
+                    "selection": row.get("selection"),
+                    "side": row["_side"],
+                    "bookmaker_name": row.get("bookmaker_name"),
+                    "odds": row["_odds"],
+                    "implied_probability": 1.0 / row["_odds"],
+                    "target": int(row["_side"] == row["_winner"]),
+                    "result": row["_winner"],
+                    "source_observation_id": row.get("observation_id"),
+                }
+            )
+    return sorted(
+        output,
+        key=lambda item: (item["captured_at"], item["game_id"], item["selection"]),
+    )
 
 
 def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> int:
@@ -128,14 +175,22 @@ def write_jsonl(path: Path, rows: Iterable[dict[str, Any]]) -> int:
     count = 0
     with path.open("w", encoding="utf-8") as handle:
         for row in rows:
-            handle.write(json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n")
+            handle.write(
+                json.dumps(row, ensure_ascii=False, separators=(",", ":")) + "\n"
+            )
             count += 1
     return count
 
 
-def build_from_files(observations_path: Path, results_path: Path, output_path: Path) -> dict[str, int]:
+def build_from_files(
+    observations_path: Path, results_path: Path, output_path: Path
+) -> dict[str, int]:
     observations = _load_jsonl(observations_path)
     results = _result_map(_load_jsonl(results_path))
     rows = build_moneyline_rows(observations, results)
     written = write_jsonl(output_path, rows)
-    return {"observations": len(observations), "resolved_games": len(results), "rows": written}
+    return {
+        "observations": len(observations),
+        "resolved_games": len(results),
+        "rows": written,
+    }

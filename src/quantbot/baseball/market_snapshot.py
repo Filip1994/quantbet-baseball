@@ -7,7 +7,6 @@ from typing import Any
 
 from .market import aggregate_bookmaker_probabilities, devig_two_way
 
-
 _REQUIRED_IDENTITY = ("game_id", "market", "captured_at", "kickoff")
 
 
@@ -25,7 +24,7 @@ def _parse_timestamp(value: Any) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
     try:
-        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value.strip())
     except ValueError:
         return None
     if parsed.tzinfo is None or parsed.utcoffset() is None:
@@ -50,7 +49,9 @@ def build_two_way_market_snapshot(
 
     for row in observations:
         side = str(row.get("side") or "").casefold()
-        bookmaker = str(row.get("bookmaker_name") or row.get("bookmaker_id") or "").strip()
+        bookmaker = str(
+            row.get("bookmaker_name") or row.get("bookmaker_id") or ""
+        ).strip()
         probability = _decimal_probability(row.get("odds", row.get("odd")))
         if side not in {"home", "away"} or not bookmaker or probability is None:
             continue
@@ -87,8 +88,16 @@ def build_two_way_market_snapshot(
         if pair is not None:
             devigged.extend(
                 [
-                    {"bookmaker_name": bookmaker, "side": "home", "probability": pair[0]},
-                    {"bookmaker_name": bookmaker, "side": "away", "probability": pair[1]},
+                    {
+                        "bookmaker_name": bookmaker,
+                        "side": "home",
+                        "probability": pair[0],
+                    },
+                    {
+                        "bookmaker_name": bookmaker,
+                        "side": "away",
+                        "probability": pair[1],
+                    },
                 ]
             )
 

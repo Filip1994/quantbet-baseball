@@ -1,10 +1,7 @@
-from datetime import datetime, timezone
-
 import pytest
 
-from quantbot.baseball.evidence import EvidenceError, OddsObservation, PickEvent
+from quantbot.baseball.evidence import EvidenceError, OddsObservation
 from quantbot.baseball.evidence_store import EvidenceStore
-
 
 KICKOFF = "2026-09-20T19:00:00+00:00"
 

@@ -42,8 +42,7 @@ def collect_results(
     for date_iso in requested_dates:
         try:
             rows.extend(
-                _normalise(game, captured_at)
-                for game in client.games_by_date(date_iso)
+                _normalise(game, captured_at) for game in client.games_by_date(date_iso)
             )
         except BaseballAPIError:
             errors += 1

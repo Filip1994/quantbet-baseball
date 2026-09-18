@@ -58,38 +58,65 @@ def main() -> None:
             continue
         if -180 <= (kickoff - now).total_seconds() / 60 <= 36 * 60:
             state = scheduler.get("events", {}).get(str(row.get("game_id")), {})
-            active.append({
-                "game_id": row.get("game_id"),
-                "league": row.get("league"),
-                "match": f"{row.get('away', '')} @ {row.get('home', '')}",
-                "kickoff": kickoff.isoformat(),
-                "last_observation_at": state.get("last_observation_at") or row.get("captured_at"),
-                "cadence_minutes": state.get("cadence_minutes"),
-                "priority": state.get("priority"),
-            })
+            active.append(
+                {
+                    "game_id": row.get("game_id"),
+                    "league": row.get("league"),
+                    "match": f"{row.get('away', '')} @ {row.get('home', '')}",
+                    "kickoff": kickoff.isoformat(),
+                    "last_observation_at": state.get("last_observation_at")
+                    or row.get("captured_at"),
+                    "cadence_minutes": state.get("cadence_minutes"),
+                    "priority": state.get("priority"),
+                }
+            )
     active.sort(key=lambda x: x["kickoff"])
 
-    bookmaker_counter = Counter(str(row.get("bookmaker_name")) for row in observations if row.get("bookmaker_name"))
-    market_counter = Counter(str(row.get("market")) for row in observations if row.get("market"))
-    latest_capture = max((row.get("captured_at", "") for row in snapshots), default=None)
+    bookmaker_counter = Counter(
+        str(row.get("bookmaker_name"))
+        for row in observations
+        if row.get("bookmaker_name")
+    )
+    market_counter = Counter(
+        str(row.get("market")) for row in observations if row.get("market")
+    )
+    latest_capture = max(
+        (row.get("captured_at", "") for row in snapshots), default=None
+    )
     payload = {
         "contract_version": "1.0",
         "generated_at": now.isoformat(),
-        "system": {"status": "HEALTHY" if latest_capture else "NO_DATA", "paper_mode": True},
+        "system": {
+            "status": "HEALTHY" if latest_capture else "NO_DATA",
+            "paper_mode": True,
+        },
         "overview": {
             "events_observed": len(latest_by_game),
             "active_events": len(active),
             "observations": len(observations),
-            "strong_signals": len([s for s in signals if s.get("status") in {"PAPER_SIGNAL", "STRONG_SIGNAL"}]),
-            "production": len([s for s in signals if s.get("status") == "PAPER_SIGNAL"]),
+            "strong_signals": len(
+                [
+                    s
+                    for s in signals
+                    if s.get("status") in {"PAPER_SIGNAL", "STRONG_SIGNAL"}
+                ]
+            ),
+            "production": len(
+                [s for s in signals if s.get("status") == "PAPER_SIGNAL"]
+            ),
             "bookmakers": len(bookmaker_counter),
             "markets": len(market_counter),
         },
-        "freshness": {"last_successful_collection": latest_capture, "current_observation_age_seconds": None},
+        "freshness": {
+            "last_successful_collection": latest_capture,
+            "current_observation_age_seconds": None,
+        },
         "api": {"daily_ceiling": 7104, "daily_subscription": 7500, "headroom": 396},
         "live_watchlist": active[:50],
         "production": [s for s in signals if s.get("status") == "PAPER_SIGNAL"][:50],
-        "strong_signals": [s for s in signals if s.get("status") in {"PAPER_SIGNAL", "STRONG_SIGNAL"}][:50],
+        "strong_signals": [
+            s for s in signals if s.get("status") in {"PAPER_SIGNAL", "STRONG_SIGNAL"}
+        ][:50],
         "market_intelligence": {
             "top_bookmakers": bookmaker_counter.most_common(20),
             "top_markets": market_counter.most_common(30),
@@ -97,7 +124,9 @@ def main() -> None:
     }
     out = root / "data" / "baseball" / "dashboard.json"
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
     print(out)
 
 

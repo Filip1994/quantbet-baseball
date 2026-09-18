@@ -3,15 +3,17 @@
 This module is deliberately storage-agnostic. It validates the evidence boundary
 before observations or pick events can be persisted or replayed.
 """
+
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import datetime
-from enum import Enum
 import hashlib
 import json
 import math
-from typing import Any, Mapping
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any
 
 
 class EvidenceError(ValueError):
@@ -38,7 +40,7 @@ def _timestamp(value: str, field: str) -> datetime:
     if not isinstance(value, str) or not value:
         raise EvidenceError(f"{field} must be a non-empty ISO-8601 string")
     try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value)
     except ValueError as exc:
         raise EvidenceError(f"{field} is not a valid ISO-8601 timestamp") from exc
     if parsed.tzinfo is None or parsed.utcoffset() is None:
@@ -82,8 +84,16 @@ class OddsObservation:
     kickoff_at: str
 
     def __post_init__(self) -> None:
-        for name in ("observation_id", "game_id", "selection", "bookmaker", "raw_price",
-                     "source_payload_ref", "source_payload_checksum", "schema_version"):
+        for name in (
+            "observation_id",
+            "game_id",
+            "selection",
+            "bookmaker",
+            "raw_price",
+            "source_payload_ref",
+            "source_payload_checksum",
+            "schema_version",
+        ):
             _nonempty(getattr(self, name), name)
         if self.market_family not in {m.value for m in MarketFamily}:
             raise EvidenceError("market_family is unsupported")
@@ -130,9 +140,17 @@ class PickEvent:
     schema_version: str
 
     def __post_init__(self) -> None:
-        for name in ("pick_id", "game_id", "selection", "decision_reason", "model_version",
-                     "feature_snapshot_ref", "market_snapshot_ref", "source_data_cutoff_at",
-                     "schema_version"):
+        for name in (
+            "pick_id",
+            "game_id",
+            "selection",
+            "decision_reason",
+            "model_version",
+            "feature_snapshot_ref",
+            "market_snapshot_ref",
+            "source_data_cutoff_at",
+            "schema_version",
+        ):
             _nonempty(getattr(self, name), name)
         if self.market_family not in {m.value for m in MarketFamily}:
             raise EvidenceError("market_family is unsupported")
@@ -145,19 +163,33 @@ class PickEvent:
         _timestamp(self.decision_at, "decision_at")
         _timestamp(self.source_data_cutoff_at, "source_data_cutoff_at")
         if self.decision == Decision.BET.value:
-            for name in ("decision_decimal_odds", "model_probability", "fair_decimal_odds",
-                         "market_implied_probability", "edge", "expected_value_per_unit"):
+            for name in (
+                "decision_decimal_odds",
+                "model_probability",
+                "fair_decimal_odds",
+                "market_implied_probability",
+                "edge",
+                "expected_value_per_unit",
+            ):
                 _finite_number(getattr(self, name), name)
-            _finite_number(self.decision_decimal_odds, "decision_decimal_odds", minimum=1.0)
+            _finite_number(
+                self.decision_decimal_odds, "decision_decimal_odds", minimum=1.0
+            )
             for name in ("model_probability", "market_implied_probability"):
                 value = float(getattr(self, name))
                 if not 0.0 <= value <= 1.0:
                     raise EvidenceError(f"{name} must be between 0 and 1")
         else:
             # PASS events are retained, but numerical metrics are explicitly unknown.
-            for name in ("decision_decimal_odds", "model_probability", "fair_decimal_odds",
-                         "market_implied_probability", "edge", "expected_value_per_unit",
-                         "uncertainty_metric"):
+            for name in (
+                "decision_decimal_odds",
+                "model_probability",
+                "fair_decimal_odds",
+                "market_implied_probability",
+                "edge",
+                "expected_value_per_unit",
+                "uncertainty_metric",
+            ):
                 if getattr(self, name) is not None:
                     raise EvidenceError(f"PASS event must leave {name} null")
 
@@ -167,10 +199,14 @@ class PickEvent:
 
 def canonical_json(record: OddsObservation | PickEvent) -> str:
     """Return deterministic compact JSON for hashing and JSONL persistence."""
-    return json.dumps(record.to_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return json.dumps(
+        record.to_dict(), sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
 
 
 def payload_checksum(payload: Mapping[str, Any]) -> str:
     """Hash a source payload using the same deterministic JSON representation."""
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    ).encode()
     return hashlib.sha256(encoded).hexdigest()

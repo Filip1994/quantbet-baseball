@@ -4,10 +4,11 @@ This is the persistence boundary for the first vertical slice. It deliberately
 has no database dependency: the contract can be tested and later backed by
 SQLite/PostgreSQL without changing identity or conflict semantics.
 """
+
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from .evidence import EvidenceError, OddsObservation, PickEvent, canonical_json
 
@@ -53,10 +54,17 @@ class EvidenceStore:
         return self._pick_events.get(pick_id)
 
     def observations(self) -> tuple[OddsObservation, ...]:
-        return tuple(sorted(self._observations.values(), key=lambda r: (r.observed_at, r.observation_id)))
+        return tuple(
+            sorted(
+                self._observations.values(),
+                key=lambda r: (r.observed_at, r.observation_id),
+            )
+        )
 
     def pick_events(self) -> tuple[PickEvent, ...]:
-        return tuple(sorted(self._pick_events.values(), key=lambda r: (r.decision_at, r.pick_id)))
+        return tuple(
+            sorted(self._pick_events.values(), key=lambda r: (r.decision_at, r.pick_id))
+        )
 
     def stats(self) -> StoreStats:
         return StoreStats(len(self._observations), len(self._pick_events))

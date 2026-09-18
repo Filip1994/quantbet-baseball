@@ -31,7 +31,9 @@ class MarketMathContractTests(unittest.TestCase):
         self.assertEqual(result, {"home": 0.6 / 1.1, "away": 0.5 / 1.1})
 
     def test_incomplete_market_fails_closed(self) -> None:
-        self.assertIsNone(aggregate_bookmaker_probabilities([{"side": "home", "probability": 0.6}]))
+        self.assertIsNone(
+            aggregate_bookmaker_probabilities([{"side": "home", "probability": 0.6}])
+        )
 
 
 if __name__ == "__main__":

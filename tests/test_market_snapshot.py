@@ -82,7 +82,9 @@ class MarketSnapshotContractTests(unittest.TestCase):
 
     def test_naive_timestamp_fails_closed(self) -> None:
         self.assertIsNone(
-            build_two_way_market_snapshot([self._row(captured_at="2026-09-10T10:00:00")])
+            build_two_way_market_snapshot(
+                [self._row(captured_at="2026-09-10T10:00:00")]
+            )
         )
 
     def test_invalid_odds_fail_closed(self) -> None:
