@@ -3,6 +3,7 @@ import uuid
 from pathlib import Path
 
 import psycopg
+import pytest
 
 from quantbot.baseball.db import apply_migrations
 from quantbot.baseball.evidence import OddsObservation
@@ -30,7 +31,9 @@ def _observation() -> OddsObservation:
 
 
 def test_migrations_and_repository_are_idempotent() -> None:
-    database_url = os.environ["DATABASE_URL"]
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
     apply_migrations(Path("."), database_url)
     record = _observation()
 
