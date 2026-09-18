@@ -49,13 +49,19 @@ def build_moneyline_signal(
         return result
 
     home = evaluate_moneyline_decision(
-        model_home, home_market_probability, home_decimal_odds,
-        min_edge=min_edge, min_expected_value=min_expected_value,
+        model_home,
+        home_market_probability,
+        home_decimal_odds,
+        min_edge=min_edge,
+        min_expected_value=min_expected_value,
         uncertainty_approved=uncertainty_approved,
     )
     away = evaluate_moneyline_decision(
-        model_away, away_market_probability, away_decimal_odds,
-        min_edge=min_edge, min_expected_value=min_expected_value,
+        model_away,
+        away_market_probability,
+        away_decimal_odds,
+        min_edge=min_edge,
+        min_expected_value=min_expected_value,
         uncertainty_approved=uncertainty_approved,
     )
     result["home"] = home
@@ -64,7 +70,11 @@ def build_moneyline_signal(
         ("home", home),
         ("away", away),
     ]
-    bets = [(side, candidate) for side, candidate in eligible if candidate["decision"] == "BET"]
+    bets = [
+        (side, candidate)
+        for side, candidate in eligible
+        if candidate["decision"] == "BET"
+    ]
     if not bets:
         result["reason"] = "no_side_passed_policy"
         return result
@@ -73,9 +83,11 @@ def build_moneyline_signal(
         bets,
         key=lambda item: (float(item[1]["expected_value"]), float(item[1]["edge"])),
     )
-    result.update({
-        "decision": "BET",
-        "reason": "best_eligible_side_selected",
-        "selected_side": selected_side,
-    })
+    result.update(
+        {
+            "decision": "BET",
+            "reason": "best_eligible_side_selected",
+            "selected_side": selected_side,
+        }
+    )
     return result

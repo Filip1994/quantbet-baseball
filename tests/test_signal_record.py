@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 import unittest
 
-from quantbot.baseball.signal_record import serialize_signal_record, validate_signal_record
+from quantbot.baseball.signal_record import (
+    serialize_signal_record,
+    validate_signal_record,
+)
 
 
 class SignalRecordTests(unittest.TestCase):

@@ -50,7 +50,9 @@ def build_two_way_market_snapshot(
 
     for row in observations:
         side = str(row.get("side") or "").casefold()
-        bookmaker = str(row.get("bookmaker_name") or row.get("bookmaker_id") or "").strip()
+        bookmaker = str(
+            row.get("bookmaker_name") or row.get("bookmaker_id") or ""
+        ).strip()
         probability = _decimal_probability(row.get("odds", row.get("odd")))
         if side not in {"home", "away"} or not bookmaker or probability is None:
             continue
@@ -87,8 +89,16 @@ def build_two_way_market_snapshot(
         if pair is not None:
             devigged.extend(
                 [
-                    {"bookmaker_name": bookmaker, "side": "home", "probability": pair[0]},
-                    {"bookmaker_name": bookmaker, "side": "away", "probability": pair[1]},
+                    {
+                        "bookmaker_name": bookmaker,
+                        "side": "home",
+                        "probability": pair[0],
+                    },
+                    {
+                        "bookmaker_name": bookmaker,
+                        "side": "away",
+                        "probability": pair[1],
+                    },
                 ]
             )
 

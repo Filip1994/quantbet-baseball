@@ -22,7 +22,15 @@ STATES = {
     "INSUFFICIENT_DATA",
 }
 
-TERMINAL_STATES = {"SETTLED", "EVALUATED", "SKIPPED", "BLOCKED", "NO_ODDS", "API_ERROR", "INSUFFICIENT_DATA"}
+TERMINAL_STATES = {
+    "SETTLED",
+    "EVALUATED",
+    "SKIPPED",
+    "BLOCKED",
+    "NO_ODDS",
+    "API_ERROR",
+    "INSUFFICIENT_DATA",
+}
 
 
 def _text(value: Any) -> str:
@@ -47,7 +55,9 @@ def observation_id(
         "odd": _text(odd),
         "handicap": _text(handicap),
     }
-    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    digest = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
     return digest[:24]
 
 
@@ -70,11 +80,25 @@ def flatten_market_observations(snapshot: dict[str, Any]) -> list[dict[str, Any]
                 selection = _text(value.get("value"))
                 odd = value.get("odd")
                 handicap = value.get("handicap")
-                if game_id is None or not bookmaker_name or not market_name or not selection or odd is None:
+                if (
+                    game_id is None
+                    or not bookmaker_name
+                    or not market_name
+                    or not selection
+                    or odd is None
+                ):
                     continue
                 rows.append(
                     {
-                        "observation_id": observation_id(game_id, bookmaker_name, market_name, selection, captured_at, odd, handicap),
+                        "observation_id": observation_id(
+                            game_id,
+                            bookmaker_name,
+                            market_name,
+                            selection,
+                            captured_at,
+                            odd,
+                            handicap,
+                        ),
                         "event_id": str(game_id),
                         "game_id": game_id,
                         "league": snapshot.get("league"),

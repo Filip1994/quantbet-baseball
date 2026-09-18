@@ -20,14 +20,18 @@ def observation_interval_minutes(kickoff: datetime, now: datetime) -> int:
     return 10_000
 
 
-def is_observation_due(kickoff: datetime, now: datetime, last_captured_at: datetime | None) -> bool:
+def is_observation_due(
+    kickoff: datetime, now: datetime, last_captured_at: datetime | None
+) -> bool:
     if last_captured_at is None:
         return True
     interval = observation_interval_minutes(kickoff, now)
     return now - last_captured_at >= timedelta(minutes=interval)
 
 
-def build_scheduler_record(game: dict[str, Any], now: datetime, last_captured_at: datetime | None) -> dict[str, Any]:
+def build_scheduler_record(
+    game: dict[str, Any], now: datetime, last_captured_at: datetime | None
+) -> dict[str, Any]:
     kickoff = game["kickoff"]
     if isinstance(kickoff, str):
         kickoff = datetime.fromisoformat(kickoff)
@@ -39,7 +43,11 @@ def build_scheduler_record(game: dict[str, Any], now: datetime, last_captured_at
         "kickoff": kickoff.isoformat(),
         "minutes_to_kickoff": round((kickoff - now).total_seconds() / 60, 1),
         "cadence_minutes": interval,
-        "last_observation_at": last_captured_at.isoformat() if last_captured_at else None,
+        "last_observation_at": last_captured_at.isoformat()
+        if last_captured_at
+        else None,
         "observation_due": due,
-        "priority": "CLOSING" if -180 < (kickoff - now).total_seconds() / 60 <= 60 else "ACTIVE",
+        "priority": "CLOSING"
+        if -180 < (kickoff - now).total_seconds() / 60 <= 60
+        else "ACTIVE",
     }

@@ -7,7 +7,13 @@ from quantbot.baseball.training_dataset import _is_moneyline, build_moneyline_ro
 
 class MarketContractTests(unittest.TestCase):
     def test_accepts_explicit_full_game_winner_markets(self) -> None:
-        for market in ("Moneyline", "Match Winner", "Game Winner", "Match Result", "Game Result"):
+        for market in (
+            "Moneyline",
+            "Match Winner",
+            "Game Winner",
+            "Match Result",
+            "Game Result",
+        ):
             self.assertTrue(_is_moneyline(market))
 
     def test_rejects_ambiguous_or_non_moneyline_markets(self) -> None:

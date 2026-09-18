@@ -5,6 +5,7 @@ read-only retrieval. Concrete adapters (for example PostgreSQL on Railway)
 must preserve the identity, idempotency, conflict, and ordering semantics
 already defined by :mod:`evidence_store`.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -34,11 +35,9 @@ class EvidenceRepository(Protocol):
         """Append one immutable pick event; return False for an exact duplicate."""
         ...
 
-    def get_observation(self, observation_id: str) -> OddsObservation | None:
-        ...
+    def get_observation(self, observation_id: str) -> OddsObservation | None: ...
 
-    def get_pick_event(self, pick_id: str) -> PickEvent | None:
-        ...
+    def get_pick_event(self, pick_id: str) -> PickEvent | None: ...
 
     def observations(self) -> tuple[OddsObservation, ...]:
         """Return observations in deterministic order."""
@@ -48,5 +47,4 @@ class EvidenceRepository(Protocol):
         """Return pick events in deterministic order."""
         ...
 
-    def stats(self) -> RepositoryStats:
-        ...
+    def stats(self) -> RepositoryStats: ...

@@ -15,7 +15,9 @@ def _finite_probability(value: Any) -> float | None:
     return probability
 
 
-def devig_two_way(home_probability: Any, away_probability: Any) -> tuple[float, float] | None:
+def devig_two_way(
+    home_probability: Any, away_probability: Any
+) -> tuple[float, float] | None:
     """Normalize a valid two-way market pair by removing the overround.
 
     This is a proportional normalization only. It is deliberately limited to
@@ -31,7 +33,9 @@ def devig_two_way(home_probability: Any, away_probability: Any) -> tuple[float, 
     return home / total, away / total
 
 
-def aggregate_bookmaker_probabilities(rows: Iterable[dict[str, Any]]) -> dict[str, float] | None:
+def aggregate_bookmaker_probabilities(
+    rows: Iterable[dict[str, Any]],
+) -> dict[str, float] | None:
     """Return a bookmaker-neutral mean of already de-vigged two-way prices.
 
     Each input row must contain ``side`` and ``probability``. Both sides must

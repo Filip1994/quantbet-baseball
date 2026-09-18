@@ -25,7 +25,10 @@ def validate_signal_record(record: Any) -> bool:
     """Validate the minimum immutable envelope for an auditable signal record."""
     if not isinstance(record, dict):
         return False
-    if any(not isinstance(record.get(field), str) or not record[field].strip() for field in _REQUIRED):
+    if any(
+        not isinstance(record.get(field), str) or not record[field].strip()
+        for field in _REQUIRED
+    ):
         return False
     if record["decision"] not in {"BET", "PASS"}:
         return False
@@ -34,7 +37,11 @@ def validate_signal_record(record: Any) -> bool:
     for key in ("edge", "expected_value", "fair_decimal_odds"):
         if key in record:
             value = record[key]
-            if not isinstance(value, (int, float)) or isinstance(value, bool) or not math.isfinite(float(value)):
+            if (
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or not math.isfinite(float(value))
+            ):
                 return False
     return True
 
