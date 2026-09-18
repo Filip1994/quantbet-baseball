@@ -6,13 +6,14 @@ before observations or pick events can be persisted or replayed.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import datetime
-from enum import Enum
 import hashlib
 import json
 import math
-from typing import Any, Mapping
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Any
 
 
 class EvidenceError(ValueError):
@@ -39,7 +40,7 @@ def _timestamp(value: str, field: str) -> datetime:
     if not isinstance(value, str) or not value:
         raise EvidenceError(f"{field} must be a non-empty ISO-8601 string")
     try:
-        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value)
     except ValueError as exc:
         raise EvidenceError(f"{field} is not a valid ISO-8601 timestamp") from exc
     if parsed.tzinfo is None or parsed.utcoffset() is None:

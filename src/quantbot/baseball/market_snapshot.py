@@ -7,7 +7,6 @@ from typing import Any
 
 from .market import aggregate_bookmaker_probabilities, devig_two_way
 
-
 _REQUIRED_IDENTITY = ("game_id", "market", "captured_at", "kickoff")
 
 
@@ -25,7 +24,7 @@ def _parse_timestamp(value: Any) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
     try:
-        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value.strip())
     except ValueError:
         return None
     if parsed.tzinfo is None or parsed.utcoffset() is None:

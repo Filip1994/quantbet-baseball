@@ -7,9 +7,9 @@ records, and line changes create separate market epochs.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Iterable
 
 from .evidence import EvidenceError, OddsObservation
 
@@ -38,7 +38,7 @@ class MarketEpoch:
 
 
 def _instant(value: str) -> datetime:
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    parsed = datetime.fromisoformat(value)
     if parsed.tzinfo is None or parsed.utcoffset() is None:
         raise EvidenceError("timeline timestamps must be timezone-aware")
     return parsed

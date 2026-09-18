@@ -79,7 +79,7 @@ def build_moneyline_signal(
         result["reason"] = "no_side_passed_policy"
         return result
 
-    selected_side, selected = max(
+    selected_side, _selected = max(
         bets,
         key=lambda item: (float(item[1]["expected_value"]), float(item[1]["edge"])),
     )

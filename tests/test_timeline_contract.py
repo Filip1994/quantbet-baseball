@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 import pytest
 
 from quantbot.baseball.evidence import EvidenceError, OddsObservation
@@ -10,22 +8,21 @@ from quantbot.baseball.timeline import (
     select_observed_price,
 )
 
-
-BASE = dict(
-    game_id="g-1",
-    market_family="moneyline",
-    line=None,
-    selection="home",
-    bookmaker="book-a",
-    decimal_odds=2.1,
-    raw_price="+110",
-    retrieved_at="2026-09-14T10:01:00+00:00",
-    source_payload_ref="payload-1",
-    source_payload_checksum="abc",
-    schema_version="1.0",
-    market_status="open",
-    kickoff_at="2026-09-14T20:00:00+00:00",
-)
+BASE = {
+    "game_id": "g-1",
+    "market_family": "moneyline",
+    "line": None,
+    "selection": "home",
+    "bookmaker": "book-a",
+    "decimal_odds": 2.1,
+    "raw_price": "+110",
+    "retrieved_at": "2026-09-14T10:01:00+00:00",
+    "source_payload_ref": "payload-1",
+    "source_payload_checksum": "abc",
+    "schema_version": "1.0",
+    "market_status": "open",
+    "kickoff_at": "2026-09-14T20:00:00+00:00",
+}
 
 
 def obs(identifier, observed_at, **changes):

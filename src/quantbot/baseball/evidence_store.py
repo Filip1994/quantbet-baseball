@@ -7,8 +7,8 @@ SQLite/PostgreSQL without changing identity or conflict semantics.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from .evidence import EvidenceError, OddsObservation, PickEvent, canonical_json
 

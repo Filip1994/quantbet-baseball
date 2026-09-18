@@ -8,8 +8,9 @@ already defined by :mod:`evidence_store`.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Protocol
+from typing import Protocol
 
 from .evidence import OddsObservation, PickEvent
 
