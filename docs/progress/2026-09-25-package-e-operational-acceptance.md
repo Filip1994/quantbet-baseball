@@ -774,3 +774,12 @@ A one-time follow-up verification is scheduled for the next cron window; it must
 Natural cron executions on deployment `667487c1-6b31-4624-ae36-a655147b6f08` now prove the CANARY gate is `READY` with no blocker codes. The live budget projection remains 7500 daily / 75 per scheduled cycle / 7200 worst-case / 300 headroom, and production remains `PAPER_MODE=true`, `BASEBALL_ENABLE_COLLECTION=false`.
 
 The chosen safe execution mechanism is a DB-idempotent one-shot path inside the existing worker: an explicit canary flag may trigger one bounded canary only when the CANARY gate is READY; once a recent PASSED canary exists, later cron invocations must skip re-execution even if the flag remains armed. No cron rewrite, start-command rewrite, temporary service, or collection enablement is required.
+
+
+## One-shot canary implementation and arming — 2026-09-26
+
+PR #14 introduced the safe one-shot execution mechanism required to run the existing bounded canary without temporary cron/start-command/service hacks. CI passed and the PR was squash-merged to main as `dd423761e9146c1ea674a483ae8b12c3fe84fc50`. Deployment `26d1fbdd-7389-4ad4-b9b4-691aefcb2fcb` reached SUCCESS.
+
+The guarded Baseball service was then armed with explicit caps: 8 total provider attempts, 2 odds requests, 1 monitoring refresh, and 1 settlement refresh. `BASEBALL_ENABLE_COLLECTION=false` and `PAPER_MODE=true` were explicitly reasserted. Railway created redeployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634`.
+
+Acceptance remains pending the natural cron evidence. PASS is not assumed in advance.
