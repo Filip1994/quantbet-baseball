@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 from quantbot.baseball.fixture_evidence import FixtureObservation
@@ -89,15 +90,7 @@ def test_terminal_game_creates_result_and_settlement() -> None:
     summary = settle_due_moneyline_picks(
         _Client("FT"),
         repository,
-        now=__import__("datetime").datetime(
-            2026,
-            9,
-            20,
-            22,
-            0,
-            1,
-            tzinfo=__import__("datetime").UTC,
-        ),
+        now=datetime(2026, 9, 20, 22, 0, 1, tzinfo=UTC),
     )
 
     assert summary["game_calls"] == 1
@@ -114,14 +107,7 @@ def test_nonterminal_game_is_not_settled() -> None:
     summary = settle_due_moneyline_picks(
         _Client("IN1"),
         repository,
-        now=__import__("datetime").datetime(
-            2026,
-            9,
-            20,
-            19,
-            30,
-            tzinfo=__import__("datetime").UTC,
-        ),
+        now=datetime(2026, 9, 20, 19, 30, tzinfo=UTC),
     )
 
     assert summary["nonterminal"] == 1
