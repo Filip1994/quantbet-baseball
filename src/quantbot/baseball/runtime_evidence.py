@@ -86,7 +86,7 @@ class CollectionCycle:
         started_at: datetime,
         finished_at: datetime,
         summary: dict[str, int | str],
-    ) -> "CollectionCycle":
+    ) -> CollectionCycle:
         return cls(
             cycle_id=cycle_id,
             started_at=started_at.isoformat(),
