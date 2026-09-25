@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS activation_gate_assessments (
     cycles_per_day INTEGER NOT NULL,
     worst_case_daily_requests INTEGER NOT NULL,
     request_headroom INTEGER NOT NULL,
+    daily_reserve_required INTEGER NOT NULL,
     paper_mode BOOLEAN NOT NULL,
     collection_enabled BOOLEAN NOT NULL,
     api_key_configured BOOLEAN NOT NULL,
@@ -118,6 +119,7 @@ CREATE TABLE IF NOT EXISTS activation_gate_assessments (
         AND cron_interval_minutes <= 1440
         AND cycles_per_day > 0
         AND worst_case_daily_requests >= 0
+        AND daily_reserve_required >= 0
     ),
     CONSTRAINT activation_gate_reason_shape CHECK (
         (verdict = 'READY' AND cardinality(reason_codes) = 0)
