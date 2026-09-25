@@ -664,3 +664,31 @@ Safety:
 - no production collection variable has been enabled;
 - no canary has been executed yet;
 - no football repository or Railway project has been modified.
+
+
+### Package E implementation checkpoint — 2026-09-25
+
+Implemented on `finish/package-e-canary-acceptance-20260925`:
+
+- shared **75 total provider attempts/cycle** hard cap;
+- 15-minute worst-case budget reduced to 7,200/day;
+- 300/day theoretical headroom against the 7,500 subscription budget;
+- default activation reserve requirement of 250/day;
+- all retries and lifecycle/broad requests share the same request counter;
+- broad odds capacity now consumes only what remains after settlement + monitoring and two reserved schedule calls;
+- explicit `SCHEDULED` / `CANARY` collection-cycle execution modes;
+- migration `007_operational_acceptance.sql`;
+- immutable canary-run evidence;
+- immutable activation-gate assessments;
+- performance/CLV diagnostic SQL projections;
+- bounded explicit canary runner;
+- machine-readable CANARY and SCHEDULED_COLLECTION gates;
+- unit + PostgreSQL integration tests;
+- Railway smoke workflow coverage;
+- `.env.example` activation/budget controls.
+
+No production canary has been executed and `BASEBALL_ENABLE_COLLECTION` remains disabled.
+
+Next gate:
+
+> Global CI + Railway PostgreSQL smoke must be green before PR merge or any production canary.
