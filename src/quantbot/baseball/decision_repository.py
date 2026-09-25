@@ -375,6 +375,21 @@ class PostgreSQLMoneylineDecisionRepository:
     def append_observations(self, records: tuple[OddsObservation, ...]) -> int:
         return self.evidence.append_observations(records)
 
+    def get_observation(self, observation_id: str) -> OddsObservation | None:
+        return self.evidence.get_observation(observation_id)
+
+    def get_registered_pick_for_verification(
+        self,
+        verification_id: str,
+    ) -> RegisteredPick | None:
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT canonical_record FROM registered_picks WHERE verification_id = %s",
+                (verification_id,),
+            )
+            row = cursor.fetchone()
+        return None if row is None else RegisteredPick(**_canonical_object(row[0]))
+
     def latest_fixture_observation(
         self,
         game_id: str,
