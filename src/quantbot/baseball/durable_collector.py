@@ -232,7 +232,7 @@ def collect_durable_once(
     cycle_request_cap = (
         max_api_requests_per_cycle
         if max_api_requests_per_cycle is not None
-        else int(os.getenv("BASEBALL_MAX_API_REQUESTS_PER_CYCLE", "78"))
+        else int(os.getenv("BASEBALL_MAX_API_REQUESTS_PER_CYCLE", "75"))
     )
     if cycle_request_cap < 1:
         raise ValueError("BASEBALL_MAX_API_REQUESTS_PER_CYCLE must be positive")
