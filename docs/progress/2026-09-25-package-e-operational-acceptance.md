@@ -307,3 +307,36 @@ Corrections were applied in commits:
 This was a formatting-only failure. Python compilation had already succeeded.
 
 No production configuration changed. Collection remains disabled.
+
+
+## CI iteration 2 — lint failure and correction
+
+Second global `Baseball tests` run:
+
+- workflow run: `36154509287`;
+- compile: SUCCESS;
+- Ruff format: SUCCESS;
+- Ruff lint: FAILED;
+- pytest did not run.
+
+Exact lint findings:
+
+- `src/quantbot/baseball/canary.py:141` — BLE001 broad `except Exception as exc`;
+- `src/quantbot/baseball/canary.py:162` — BLE001 broad inner `except Exception`.
+
+Correction:
+
+- operational failure handling now catches only:
+  - `RuntimeError`;
+  - `ValueError`;
+  - `psycopg.Error`;
+- unexpected programmer errors such as `AttributeError`, `KeyError`, or unrelated `TypeError` are no longer converted into a generic failed-canary fact;
+- failed-canary persistence fallback catches only `psycopg.Error`; if failure evidence itself cannot be persisted because PostgreSQL is unavailable, the original operational exception is re-raised.
+
+Fix commit:
+
+- `0b705da` — narrow canary operational exception handling.
+
+This correction improves observability rather than merely satisfying lint: coding defects now surface instead of being silently classified as provider/runtime canary failures.
+
+Production collection remains disabled and no production canary has been executed.
