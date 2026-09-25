@@ -610,3 +610,57 @@ Next package:
 
 > Package E — canary/operational acceptance, settled-pick performance evaluation, CLV diagnostics and the explicit production collection enablement gate. Collection must remain disabled until that gate passes.
 
+
+
+## 47. Package E — operational acceptance / canary gate started — 2026-09-25
+
+Package D was independently verified after merge before starting Package E.
+
+Verified Package D production evidence:
+
+- PR #8 `Finish Package D: settlement CLV and dashboard projections` is merged;
+- Package D head CI:
+  - `Baseball tests`: **SUCCESS**;
+  - `Railway runtime smoke`: **SUCCESS**;
+- main commit: `0f1126fec305de58562c5551b0d81f36df7a2b9a`;
+- Baseball Railway deployment: `1fc35c1d-9c1c-4843-b52e-154cb60411f9`;
+- Railway deployment status: **SUCCESS**;
+- deploy log explicitly applied:
+  - `006_moneyline_settlement_clv.sql`;
+- later cron runs remain:
+  - `collection_enabled=false`;
+  - `mode="storage-ready"`;
+  - `status="ready"`.
+
+Package E branch:
+
+- `finish/package-e-canary-acceptance-20260925`.
+
+Package E objectives:
+
+1. machine-readable operational activation gate;
+2. bounded one-shot canary mode distinct from scheduled production collection;
+3. settled-pick performance evaluation;
+4. CLV coverage / diagnostics;
+5. explicit evidence for why scheduled collection is READY or BLOCKED;
+6. keep scheduled collection disabled until the gate is proven.
+
+Important finding discovered during Package E audit:
+
+> The old `BASEBALL_MAX_ODDS_REQUESTS=76` budget was calibrated around 2 schedule requests + 76 odds requests per 15-minute cycle, which is 78 requests/cycle × 96 cycles/day = 7,488 requests/day. Package C and D added monitoring and settlement provider calls. Those calls share the same API client but are not all subtracted from the old broad-odds cap. Therefore the new worst-case request budget can exceed the 7,500/day subscription ceiling.
+
+This means the activation gate must remain BLOCKED until a shared total per-cycle provider request cap is implemented.
+
+Required Package E correction:
+
+- bound **all fresh provider attempts** through one total cycle cap;
+- include retries because `BaseballAPIClient.request_count` increments per HTTP attempt;
+- prioritize settlement and active-pick monitoring;
+- give broad schedule/odds collection only the remaining capacity;
+- make daily worst-case request math mechanically auditable.
+
+Safety:
+
+- no production collection variable has been enabled;
+- no canary has been executed yet;
+- no football repository or Railway project has been modified.
