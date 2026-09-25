@@ -128,3 +128,154 @@ No scheduled collection activation is permitted while worst-case attempts/day ex
 **BLOCKED for canary execution until shared request-cap logic is implemented and tested.**
 
 No production variable has been changed.
+
+
+## Implementation update — shared request cap, canary evidence, gate and diagnostics
+
+Package E implementation now contains the following.
+
+### Shared total API request cap
+
+Updated `src/quantbot/baseball/durable_collector.py`.
+
+New behavior:
+
+- `BASEBALL_MAX_API_REQUESTS_PER_CYCLE` defaults to **75**;
+- the production `BaseballAPIClient` is constructed with that per-cycle cap;
+- every fresh HTTP attempt increments the same `request_count`;
+- retries, settlement refreshes, monitoring fixture refreshes, monitoring odds refreshes, schedule discovery and broad odds calls therefore share one hard ceiling;
+- `remaining_broad_odds_capacity()` reserves two schedule calls and gives the broad odds lane only the remaining capacity;
+- lifecycle work remains priority-ordered:
+  1. settlement;
+  2. monitoring;
+  3. broad collection.
+
+Budget math with current defaults:
+
+- 15-minute cadence = 96 cycles/day;
+- 75 attempts/cycle × 96 = **7,200 attempts/day** worst case;
+- configured daily ceiling = 7,500;
+- theoretical headroom = **300 attempts/day**;
+- default required operational reserve = **250 attempts/day**.
+
+The previous 78-attempt design would produce 7,488 worst-case attempts/day and only 12 requests of headroom, so the new gate deliberately rejects that configuration.
+
+### Collection execution mode
+
+Updated:
+
+- `runtime_evidence.py`;
+- `postgres_repository.py`;
+- migration `007_operational_acceptance.sql`.
+
+`collection_cycles` now distinguishes:
+
+- `SCHEDULED`;
+- `CANARY`.
+
+This keeps a bounded canary auditable and prevents it from being confused with normal scheduled production collection.
+
+### Migration 007
+
+Added `migrations/007_operational_acceptance.sql`.
+
+It adds:
+
+- `collection_cycles.execution_mode`;
+- immutable `operational_canary_runs`;
+- immutable `activation_gate_assessments`;
+- `baseball_moneyline_evaluation_rows`;
+- `baseball_moneyline_performance`;
+- `baseball_moneyline_performance_breakdown`.
+
+Performance projections expose:
+
+- settled picks;
+- wins/losses/pushes;
+- unit P&L;
+- ROI per unit staked;
+- Brier score;
+- log loss;
+- CLV availability/coverage;
+- average probability CLV;
+- average price-ratio CLV;
+- positive CLV rate;
+- model-version and bookmaker breakdowns.
+
+### Canary runner
+
+Added `src/quantbot/baseball/canary.py`.
+
+Safety rules:
+
+- refuses to run if `BASEBALL_ENABLE_COLLECTION=true`;
+- requires explicit `BASEBALL_ENABLE_CANARY=true`;
+- defaults to only 8 total fresh provider attempts;
+- uses the same archive/database collector path as production;
+- persists a durable canary fact.
+
+A canary can pass only if:
+
+- at least one provider request occurred;
+- there were zero collection errors;
+- both fixture and odds PostgreSQL writes are verified;
+- both fixture and odds evidence point to remote `s3://` archive objects;
+- the collection cycle is explicitly marked `CANARY`.
+
+No canary has been executed in production yet.
+
+### Activation gate
+
+Added `src/quantbot/baseball/activation_gate.py`.
+
+Targets:
+
+- `CANARY`;
+- `SCHEDULED_COLLECTION`.
+
+Current checks include:
+
+- PAPER_MODE enabled;
+- scheduled collection still disabled before activation;
+- API key configured;
+- full raw archive configuration present;
+- migrations current;
+- recent Railway runtime cycle;
+- safe daily request math and required reserve;
+- recent successful canary for scheduled activation.
+
+Every assessment is persisted with exact budget inputs and reason codes.
+
+### Tests added
+
+Added:
+
+- `tests/test_operational_acceptance.py`;
+- `tests/test_operational_postgres_integration.py`.
+
+Extended:
+
+- `tests/test_durable_collector.py`.
+
+Tests explicitly prove:
+
+- 75/cycle → 7,200/day → 300 headroom → budget-safe;
+- 78/cycle → only 12 headroom → blocked by the 250 reserve rule;
+- CANARY readiness does not require a previous canary;
+- SCHEDULED_COLLECTION readiness does require a recent successful canary;
+- scheduled collection already being enabled is itself a pre-activation gate failure;
+- passed canary facts require archive + database evidence;
+- PostgreSQL migration/view/canary/gate persistence works end to end;
+- lifecycle provider calls reduce broad odds capacity.
+
+### CI and configuration
+
+Updated Railway runtime smoke coverage for all Package E modules/tests.
+
+Updated `.env.example` with the new budget, canary and gate controls.
+
+### Current production decision
+
+Scheduled collection remains **OFF**.
+
+The next step is CI validation of this branch. Only after Package E is green and deployed should a bounded canary be considered.
