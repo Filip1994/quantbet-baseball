@@ -385,3 +385,135 @@ Post-merge sequence remains:
 4. document the exact READY/BLOCKED result;
 5. only if CANARY readiness is READY, separately decide whether to arm and execute one bounded canary;
 6. scheduled collection remains OFF until the canary passes and the `SCHEDULED_COLLECTION` gate is READY.
+
+
+## Production deployment and gate reachability follow-up
+
+Package E PR #9 merged to main as:
+
+- `d1e7b82f5006507200f6f9ebe652e60533455538`.
+
+Baseball Railway auto-deployment:
+
+- project: `believable-contentment`;
+- service: `quantbet-baseball`;
+- deployment: `26d1ed34-70d7-4aaa-a23f-e0452ac35133`;
+- deployment status: **SUCCESS**;
+- deploy log explicitly confirmed:
+  - `007_operational_acceptance.sql` applied.
+
+Scheduled collection was not enabled by the deploy.
+
+### Production prerequisite audit
+
+A read-only Railway variable-name audit confirmed:
+
+Present:
+
+- `DATABASE_URL`;
+- `PAPER_MODE`;
+- `BASEBALL_ENABLE_COLLECTION`;
+- complete raw archive variable set;
+- API base URL / retry / daily budget variables.
+
+Missing:
+
+- `API_BASEBALL_KEY`.
+
+No alternate Baseball provider-key variable name was found.
+
+Therefore the production CANARY readiness verdict is expected to include:
+
+- `API_KEY_MISSING`.
+
+No secret values were exposed and no Railway variable was changed.
+
+### Operational reachability gap
+
+The Package E activation gate was originally exposed as:
+
+```text
+PYTHONPATH=src python -m quantbot.baseball.activation_gate
+```
+
+Railway's available management interface does not provide arbitrary `exec` into an already deployed cron container.
+
+A Railway agent check confirmed:
+
+- no direct arbitrary command execution surface;
+- no direct SQL execution surface;
+- executing the CLI would otherwise require a temporary service/config change.
+
+Decision:
+
+> Do not create a temporary production function or mutate service configuration merely to invoke the readiness gate.
+
+### Runtime gate hotfix
+
+Created branch:
+
+- `package-e-gate-runtime-20260925`.
+
+Implemented:
+
+- storage-ready worker automatically executes the `CANARY` readiness assessment whenever:
+  - scheduled collection is OFF; and
+  - `DATABASE_URL` exists;
+- assessment is persisted through the existing immutable `activation_gate_assessments` table;
+- no provider API request is made by the gate;
+- worker JSON logs only a compact activation projection:
+  - assessment ID;
+  - target;
+  - verdict;
+  - reason codes;
+  - budget;
+  - checks;
+- full performance diagnostics remain queryable from PostgreSQL views and are not duplicated into every cron log;
+- when collection is ON, the storage-ready gate is not executed.
+
+Hotfix commits so far:
+
+- `787fa56` — emit CANARY readiness from storage-ready worker;
+- `2a1c498` — test storage-ready activation gate emission.
+
+Expected production behavior after hotfix deploy:
+
+```text
+collection_enabled=false
+mode=storage-ready
+activation_gate.verdict=BLOCKED
+activation_gate.reason_codes includes API_KEY_MISSING
+```
+
+This closes the operational gap without enabling collection, enabling canary, adding an HTTP admin endpoint, or modifying Railway service configuration.
+
+
+## Gate runtime hotfix CI — green
+
+Hotfix PR #10 code/doc head before this final documentation commit:
+
+- `5a135926f5bf56f91213c5a6aefcae0d74c6d8dc`.
+
+Verification:
+
+- global `Baseball tests` run `36155704541`: **SUCCESS**;
+- `Railway runtime smoke` run `36155704549`: **SUCCESS**.
+
+The PostgreSQL smoke passed:
+
+- compile;
+- focused Ruff format;
+- focused Ruff lint;
+- focused tests including runtime foundation and operational acceptance database tests.
+
+The hotfix is merge-ready from a code/database perspective.
+
+Expected production verification after merge:
+
+1. Railway deploy succeeds;
+2. migration state remains current;
+3. next storage-ready cron persists an activation assessment;
+4. worker log exposes compact `activation_gate`;
+5. expected verdict is `BLOCKED`;
+6. expected reason set includes `API_KEY_MISSING`;
+7. `collection_enabled` remains `false`.

@@ -31,6 +31,18 @@ def test_worker_is_safe_by_default(
     monkeypatch.delenv("BASEBALL_ENABLE_COLLECTION", raising=False)
     monkeypatch.setattr(worker, "apply_migrations", lambda root: ("001.sql",))
     monkeypatch.setattr(worker, "_record_runtime", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        worker,
+        "_record_activation_gate",
+        lambda *args, **kwargs: {
+            "assessment_id": "assessment-1",
+            "target": "CANARY",
+            "verdict": "BLOCKED",
+            "reason_codes": ["API_KEY_MISSING"],
+            "budget": {"cycle_request_cap": 75},
+            "checks": {"collection_enabled": False},
+        },
+    )
 
     result = worker.run_once(tmp_path)
 
@@ -38,6 +50,14 @@ def test_worker_is_safe_by_default(
     assert result["mode"] == "storage-ready"
     assert result["collection_enabled"] is False
     assert result["migrations_applied"] == ["001.sql"]
+    assert result["activation_gate"] == {
+        "assessment_id": "assessment-1",
+        "target": "CANARY",
+        "verdict": "BLOCKED",
+        "reason_codes": ["API_KEY_MISSING"],
+        "budget": {"cycle_request_cap": 75},
+        "checks": {"collection_enabled": False},
+    }
 
 
 def test_worker_runs_durable_collector_only_when_enabled(
@@ -47,6 +67,13 @@ def test_worker_runs_durable_collector_only_when_enabled(
     monkeypatch.setenv("BASEBALL_ENABLE_COLLECTION", "true")
     monkeypatch.setattr(worker, "apply_migrations", lambda root: ())
     monkeypatch.setattr(worker, "_record_runtime", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        worker,
+        "_record_activation_gate",
+        lambda *args, **kwargs: pytest.fail(
+            "activation gate must not run when collection is enabled"
+        ),
+    )
     monkeypatch.setattr(
         durable_collector,
         "collect_durable_once",
