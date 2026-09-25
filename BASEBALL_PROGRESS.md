@@ -762,3 +762,13 @@ An operational reachability gap was also found: Railway exposes no arbitrary `ex
 Hotfix branch `package-e-gate-runtime-20260925` now makes the storage-ready worker automatically persist and emit the CANARY readiness verdict while scheduled collection is OFF.
 
 No provider API call is made by that assessment. Collection and canary remain disabled.
+
+
+### Gate runtime hotfix CI green
+
+PR #10 head `5a135926f` passed:
+
+- Baseball tests `36155704541`: SUCCESS;
+- Railway/PostgreSQL smoke `36155704549`: SUCCESS.
+
+After merge, production acceptance requires observing the next storage-ready cron's persisted activation verdict. Expected blocker remains `API_KEY_MISSING`.
