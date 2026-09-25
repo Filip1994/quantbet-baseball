@@ -99,7 +99,7 @@ class GameResultFact:
     winner: str
     source_payload_ref: str
     source_payload_checksum: str
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
 
     def __post_init__(self) -> None:
         for field in (
@@ -146,6 +146,8 @@ class PickSettlement:
     settled_at: str
     outcome: str
     profit_per_unit: float
+    paper_stake_rsd: int
+    paper_profit_rsd: float
     closing_outcome: str
     closing_observation_id: str | None
     closing_odds: float | None
@@ -187,6 +189,20 @@ class PickSettlement:
             abs_tol=1e-10,
         ):
             raise EvidenceError("profit_per_unit does not match settlement outcome")
+        if (
+            isinstance(self.paper_stake_rsd, bool)
+            or not isinstance(self.paper_stake_rsd, int)
+            or self.paper_stake_rsd <= 0
+        ):
+            raise EvidenceError("paper_stake_rsd must be a positive integer")
+        expected_paper_profit = round(expected_profit * self.paper_stake_rsd, 2)
+        if not math.isclose(
+            self.paper_profit_rsd,
+            expected_paper_profit,
+            rel_tol=0.0,
+            abs_tol=1e-9,
+        ):
+            raise EvidenceError("paper_profit_rsd does not match paper stake and outcome")
         if self.closing_outcome not in {
             "CAPTURED",
             "STALE_QUOTE",
@@ -380,6 +396,8 @@ def build_pick_settlement(
         settled_at=settled_at,
         outcome=outcome,
         profit_per_unit=profit,
+        paper_stake_rsd=pick.paper_stake_rsd,
+        paper_profit_rsd=round(profit * pick.paper_stake_rsd, 2),
         closing_outcome=closing.outcome,
         closing_observation_id=closing_observation_id,
         closing_odds=closing_odds,
