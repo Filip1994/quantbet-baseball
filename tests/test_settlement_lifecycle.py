@@ -36,7 +36,13 @@ def _pick(selection: str = "home") -> RegisteredPick:
 
 
 def _result(*, home_score: int, away_score: int) -> GameResultFact:
-    winner = "home" if home_score > away_score else "away" if away_score > home_score else "tie"
+    winner = (
+        "home"
+        if home_score > away_score
+        else "away"
+        if away_score > home_score
+        else "tie"
+    )
     return GameResultFact(
         result_id=f"result-{home_score}-{away_score}",
         game_id="20",
