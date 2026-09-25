@@ -22,6 +22,7 @@ LOCAL_BOOKMAKER_TOKENS = (
 )
 TARGET_MARKET_TOKENS = (
     "moneyline",
+    "home/away",
     "winner",
     "run line",
     "spread",
