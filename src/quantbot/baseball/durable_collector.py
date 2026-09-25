@@ -221,9 +221,7 @@ def collect_durable_once(
     archive = archive_from_env(settings.raw_archive_dir, require_remote=True)
     client = BaseballAPIClient(settings, raw_archive=archive)
     max_odds_requests = int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
-    max_monitoring_refreshes = int(
-        os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10")
-    )
+    max_monitoring_refreshes = int(os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10"))
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
     if max_monitoring_refreshes < 1:
@@ -292,9 +290,7 @@ def collect_durable_once(
             summary["monitoring_fixture_calls"] = int(monitoring["fixture_calls"])
             summary["monitoring_odds_calls"] = int(monitoring["odds_calls"])
             summary["monitoring_finalizations"] = int(monitoring["finalizations"])
-            summary["monitoring_closing_captured"] = int(
-                monitoring["closing_captured"]
-            )
+            summary["monitoring_closing_captured"] = int(monitoring["closing_captured"])
             summary["monitoring_closing_stale"] = int(monitoring["closing_stale"])
             summary["monitoring_closing_no_valid_quote"] = int(
                 monitoring["closing_no_valid_quote"]
