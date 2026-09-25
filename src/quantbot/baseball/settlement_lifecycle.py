@@ -99,7 +99,7 @@ class GameResultFact:
     winner: str
     source_payload_ref: str
     source_payload_checksum: str
-    schema_version: str = "1.1"
+    schema_version: str = "1.0"
 
     def __post_init__(self) -> None:
         for field in (
@@ -155,7 +155,7 @@ class PickSettlement:
     clv_probability_delta: float | None
     clv_price_ratio: float | None
     clv_status: str
-    schema_version: str = "1.0"
+    schema_version: str = "1.1"
 
     def __post_init__(self) -> None:
         for field in (
