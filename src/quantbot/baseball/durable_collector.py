@@ -24,6 +24,9 @@ from .db import database_url_from_env
 from .evidence import OddsObservation
 from .fixture_evidence import FixtureObservation, canonical_fixture_observation
 from .ingestion import canonical_moneyline_observations
+from .moneyline_monitoring import monitor_due_moneyline_picks
+from .monitoring_lifecycle import OddsLifecyclePolicy
+from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .raw_archive import archive_from_env
 from .runtime_evidence import CollectionCycle
@@ -218,8 +221,13 @@ def collect_durable_once(
     archive = archive_from_env(settings.raw_archive_dir, require_remote=True)
     client = BaseballAPIClient(settings, raw_archive=archive)
     max_odds_requests = int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
+    max_monitoring_refreshes = int(
+        os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10")
+    )
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
+    if max_monitoring_refreshes < 1:
+        raise ValueError("BASEBALL_MAX_MONITORING_REFRESHES must be positive")
 
     cycle_started_at = datetime.now(UTC)
     cycle_now = now or cycle_started_at
@@ -248,11 +256,48 @@ def collect_durable_once(
             return summary
 
         try:
+            monitoring_repository = PostgreSQLMoneylineMonitoringRepository(connection)
+            monitoring = monitor_due_moneyline_picks(
+                client,
+                monitoring_repository,
+                now=cycle_now,
+                policy=OddsLifecyclePolicy(),
+                max_refreshes=max_monitoring_refreshes,
+            )
+            remaining_odds_requests = max(
+                0,
+                max_odds_requests - int(monitoring["odds_calls"]),
+            )
             summary = collect_with_dependencies(
                 client,
                 repository,
                 now=cycle_now,
-                max_odds_requests=max_odds_requests,
+                max_odds_requests=remaining_odds_requests,
+            )
+            summary["fixture_observations_inserted"] = int(
+                summary["fixture_observations_inserted"]
+            ) + int(monitoring["fixture_observations_inserted"])
+            summary["odds_calls"] = int(summary["odds_calls"]) + int(
+                monitoring["odds_calls"]
+            )
+            summary["canonical_rows"] = int(summary["canonical_rows"]) + int(
+                monitoring["canonical_rows"]
+            )
+            summary["observations_inserted"] = int(
+                summary["observations_inserted"]
+            ) + int(monitoring["observations_inserted"])
+            summary["errors"] = int(summary["errors"]) + int(monitoring["errors"])
+            summary["monitoring_started"] = int(monitoring["monitoring_started"])
+            summary["monitoring_due_picks"] = int(monitoring["due_picks"])
+            summary["monitoring_fixture_calls"] = int(monitoring["fixture_calls"])
+            summary["monitoring_odds_calls"] = int(monitoring["odds_calls"])
+            summary["monitoring_finalizations"] = int(monitoring["finalizations"])
+            summary["monitoring_closing_captured"] = int(
+                monitoring["closing_captured"]
+            )
+            summary["monitoring_closing_stale"] = int(monitoring["closing_stale"])
+            summary["monitoring_closing_no_valid_quote"] = int(
+                monitoring["closing_no_valid_quote"]
             )
             repository.append_collection_cycle(
                 CollectionCycle.from_summary(
