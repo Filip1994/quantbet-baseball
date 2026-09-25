@@ -1371,3 +1371,22 @@ Validation:
 - PR #16 was squash-merged to `main` as `e0f2926287c4dd269a499249f3645f684e2d048a`.
 
 Production remains safe pending Railway deployment of that commit: canary disabled, scheduled collection disabled, paper mode required. After deployment success, one bounded diagnostic canary may be re-armed with the existing 8/2/1/1 caps to capture the exact live market labels responsible for the zero-canonical-row failure.
+
+
+## 70. Canary schema probe deployed and re-armed — 2026-09-26
+
+PR #16 `Add canary-only odds schema probe` passed Baseball tests and Railway runtime smoke and was merged to main as `e0f2926287c4dd269a499249f3645f684e2d048a`.
+
+Production deployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` reached `SUCCESS` on that commit.
+
+The guarded Baseball service was then re-armed for exactly one bounded diagnostic canary with:
+
+- `BASEBALL_ENABLE_CANARY=true`;
+- `BASEBALL_CANARY_MAX_API_REQUESTS=8`;
+- `BASEBALL_CANARY_MAX_ODDS_REQUESTS=2`;
+- `BASEBALL_CANARY_MAX_MONITORING_REFRESHES=1`;
+- `BASEBALL_CANARY_MAX_SETTLEMENT_REFRESHES=1`;
+- `BASEBALL_ENABLE_COLLECTION=false`;
+- `PAPER_MODE=true`.
+
+The diagnostic code records only distinct market names and candidate selection labels during CANARY execution. It does not log prices, credentials, or widen production canonicalization. The next natural cron is required to provide the exact provider market schema before any parser change is accepted.
