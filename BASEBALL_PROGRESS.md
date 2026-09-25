@@ -1428,3 +1428,36 @@ Research-layer additions:
 - player statistics may only support game-level feature construction; player-prop betting remains excluded.
 
 This merge does not integrate weather into the production collector, does not change pick thresholds, does not enable scheduled collection, and adds no database migration. Production remains paper-only. The main deploy created by this merge is also the next clean opportunity for the already configured bounded schema-probe canary to load its runtime variables naturally.
+
+
+## 72. Second bounded canary: selected odds payloads contained no market rows — 2026-09-26
+
+A second natural bounded canary executed at `2026-09-25T23:46:33.726660077Z` with the canary-only schema probe active.
+
+Evidence:
+
+- canary id: `e7e10245-4941-55c1-8cdd-f7b662047dca`;
+- collection cycle: `eaf76e67-fea3-42e3-90ee-b40f8dddb488`;
+- API requests: 4 of max 8;
+- fixture observations inserted: 66;
+- games seen: 66;
+- pregame games: 35;
+- games selected for odds: 2;
+- odds calls: 2;
+- provider/API errors: 0;
+- raw market rows: 0;
+- canonical rows: 0;
+- PostgreSQL odds observations inserted: 0;
+- schema market names: empty;
+- schema candidate values: empty;
+- status: `FAILED` with `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`.
+
+This does **not** prove a moneyline market-name mismatch. Unlike the first canary, these two selected games exposed no compact market rows at all. The next diagnostic must distinguish an empty provider odds response from an unrecognized payload shape before changing canonical moneyline matching.
+
+Safety action immediately after this result:
+
+- `BASEBALL_ENABLE_CANARY=false`;
+- `BASEBALL_ENABLE_COLLECTION=false`;
+- `PAPER_MODE=true`.
+
+Next bounded diagnostic design: record only response row counts and JSON key names (no odds/prices/secrets), and increase the diagnostic odds sample from 2 to at most 4 games while retaining the hard 8-request canary cap.
