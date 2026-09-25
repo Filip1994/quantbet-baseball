@@ -760,3 +760,17 @@ Baseball Railway auto-deploy:
 - observed status at this checkpoint: WAITING.
 
 Migration 007 has not yet been claimed as applied. Scheduled collection remains disabled and no canary has been run.
+
+
+### Package E production prerequisite finding
+
+Read-only Railway variable-name audit found:
+
+- PostgreSQL configured;
+- full raw archive variable set present;
+- PAPER_MODE / collection controls present;
+- **`API_BASEBALL_KEY` absent**.
+
+Therefore the CANARY readiness gate is expected to be BLOCKED with `API_KEY_MISSING` until the Baseball provider key is configured.
+
+No secrets were exposed and no Railway variables were changed.
