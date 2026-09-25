@@ -61,6 +61,23 @@ class CollectorClient(Protocol):
     def odds_with_receipt(self, game_id: int) -> tuple[list[dict[str, Any]], Any]: ...
 
 
+def remaining_broad_odds_capacity(
+    *,
+    cycle_request_cap: int,
+    requests_used: int,
+    max_odds_requests: int,
+    schedule_request_reserve: int = 2,
+) -> int:
+    if cycle_request_cap < 1:
+        raise ValueError("cycle_request_cap must be positive")
+    if requests_used < 0 or max_odds_requests < 0 or schedule_request_reserve < 0:
+        raise ValueError("request counts cannot be negative")
+    return min(
+        max_odds_requests,
+        max(0, cycle_request_cap - requests_used - schedule_request_reserve),
+    )
+
+
 def _market_row_count(compact: dict[str, Any]) -> int:
     return sum(
         len(market.get("values") or [])
@@ -311,9 +328,10 @@ def collect_durable_once(
                 policy=OddsLifecyclePolicy(),
                 max_refreshes=max_monitoring_refreshes,
             )
-            remaining_odds_requests = min(
-                max_odds_requests,
-                max(0, effective_request_cap - client.request_count - 2),
+            remaining_odds_requests = remaining_broad_odds_capacity(
+                cycle_request_cap=effective_request_cap,
+                requests_used=client.request_count,
+                max_odds_requests=max_odds_requests,
             )
             summary = collect_with_dependencies(
                 client,
