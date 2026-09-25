@@ -8,7 +8,7 @@ from typing import Any
 
 from .decision_lifecycle import RegisteredPick
 from .decision_repository import PostgreSQLMoneylineDecisionRepository
-from .evidence import EvidenceConflictError, OddsObservation
+from .evidence import OddsObservation
 from .fixture_evidence import FixtureObservation
 from .monitoring_lifecycle import (
     ClosingFinalization,
@@ -109,16 +109,17 @@ class PostgreSQLMoneylineMonitoringRepository:
         started = _utc(started_at, "started_at")
         pick = self._pick(pick_id)
         kickoff = datetime.fromisoformat(pick.kickoff_at).astimezone(UTC)
-        if started >= kickoff:
-            raise MonitoringConflictError("monitoring cannot start at or after kickoff")
-
         existing = self.monitoring_state(pick_id)
         if existing is not None:
             return existing
 
-        next_refresh = min(
-            started + timedelta(seconds=policy.monitoring_interval_seconds),
-            kickoff,
+        next_refresh = (
+            started
+            if started >= kickoff
+            else min(
+                started + timedelta(seconds=policy.monitoring_interval_seconds),
+                kickoff,
+            )
         )
         transition_id = monitoring_transition_id(pick_id, "MONITORING_STARTED")
         try:
@@ -245,6 +246,12 @@ class PostgreSQLMoneylineMonitoringRepository:
 
     def append_observations(self, records: tuple[OddsObservation, ...]) -> int:
         return self.decisions.append_observations(records)
+
+    def append_fixture_observations(
+        self,
+        records: tuple[FixtureObservation, ...],
+    ) -> int:
+        return self.decisions.evidence.append_fixture_observations(records)
 
     def _complete_pairs(
         self,
