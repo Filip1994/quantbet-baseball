@@ -168,10 +168,11 @@ def _moneyline_observation(
     observation_id,
     selection,
     odds,
+    game_id="2",
 ):
     return OddsObservation(
         observation_id=observation_id,
-        game_id="2",
+        game_id=game_id,
         market_family="moneyline",
         line=None,
         selection=selection,
@@ -286,3 +287,126 @@ def test_moneyline_candidate_requires_fresh_quote_before_registration() -> None:
         )
         assert replay.pick == registered.pick
         assert replay.verification == registered.verification
+
+class _DeterioratedFreshQuoteClient:
+    def odds_with_receipt(self, game_id):
+        assert game_id == 3
+        return (
+            [
+                {
+                    "bookmakers": [
+                        {
+                            "name": "book-a",
+                            "bets": [
+                                {
+                                    "name": "Moneyline",
+                                    "values": [
+                                        {"value": "Home", "odd": "1.65"},
+                                        {"value": "Away", "odd": "2.30"},
+                                    ],
+                                }
+                            ],
+                        }
+                    ]
+                }
+            ],
+            ArchiveReceipt(
+                ref="s3://raw/game-3-final.json",
+                checksum="f" * 64,
+                captured_at="2026-09-20T17:02:00+00:00",
+            ),
+        )
+
+
+def test_final_price_deterioration_rejects_registration() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+    apply_migrations(Path("."), database_url)
+
+    fixture = FixtureObservation(
+        fixture_observation_id=str(uuid.uuid4()),
+        game_id="3",
+        provider="api-sports-baseball",
+        provider_game_id=3,
+        league="MLB",
+        home_team_id=401,
+        home_team_name="Home Three",
+        away_team_id=402,
+        away_team_name="Away Three",
+        kickoff_at="2026-09-20T19:00:00+00:00",
+        provider_status="NS",
+        observed_at="2026-09-20T17:00:00+00:00",
+        source_payload_ref="s3://raw/games-3.json",
+        source_payload_checksum="1" * 64,
+        schema_version="1.0",
+    )
+    home = _moneyline_observation(
+        observation_id="00000000-0000-0000-0000-000000000031",
+        selection="home",
+        odds=2.10,
+        game_id="3",
+    )
+    away = _moneyline_observation(
+        observation_id="00000000-0000-0000-0000-000000000032",
+        selection="away",
+        odds=1.80,
+        game_id="3",
+    )
+    prediction = build_model_prediction(
+        game_id="3",
+        model_version="baseline-v1",
+        feature_snapshot_ref="feature://3/1659",
+        source_data_cutoff_at="2026-09-20T16:59:00+00:00",
+        predicted_at="2026-09-20T17:00:30+00:00",
+        home_probability=0.55,
+        away_probability=0.45,
+        uncertainty_metric=0.02,
+    )
+    policy = MoneylineDecisionPolicy()
+
+    with psycopg.connect(database_url) as connection:
+        evidence = PostgreSQLEvidenceRepository(connection)
+        assert evidence.append_fixture_observations((fixture,)) == 1
+        repository = PostgreSQLMoneylineDecisionRepository(connection)
+        assert repository.append_observations((home, away)) == 2
+
+        preliminary = evaluate_preliminary_moneyline(
+            repository,
+            prediction,
+            bookmaker="book-a",
+            evaluated_at=datetime(2026, 9, 20, 17, 1, tzinfo=UTC),
+            policy=policy,
+        )
+        assert preliminary is not None
+        assert preliminary.candidate is not None
+        assert preliminary.candidate.selection == "home"
+
+        result = verify_and_register_moneyline(
+            _DeterioratedFreshQuoteClient(),
+            repository,
+            preliminary.candidate.evaluation_id,
+            clock=_Clock(
+                datetime(2026, 9, 20, 17, 1, 30, tzinfo=UTC),
+                datetime(2026, 9, 20, 17, 2, 5, tzinfo=UTC),
+                datetime(2026, 9, 20, 17, 2, 6, tzinfo=UTC),
+            ),
+            policy=policy,
+        )
+
+        assert result.verification.status == "REJECTED"
+        assert result.verification.reason_codes == ("FINAL_EDGE_BELOW_THRESHOLD",)
+        assert result.final_evaluation is not None
+        assert result.final_evaluation.outcome == "PASS"
+        assert result.pick is None
+
+        replay = verify_and_register_moneyline(
+            _DeterioratedFreshQuoteClient(),
+            repository,
+            preliminary.candidate.evaluation_id,
+            clock=_Clock(datetime(2026, 9, 20, 17, 3, tzinfo=UTC)),
+            policy=policy,
+        )
+        assert replay.verification == result.verification
+        assert replay.pick is None
+
