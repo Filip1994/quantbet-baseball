@@ -268,6 +268,8 @@ def test_registered_pick_settles_from_authoritative_result_with_clv() -> None:
         )
 
         after_health = PostgreSQLEvidenceRepository(connection).health_snapshot()
-        assert after_health["game_result_facts"] == before_health["game_result_facts"] + 1
+        assert (
+            after_health["game_result_facts"] == before_health["game_result_facts"] + 1
+        )
         assert after_health["settled_picks"] == before_health["settled_picks"] + 1
         assert after_health["clv_available"] == before_health["clv_available"] + 1
