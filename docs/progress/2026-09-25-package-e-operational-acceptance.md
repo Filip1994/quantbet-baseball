@@ -517,3 +517,75 @@ Expected production verification after merge:
 5. expected verdict is `BLOCKED`;
 6. expected reason set includes `API_KEY_MISSING`;
 7. `collection_enabled` remains `false`.
+
+
+## Production configuration drift correction
+
+Live storage-ready gate output after the runtime hotfix proved the gate is reachable and persisted.
+
+Observed production assessment:
+
+- verdict: `BLOCKED`;
+- reasons:
+  - `API_BUDGET_UNSAFE`;
+  - `API_KEY_MISSING`.
+
+The budget blocker was traced to Railway configuration drift:
+
+- `BASEBALL_API_REQUEST_BUDGET=78`.
+
+This value was historical per-run configuration. Package E now interprets the variable as the provider daily subscription ceiling.
+
+The repository contract and Package E budget design use:
+
+- daily ceiling: `7500`;
+- per-cycle hard cap: `75`;
+- 96 cycles/day;
+- worst-case: `7200`;
+- reserve requirement: `250`;
+- theoretical safe headroom: `300`.
+
+Production correction applied:
+
+- `BASEBALL_API_REQUEST_BUDGET=7500`.
+
+Railway deployment triggered by the variable change:
+
+- `ea40064f-a02c-4228-9d1f-5792402e48e2`.
+
+At the time of writing it was still initializing.
+
+No API key was added, no canary was armed, and scheduled collection remains OFF.
+
+The expected next readiness state is `BLOCKED` only by `API_KEY_MISSING`, pending verification from the redeployed worker log.
+
+
+## Budget-fix redeploy result
+
+The Railway deployment caused by the `BASEBALL_API_REQUEST_BUDGET=7500` correction completed successfully:
+
+- deployment: `ea40064f-a02c-4228-9d1f-5792402e48e2`;
+- status: `SUCCESS`;
+- deployed commit remains `fdaf67048ac776a31774421c0f9fe31987890e8b`;
+- no new migration was required.
+
+Important cron behavior:
+
+- deployment startup/pre-deploy is not the scheduled worker execution;
+- the redeploy therefore did not immediately emit a fresh activation assessment.
+
+Railway was checked for a safe manual cron trigger. No non-mutating one-shot invocation is available.
+
+Decision:
+
+> Preserve production configuration and wait for the normal 15-minute cron instead of temporarily changing cron/service behavior merely to force the gate.
+
+Expected next live assessment remains:
+
+- budget safe at 7,500 daily ceiling / 7,200 worst-case;
+- `API_BUDGET_UNSAFE` absent;
+- `API_KEY_MISSING` present;
+- verdict `BLOCKED`;
+- collection OFF.
+
+This remains an expectation until the scheduled worker log confirms it.
