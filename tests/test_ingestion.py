@@ -53,6 +53,34 @@ def test_maps_supported_full_game_moneyline() -> None:
     assert row.source_payload_checksum == "a" * 64
 
 
+def test_maps_api_sports_home_away_as_full_game_moneyline() -> None:
+    home = canonical_moneyline_observations(
+        snapshot(market="Home/Away", selection="Home", odd="1.88"),
+        receipt(),
+    )
+    away = canonical_moneyline_observations(
+        snapshot(market="Home/Away", selection="Away", odd="2.02"),
+        receipt(),
+    )
+
+    assert len(home) == 1
+    assert home[0].market_family == "moneyline"
+    assert home[0].selection == "home"
+    assert home[0].decimal_odds == 1.88
+    assert len(away) == 1
+    assert away[0].selection == "away"
+    assert away[0].decimal_odds == 2.02
+
+
+def test_home_away_innings_variant_remains_rejected() -> None:
+    rows = canonical_moneyline_observations(
+        snapshot(market="Home/Away (1st 5 Innings)"),
+        receipt(),
+    )
+
+    assert rows == ()
+
+
 def test_maps_team_name_to_away_side() -> None:
     rows = canonical_moneyline_observations(
         snapshot(selection="Away Club", odd="2.15"),
