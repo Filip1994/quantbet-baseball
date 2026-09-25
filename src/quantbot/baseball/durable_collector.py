@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -21,9 +22,10 @@ from .collector import (
 from .config import BaseballSettings
 from .db import database_url_from_env
 from .evidence import OddsObservation
+from .fixture_evidence import FixtureObservation, canonical_fixture_observation
 from .ingestion import canonical_moneyline_observations
-from .operational import FixtureObservation, fixture_observation_from_game
 from .postgres_repository import PostgreSQLEvidenceRepository
+from .runtime_evidence import CollectionCycle
 from .raw_archive import archive_from_env
 from .scheduler import build_scheduler_record, is_observation_due
 
@@ -94,7 +96,7 @@ def collect_with_dependencies(
         fixture_records = tuple(
             record
             for game in date_games
-            if (record := fixture_observation_from_game(game, schedule_receipt))
+            if (record := canonical_fixture_observation(game, schedule_receipt))
             is not None
         )
         fixture_observations += len(fixture_records)
@@ -191,7 +193,7 @@ def collect_with_dependencies(
         "status": "collected",
         "games_seen": len(games),
         "fixture_observations": fixture_observations,
-        "fixtures_inserted": fixtures_inserted,
+        "fixture_observations_inserted": fixtures_inserted,
         "pregame_games": len(learning),
         "due_events": len(due),
         "games_selected": len(selected),
@@ -219,26 +221,48 @@ def collect_durable_once(
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
 
+    cycle_started_at = datetime.now(UTC)
+    cycle_now = now or cycle_started_at
+
     with psycopg.connect(database_url_from_env()) as connection:
+        repository = PostgreSQLEvidenceRepository(connection)
+        cycle_id = str(uuid.uuid4())
         locked = connection.execute(
             "SELECT pg_try_advisory_lock(%s)",
             (_ADVISORY_LOCK_KEY,),
         ).fetchone()
         if locked is None or not bool(locked[0]):
-            return {
+            summary = {
                 "status": "skipped_locked",
                 "api_requests": 0,
                 "api_remaining": settings.api_request_budget,
             }
+            repository.append_collection_cycle(
+                CollectionCycle.from_summary(
+                    cycle_id=cycle_id,
+                    started_at=cycle_started_at,
+                    finished_at=datetime.now(UTC),
+                    summary=summary,
+                )
+            )
+            return summary
 
         try:
-            repository = PostgreSQLEvidenceRepository(connection)
-            return collect_with_dependencies(
+            summary = collect_with_dependencies(
                 client,
                 repository,
-                now=now or datetime.now(UTC),
+                now=cycle_now,
                 max_odds_requests=max_odds_requests,
             )
+            repository.append_collection_cycle(
+                CollectionCycle.from_summary(
+                    cycle_id=cycle_id,
+                    started_at=cycle_started_at,
+                    finished_at=datetime.now(UTC),
+                    summary=summary,
+                )
+            )
+            return summary
         finally:
             connection.execute(
                 "SELECT pg_advisory_unlock(%s)",
