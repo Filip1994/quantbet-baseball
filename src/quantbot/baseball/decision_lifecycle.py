@@ -638,12 +638,8 @@ class RegisteredPick:
             raise EvidenceError("registered pick state is invalid")
         if self.paper_mode is not True:
             raise EvidenceError("this project only registers paper picks")
-        if (
-            isinstance(self.paper_stake_minor, bool)
-            or not isinstance(self.paper_stake_minor, int)
-            or self.paper_stake_minor <= 0
-        ):
-            raise EvidenceError("paper_stake_minor must be a positive integer")
+        if self.paper_stake_minor != 30_000:
+            raise EvidenceError("paper stake must be fixed at 300 RSD")
         if self.currency != "RSD":
             raise EvidenceError("paper pick currency must be RSD")
         if _finite(self.entry_odds, "entry_odds") <= 1.0:
@@ -672,8 +668,6 @@ def build_registered_pick(
     prediction: ModelPrediction,
     entry_observation: OddsObservation,
     registered_at: str,
-    paper_stake_minor: int = 30_000,
-    currency: str = "RSD",
 ) -> RegisteredPick:
     if verification.status != "READY":
         raise EvidenceError("registered pick requires ready final verification")
@@ -713,6 +707,6 @@ def build_registered_pick(
         registered_at=registered_at,
         paper_mode=True,
         state="REGISTERED",
-        paper_stake_minor=paper_stake_minor,
-        currency=currency,
+        paper_stake_minor=30_000,
+        currency="RSD",
     )
