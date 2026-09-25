@@ -589,3 +589,96 @@ Expected next live assessment remains:
 - collection OFF.
 
 This remains an expectation until the scheduled worker log confirms it.
+
+
+## Post-budget-fix scheduled execution acceptance — 2026-09-25
+
+The outstanding Package E production expectation has now been verified from a **real natural Railway cron execution**, without changing cron, service behavior, collection state, or canary state.
+
+### Deployment state
+
+Current Baseball production deployment:
+
+- `1466ff80-d238-4f38-9822-c4098fafc9da`;
+- source commit: `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- final status: **SUCCESS**.
+
+This docs-only deployment superseded the earlier budget-variable redeployment while preserving the corrected production variable state. The service remains scheduled at:
+
+- `*/15 * * * *`.
+
+Railway service config still has no watch patterns configured. No further attempt was made to modify them.
+
+### First natural cron proving the corrected budget
+
+First observed scheduled worker execution after the budget correction:
+
+- start: `2026-09-25T16:15:46.860128915Z`;
+- structured runtime/gate record: `2026-09-25T16:15:48.524278955Z`;
+- assessment ID: `93f7b3b6-c297-52ed-8ddb-ba31c5688bd1`.
+
+Exact activation-gate budget projection:
+
+```text
+daily_request_budget=7500
+cycle_request_cap=75
+cycles_per_day=96
+worst_case_daily_requests=7200
+request_headroom=300
+daily_reserve_required=250
+```
+
+Exact relevant checks:
+
+```text
+api_key_configured=false
+canary_passed=false
+collection_enabled=false
+migrations_current=true
+paper_mode=true
+raw_archive_configured=true
+runtime_fresh=true
+```
+
+Result:
+
+```text
+target=CANARY
+reason_codes=[API_KEY_MISSING]
+verdict=BLOCKED
+mode=storage-ready
+```
+
+This proves the production budget drift is fully resolved:
+
+- `API_BUDGET_UNSAFE` no longer appears;
+- the 7,500 daily ceiling is being interpreted correctly;
+- the collector remains capped at 75 fresh attempts per cycle;
+- worst-case daily usage remains 7,200;
+- theoretical headroom remains 300, above the required 250 reserve.
+
+### Repeated-run confirmation
+
+A later natural run at `2026-09-25T21:15:17.162099029Z` produced the same gate state with assessment:
+
+- `870a6ef0-fcbf-5a06-a5dc-cc760a8c8a74`;
+- only blocker: `API_KEY_MISSING`;
+- verdict: `BLOCKED`;
+- `collection_enabled=false`.
+
+### Package E acceptance boundary
+
+Package E operational acceptance has reached the credential boundary.
+
+No code defect, migration defect, budget defect, runtime freshness defect, archive configuration defect, or paper-mode defect is blocking the CANARY target.
+
+The remaining blocker is exactly:
+
+- missing Railway variable `API_BASEBALL_KEY`.
+
+Until that credential exists:
+
+- do not enable `BASEBALL_ENABLE_CANARY`;
+- do not enable `BASEBALL_ENABLE_COLLECTION`;
+- do not fabricate provider evidence;
+- keep production in `PAPER_MODE=true`.
