@@ -256,3 +256,178 @@ Commit:
 - `75d108b` — make Railway the explicit runtime and persistence control plane.
 
 No Railway configuration, credentials, database migration, or live deployment was changed in this slice. The next implementation step is to define and build the first legitimate Railway runtime boundary, then connect it to PostgreSQL safely.
+
+## 38. Railway PostgreSQL runtime foundation — 2026-09-17
+
+Implemented and deployed the first legitimate Railway production runtime boundary.
+
+Verified implementation:
+
+- Railway project `believable-contentment`;
+- service `quantbet-baseball`;
+- PostgreSQL service with persistent Railway volume;
+- explicit worker entrypoint: `PYTHONPATH=src python -m quantbot.baseball.worker`;
+- pre-deploy migration execution;
+- `schema_migrations` tracking;
+- runtime dependencies for PostgreSQL;
+- safe default mode with collection disabled unless explicitly enabled.
+
+Relevant commit:
+
+- `c1da18f14` — add Railway PostgreSQL runtime foundation.
+
+This supersedes milestones 34–37 where Railway was still reconnaissance/intent only.
+
+## 39. Durable canonical Railway ingestion — 2026-09-18
+
+Implemented the first durable Railway data path:
+
+```text
+API-Sports Baseball
+→ raw immutable Railway object archive
+→ strict canonical moneyline normalization
+→ Railway PostgreSQL odds_observations
+```
+
+Implemented:
+
+- remote raw-payload archiving;
+- deterministic canonical observation IDs;
+- strict pregame guard;
+- moneyline-only canonical ingestion;
+- PostgreSQL append/idempotency semantics;
+- PostgreSQL advisory locking;
+- bounded per-run odds selection;
+- integration tests around migration/repository behavior.
+
+Relevant commit:
+
+- `968b1b191` — add durable canonical Baseball ingestion.
+
+Important limitation:
+
+- the durable production mapper currently canonicalizes **moneyline only**;
+- the complete pick/monitoring/closing/settlement/CLV lifecycle is not yet connected.
+
+## 40. Global repository cleanup / CI baseline — 2026-09-18
+
+Repository head advanced to:
+
+- `412e73703bc4366047ba02b64dbb3bd30c48b7a2` — make global Baseball CI green.
+
+The commit includes formatting/lint cleanup, decision-threshold corrections, temporal test fixes, exact training-observation deduplication, and PostgreSQL integration-test scoping.
+
+Railway deployment for this commit is currently reported `SUCCESS`.
+
+## 41. Production runtime audit and collection gate — 2026-09-25T12:47+02:00
+
+Performed a live GitHub + Railway audit before further model work.
+
+Verified current Railway state:
+
+- `quantbet-baseball` runs on a 15-minute cron;
+- start command is `PYTHONPATH=src python -m quantbot.baseball.worker`;
+- PostgreSQL and raw object storage exist;
+- latest inspected deployment is `SUCCESS`;
+- production logs repeatedly report:
+  - `collection_enabled=false`;
+  - `mode="storage-ready"`;
+  - `status="ready"`.
+
+Therefore:
+
+> The scheduler is healthy, but production data collection is intentionally disabled.
+
+A production DB inspection also confirmed:
+
+- tables `schema_migrations`, `odds_observations`, and `pick_events` exist;
+- `pick_events` count is 0 at the inspected time.
+
+Exact `odds_observations` count/freshness was not established through the available read-only connector, so no row-count assumption is recorded.
+
+Decision:
+
+- do **not** enable the collector yet;
+- first close the QuantBet-style moneyline lifecycle so API budget is not spent producing evidence with no downstream decision/evaluation loop.
+
+## 42. QuantBet-parity completion audit — 2026-09-25T12:47+02:00
+
+Created:
+
+- `docs/BASEBALL_COMPLETION_AUDIT_2026-09-25.md`.
+
+The audit changes the execution strategy from phase-oriented partial components to closed vertical slices.
+
+Canonical target:
+
+```text
+fixture discovery
+→ canonical quote evidence
+→ point-in-time prediction
+→ value evaluation
+→ preliminary candidate
+→ mandatory final quote verification
+→ immutable registered pick
+→ post-pick monitoring
+→ closing finalization
+→ authoritative result
+→ settlement
+→ realized CLV
+→ performance evaluation
+```
+
+The first completion target is **Moneyline Closed Loop v1**.
+
+QuantBet football is now the reference for lifecycle discipline only. Football-specific market/model mathematics must not be copied into Baseball.
+
+Next implementation package:
+
+1. canonical fixture persistence;
+2. runtime-cycle telemetry and DB health/freshness visibility;
+3. moneyline prediction/evaluation contracts;
+4. mandatory final quote verification;
+5. immutable pick registration;
+6. end-to-end tests through registration.
+
+Scheduled production collection remains disabled until the canary/observability acceptance gate is met.
+
+## 43. Package A — canonical runtime truth and fixture evidence — 2026-09-25
+
+Completed the first QuantBet-parity completion slice on branch `finish/quantbet-parity-20260925`.
+
+Implemented:
+
+- canonical stable `fixtures` identity table with API-Sports Baseball provider game/team identifiers;
+- append-only `fixture_observations` preserving kickoff/status/name evidence and raw-payload provenance;
+- durable `collection_cycles` for actual collector attempts;
+- separate `runtime_cycles` for every Railway worker invocation, including storage-ready runs while collection is disabled;
+- DB-backed `health_snapshot()` exposing fixture/quote/pick counts, bookmaker coverage, latest evidence timestamps, collection-cycle count, and Railway runtime-cycle count;
+- fresh schedule retrieval with durable raw archive receipts;
+- fixture persistence before odds-selection decisions;
+- collection-cycle persistence around advisory-lock and collection execution paths;
+- PostgreSQL integration coverage for fixture replay/idempotency, collection cycles, runtime cycles, and health projection.
+
+Reconciled duplicate implementation work:
+
+- retained the richer canonical fixture model in `fixture_evidence.py` with provider/team identities and the stable `fixtures` table;
+- removed the temporary duplicate minimal operational fixture implementation;
+- retained two telemetry layers intentionally:
+  - `collection_cycles` = actual collector attempts;
+  - `runtime_cycles` = every Railway cron invocation.
+
+CI evidence:
+
+- Railway runtime smoke: **SUCCESS**;
+- global Baseball tests: **SUCCESS**;
+- compile, Ruff format, Ruff lint, pytest, migrations and PostgreSQL integration are green.
+
+Safety / production state:
+
+- `BASEBALL_ENABLE_COLLECTION` remains disabled;
+- no production API collection was enabled during this package;
+- no football Railway project or football repository was modified.
+
+Next package:
+
+> Package B — Moneyline decision chain: point-in-time prediction evidence → value evaluation → mandatory final quote verification → immutable registered paper pick.
+
