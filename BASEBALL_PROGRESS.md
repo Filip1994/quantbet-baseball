@@ -1214,3 +1214,35 @@ Runtime safety remains unchanged:
 The deployment startup itself is not accepted as the CANARY readiness proof. The next required evidence remains the first natural cron worker run on this deployment.
 
 A one-time follow-up check was scheduled for the next cron window so the acceptance sequence can continue without manual schedule mutation. That follow-up is constrained to the same Baseball project/service and must not alter football resources or merge PR #13.
+
+
+## 67. Natural CANARY gate is READY; research scope clarified — 2026-09-26
+
+Fresh production evidence from deployment `667487c1-6b31-4624-ae36-a655147b6f08` confirms the guarded Baseball service is ready for a bounded canary.
+
+Natural cron evidence:
+
+- `2026-09-25T22:46:09.281100553Z` — assessment `4d728848-a171-5bd0-8ff6-433df8ea642c`;
+- `2026-09-25T23:00:25.018291765Z` — assessment `06819072-49ea-5308-b4ce-6c44b69b2c45`;
+- target: `CANARY`;
+- verdict: `READY`;
+- reason codes: none;
+- `api_key_configured=true`;
+- `collection_enabled=false`;
+- `paper_mode=true`;
+- `migrations_current=true`;
+- `raw_archive_configured=true`;
+- `runtime_fresh=true`;
+- daily budget 7500, cycle cap 75, worst-case 7200, reserve 250, headroom 300.
+
+The research product scope was also clarified:
+
+- no player-prop betting product;
+- initial product remains game-level moneyline research and paper picks;
+- fixed paper stake target: 300 RSD per registered single;
+- preserve full raw provider payloads;
+- canonically ingest pregame variables that are useful to game-level prediction when the provider exposes them;
+- add point-in-time weather where available and relevant, with roof/venue handling;
+- do not blindly promote every raw field into a model feature: retain everything, then admit features through availability/leakage checks.
+
+Next engineering step: implement a DB-idempotent one-shot canary path in the existing cron worker. It must run at most once while a recent PASSED canary exists, remain bounded to the configured canary request caps, and keep scheduled collection disabled.
