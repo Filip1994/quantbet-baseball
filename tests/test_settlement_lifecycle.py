@@ -116,6 +116,8 @@ def test_captured_close_produces_realized_clv_and_win_profit() -> None:
 
     assert settlement.outcome == "WIN"
     assert settlement.profit_per_unit == 1.0
+    assert settlement.paper_stake_rsd == 300
+    assert settlement.paper_profit_rsd == 300.0
     assert settlement.clv_status == "AVAILABLE"
     assert settlement.closing_odds == 1.85
     assert settlement.clv_probability_delta is not None
@@ -135,6 +137,8 @@ def test_stale_close_never_fabricates_clv() -> None:
 
     assert settlement.outcome == "LOSS"
     assert settlement.profit_per_unit == -1.0
+    assert settlement.paper_stake_rsd == 300
+    assert settlement.paper_profit_rsd == -300.0
     assert settlement.clv_status == "UNAVAILABLE_STALE_QUOTE"
     assert settlement.closing_odds is None
     assert settlement.clv_probability_delta is None
@@ -151,4 +155,6 @@ def test_tied_final_result_is_an_explicit_push() -> None:
 
     assert settlement.outcome == "PUSH"
     assert settlement.profit_per_unit == 0.0
+    assert settlement.paper_stake_rsd == 300
+    assert settlement.paper_profit_rsd == 0.0
     assert settlement.clv_status == "UNAVAILABLE_NO_VALID_QUOTE"
