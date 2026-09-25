@@ -772,3 +772,106 @@ PR #10 head `5a135926f` passed:
 - Railway/PostgreSQL smoke `36155704549`: SUCCESS.
 
 After merge, production acceptance requires observing the next storage-ready cron's persisted activation verdict. Expected blocker remains `API_KEY_MISSING`.
+
+
+## 55. Mainline reconciliation and obsolete duplicate branch — 2026-09-25
+
+While the assistant was continuing Package D on branch `finish/settlement-clv-dashboard-20260925`, Baseball `main` advanced independently.
+
+Verified newer main commits:
+
+- `0f1126fec305de58562c5551b0d81f36df7a2b9a` — Finish Package D: settlement CLV and dashboard projections;
+- `d1e7b82f5006507200f6f9ebe652e60533455538` — Finish Package E: operational canary and activation gate;
+- `fdaf67048ac776a31774421c0f9fe31987890e8b` — Hotfix Package E gate runtime reachability.
+
+The duplicate Package D PR #11 was therefore closed **without merge**.
+
+Reason:
+
+- branch merge base was Package C commit `8bb4aed...`;
+- branch was behind current main by three commits;
+- current main already contained the authoritative Package D implementation and the subsequent Package E implementation/hotfix;
+- merging the duplicate branch would risk regressing newer operational-gate work.
+
+This is a reconciliation correction, not a production rollback.
+
+## 56. Package E production deployment and live gate evidence — 2026-09-25
+
+Verified Baseball Railway target only:
+
+- project: `believable-contentment`;
+- service: `quantbet-baseball`;
+- latest completed deployment before config correction:
+  - `5a841e0d-4ff7-41d1-8ffa-c4699952dadd`;
+  - commit: `fdaf67048ac776a31774421c0f9fe31987890e8b`;
+  - status: **SUCCESS**.
+
+Storage-ready runtime log emitted a persisted CANARY readiness assessment.
+
+Observed live verdict:
+
+- target: `CANARY`;
+- verdict: `BLOCKED`;
+- reason codes:
+  - `API_BUDGET_UNSAFE`;
+  - `API_KEY_MISSING`;
+- collection enabled: `false`;
+- paper mode: `true`;
+- raw archive configured: `true`;
+- migrations current: `true`;
+- runtime fresh: `true`;
+- recent successful canary: `false`.
+
+Observed budget projection before correction:
+
+- daily request budget: **78**;
+- cycle request cap: **75**;
+- cron interval: **15 minutes**;
+- cycles/day: **96**;
+- worst-case daily requests: **7,200**;
+- required reserve: **250**;
+- request headroom: **-7,122**.
+
+This exposed production configuration drift:
+
+> `BASEBALL_API_REQUEST_BUDGET` still contained the historical per-run value `78`, while Package E now defines that variable as the provider daily request ceiling.
+
+Repository configuration and Package E design both define the intended daily ceiling as **7,500**.
+
+A Railway variable-name audit also confirmed:
+
+- `API_BASEBALL_KEY` is absent;
+- no alternate provider-key variable exists on the Baseball service;
+- secret values were not exposed.
+
+## 57. Package E production budget config correction — 2026-09-25
+
+Corrected Baseball Railway production variable:
+
+- `BASEBALL_API_REQUEST_BUDGET`:
+  - old: `78`;
+  - new: `7500`.
+
+Only the Baseball service in `believable-contentment` was changed.
+
+Not changed:
+
+- `BASEBALL_ENABLE_COLLECTION`;
+- `BASEBALL_ENABLE_CANARY`;
+- `PAPER_MODE`;
+- raw archive credentials/configuration;
+- football project/repository.
+
+Railway automatically started deployment:
+
+- deployment: `ea40064f-a02c-4228-9d1f-5792402e48e2`;
+- commit remains `fdaf67048ac776a31774421c0f9fe31987890e8b`;
+- status at the time of this log entry: `INITIALIZING`.
+
+Expected gate effect after successful redeploy:
+
+- `API_BUDGET_UNSAFE` should disappear;
+- expected remaining blocker: `API_KEY_MISSING`;
+- collection must remain disabled.
+
+This expectation is not treated as verified until the post-redeploy runtime log is inspected.
