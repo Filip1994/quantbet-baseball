@@ -270,9 +270,7 @@ def canonical_weather_snapshot(
         surface_pressure_hpa=_numeric(at("surface_pressure"), "surface_pressure"),
         cloud_cover_pct=_numeric(at("cloud_cover"), "cloud_cover"),
         wind_speed_kph=_numeric(at("wind_speed_10m"), "wind_speed_10m"),
-        wind_direction_deg=_numeric(
-            at("wind_direction_10m"), "wind_direction_10m"
-        ),
+        wind_direction_deg=_numeric(at("wind_direction_10m"), "wind_direction_10m"),
         wind_gusts_kph=_numeric(at("wind_gusts_10m"), "wind_gusts_10m"),
         weather_code=int(_numeric(at("weather_code"), "weather_code")),
         source_payload_ref=receipt.ref,
