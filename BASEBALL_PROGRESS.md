@@ -950,3 +950,23 @@ Therefore:
 No attempt was made to bypass the safety block.
 
 Production collection and canary remain disabled.
+
+
+## 60. Independent Package E migration verification — 2026-09-25
+
+Independently re-read Railway deploy logs for Package E deployment:
+
+- deployment: `26d1ed34-70d7-4aaa-a23f-e0452ac35133`;
+- commit: `d1e7b82f5006507200f6f9ebe652e60533455538`.
+
+Railway deploy log explicitly reports:
+
+- `007_operational_acceptance.sql` applied.
+
+This independently confirms the Package E operational-acceptance schema exists in Baseball production.
+
+The current blocker is not migration state. It is runtime provider configuration:
+
+- budget config drift was corrected to 7,500;
+- `API_BASEBALL_KEY` remains absent;
+- collection remains disabled.
