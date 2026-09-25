@@ -279,3 +279,31 @@ Updated `.env.example` with the new budget, canary and gate controls.
 Scheduled collection remains **OFF**.
 
 The next step is CI validation of this branch. Only after Package E is green and deployed should a bounded canary be considered.
+
+
+## CI iteration 1 — formatter failure and correction
+
+PR #9 was opened for Package E.
+
+Initial global `Baseball tests` run:
+
+- workflow run: `36154351534`;
+- compile step: SUCCESS;
+- failure step: `ruff format --check .`;
+- lint and pytest did not run because formatting failed.
+
+Ruff identified exactly two unformatted files:
+
+1. `src/quantbot/baseball/activation_gate.py`
+   - compacted five simple `int(os.getenv(...))` assignments;
+2. `tests/test_durable_collector.py`
+   - reformatted the three multiline `assert remaining_broad_odds_capacity(...) == value` expressions.
+
+Corrections were applied in commits:
+
+- `c1ce416` — activation gate Ruff formatting;
+- `239110c` — budget test Ruff formatting.
+
+This was a formatting-only failure. Python compilation had already succeeded.
+
+No production configuration changed. Collection remains disabled.
