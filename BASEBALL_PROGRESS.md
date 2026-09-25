@@ -692,3 +692,19 @@ No production canary has been executed and `BASEBALL_ENABLE_COLLECTION` remains 
 Next gate:
 
 > Global CI + Railway PostgreSQL smoke must be green before PR merge or any production canary.
+
+
+### Package E CI iteration 1
+
+PR #9 initial global test run failed only at Ruff formatting.
+
+Fixed:
+
+- `activation_gate.py` formatting;
+- shared-cycle budget test formatting.
+
+Compilation was already green. Lint/pytest were not reached in that run.
+
+Failure and exact fixes are recorded in `docs/progress/2026-09-25-package-e-operational-acceptance.md`.
+
+Production collection remains disabled.
