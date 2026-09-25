@@ -118,13 +118,17 @@ def monitor_due_moneyline_picks(
             fixture_observations_inserted += repository.append_fixture_observations(
                 (fixture_record,)
             )
-            _, fixture = repository.refresh_context(pick_id, as_of=current)
+            fixture_observed_at = datetime.fromisoformat(
+                fixture_record.observed_at
+            ).astimezone(UTC)
+            checked_at = max(current, fixture_observed_at)
+            _, fixture = repository.refresh_context(pick_id, as_of=checked_at)
 
             cutoff = datetime.fromisoformat(fixture.kickoff_at).astimezone(UTC)
-            if current >= cutoff:
+            if checked_at >= cutoff:
                 finalization = repository.finalize_closing(
                     pick_id,
-                    finalized_at=current,
+                    finalized_at=checked_at,
                 )
                 finalizations += 1
                 if finalization.outcome == "CAPTURED":
@@ -136,7 +140,7 @@ def monitor_due_moneyline_picks(
                 continue
 
             if not _pregame_status(fixture.provider_status):
-                repository.advance_refresh(pick_id, refreshed_at=current)
+                repository.advance_refresh(pick_id, refreshed_at=checked_at)
                 continue
 
             odds, odds_receipt = client.odds_with_receipt(provider_game_id)
@@ -156,7 +160,13 @@ def monitor_due_moneyline_picks(
             observations_inserted += repository.append_observations(records)
             if _has_exact_pair(records, pick.bookmaker):
                 exact_pair_refreshes += 1
-            repository.advance_refresh(pick_id, refreshed_at=current)
+            odds_observed_at = datetime.fromisoformat(
+                odds_receipt.captured_at
+            ).astimezone(UTC)
+            repository.advance_refresh(
+                pick_id,
+                refreshed_at=max(checked_at, odds_observed_at),
+            )
 
         except BaseballAPIBudgetExceeded:
             break
