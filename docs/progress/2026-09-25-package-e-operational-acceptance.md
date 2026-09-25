@@ -841,3 +841,12 @@ Schema-probe commit `e0f2926287c4dd269a499249f3645f684e2d048a` deployed successf
 The schema-probe canary ran naturally at `2026-09-25T23:46:33.726660077Z` (canary `e7e10245-4941-55c1-8cdd-f7b662047dca`, cycle `eaf76e67-fea3-42e3-90ee-b40f8dddb488`). It used 4/8 provider requests with zero API errors, inserted 66 fixture observations, but the two selected odds calls produced 0 compact market rows and therefore 0 canonical/PostgreSQL odds observations. Both schema-name diagnostic fields were empty.
 
 No parser widening is justified by this run. Canary was disarmed again and collection remains disabled. The next probe will distinguish an empty odds response from an unrecognized response shape and may inspect up to four games under the same 8-request ceiling.
+
+
+## Moneyline canonicalization root cause and fix — 2026-09-26
+
+Live-history payloads in the repository proved that API-Sports Baseball market id `1` is `Home/Away` with exactly `Home` and `Away`, while market id `14` `Match Winner` is three-way (`Home/Draw/Away`). The prior canonicalizer omitted the first market and could incorrectly drop `Draw` from the second.
+
+PR #22 fixed both behaviors and passed Baseball tests plus Railway runtime smoke before merging to main as `a4d20a9d624342a286603fe46bd2a4cf3dff3640`.
+
+No collection activation occurred. Next requirement: deploy this commit and run one bounded canary with <=8 total provider attempts and <=4 broad odds calls.
