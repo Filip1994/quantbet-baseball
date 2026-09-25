@@ -1246,3 +1246,36 @@ The research product scope was also clarified:
 - do not blindly promote every raw field into a model feature: retain everything, then admit features through availability/leakage checks.
 
 Next engineering step: implement a DB-idempotent one-shot canary path in the existing cron worker. It must run at most once while a recent PASSED canary exists, remain bounded to the configured canary request caps, and keep scheduled collection disabled.
+
+
+## 68. One-shot canary merged and armed — 2026-09-26
+
+Production-readiness work advanced from gate-only evidence to a bounded executable canary path.
+
+Code evidence:
+
+- PR #14 `Add idempotent one-shot Baseball canary execution` passed both Baseball tests and Railway runtime smoke;
+- PR #14 was squash-merged to `main` as commit `dd423761e9146c1ea674a483ae8b12c3fe84fc50`;
+- production deployment `26d1fbdd-7389-4ad4-b9b4-691aefcb2fcb` reached `SUCCESS` on that commit;
+- PR #13 remains separate and unmerged.
+
+One-shot semantics now enforced by the worker:
+
+- canary executes only when explicitly armed;
+- CANARY activation gate must be READY;
+- scheduled collection and canary cannot run together;
+- a recent persisted PASSED canary causes later armed cycles to return `ALREADY_PASSED` rather than rerun provider requests;
+- successful canary causes a separate `SCHEDULED_COLLECTION` gate assessment;
+- cron and production start command were not changed.
+
+Production variables were then explicitly set on only the guarded Baseball service:
+
+- `BASEBALL_ENABLE_CANARY=true`;
+- `BASEBALL_CANARY_MAX_API_REQUESTS=8`;
+- `BASEBALL_CANARY_MAX_ODDS_REQUESTS=2`;
+- `BASEBALL_CANARY_MAX_MONITORING_REFRESHES=1`;
+- `BASEBALL_CANARY_MAX_SETTLEMENT_REFRESHES=1`;
+- `BASEBALL_ENABLE_COLLECTION=false`;
+- `PAPER_MODE=true`.
+
+Railway created variable redeployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634`. No production canary result is claimed until a natural cron run records the persisted canary evidence.
