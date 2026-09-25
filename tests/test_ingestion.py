@@ -53,6 +53,23 @@ def test_maps_supported_full_game_moneyline() -> None:
     assert row.source_payload_checksum == "a" * 64
 
 
+def test_maps_api_sports_home_away_market_to_moneyline() -> None:
+    home_rows = canonical_moneyline_observations(
+        snapshot(market="Home/Away", selection="Home", odd="1.84"),
+        receipt(),
+    )
+    away_rows = canonical_moneyline_observations(
+        snapshot(market="Home/Away", selection="Away", odd="2.05"),
+        receipt(),
+    )
+
+    assert len(home_rows) == 1
+    assert home_rows[0].market_family == "moneyline"
+    assert home_rows[0].selection == "home"
+    assert len(away_rows) == 1
+    assert away_rows[0].selection == "away"
+
+
 def test_maps_team_name_to_away_side() -> None:
     rows = canonical_moneyline_observations(
         snapshot(selection="Away Club", odd="2.15"),
