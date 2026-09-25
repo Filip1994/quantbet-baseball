@@ -385,3 +385,47 @@ Post-merge sequence remains:
 4. document the exact READY/BLOCKED result;
 5. only if CANARY readiness is READY, separately decide whether to arm and execute one bounded canary;
 6. scheduled collection remains OFF until the canary passes and the `SCHEDULED_COLLECTION` gate is READY.
+
+
+## Production acceptance phase — Package E merged
+
+Package E PR #9 was merged after the final branch head passed both CI gates.
+
+Merge:
+
+- PR: #9 `Finish Package E: operational canary and activation gate`;
+- merge method: squash;
+- main commit: `d1e7b82f5006507200f6f9ebe652e60533455538`.
+
+Final PR-head verification before merge:
+
+- global `Baseball tests` run `36154921320`: **SUCCESS**;
+- `Railway runtime smoke` run `36154921203`: **SUCCESS**;
+- the earlier code head had also passed runs `36154788452` and `36154788449`.
+
+Railway auto-deployment triggered only on the Baseball service:
+
+- project: `believable-contentment`;
+- service: `quantbet-baseball`;
+- deployment: `26d1ed34-70d7-4aaa-a23f-e0452ac35133`;
+- commit: `d1e7b82f5006507200f6f9ebe652e60533455538`;
+- current observed state at this checkpoint: `WAITING`;
+- no build/deploy log was available yet.
+
+Therefore migration `007_operational_acceptance.sql` is **not yet claimed as production-applied** at this checkpoint.
+
+Production safety state is unchanged:
+
+- scheduled collection remains OFF;
+- no production canary has been executed;
+- no canary enable variable has been changed;
+- football repository/project remains untouched.
+
+Next operational sequence:
+
+1. wait for Baseball deployment to finish;
+2. verify migration 007 explicitly from Railway deploy log;
+3. verify storage-ready cron remains healthy and collection remains OFF;
+4. execute/persist the read-only CANARY readiness assessment;
+5. document the exact verdict/reason codes;
+6. only if readiness is READY, decide whether to arm one bounded canary.
