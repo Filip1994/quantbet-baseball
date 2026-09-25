@@ -74,6 +74,10 @@ class BudgetProjection:
             self.worst_case_daily_requests,
             "worst_case_daily_requests",
         )
+        _nonnegative_int(
+            self.daily_reserve_required,
+            "daily_reserve_required",
+        )
         _nonnegative_int(self.daily_reserve_required, "daily_reserve_required")
 
     @property
@@ -204,6 +208,7 @@ class ActivationGateAssessment:
     cycles_per_day: int
     worst_case_daily_requests: int
     request_headroom: int
+    daily_reserve_required: int
     paper_mode: bool
     collection_enabled: bool
     api_key_configured: bool
@@ -282,6 +287,7 @@ def build_activation_gate_assessment(
         "cycles_per_day": budget.cycles_per_day,
         "worst_case_daily_requests": budget.worst_case_daily_requests,
         "request_headroom": budget.request_headroom,
+        "daily_reserve_required": budget.daily_reserve_required,
         "paper_mode": paper_mode,
         "collection_enabled": collection_enabled,
         "api_key_configured": api_key_configured,
