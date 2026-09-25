@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import uuid
 from collections.abc import Callable
@@ -14,6 +15,7 @@ import psycopg
 
 from .api import BaseballAPIBudgetExceeded, BaseballAPIClient, BaseballAPIError
 from .collector import (
+    _bookmaker_records,
     _game_id,
     _game_time,
     _league_name,
@@ -94,6 +96,7 @@ def collect_with_dependencies(
     now: datetime,
     max_odds_requests: int,
     clock: Callable[[], datetime] | None = None,
+    schema_probe: bool = False,
 ) -> dict[str, int | str]:
     """Collect one strict pregame cycle with injectable boundaries for tests."""
 
@@ -176,6 +179,8 @@ def collect_with_dependencies(
     raw_market_rows = 0
     canonical_rows = 0
     inserted = 0
+    schema_market_names: set[str] = set()
+    schema_candidate_values: dict[str, set[str]] = {}
 
     for game in selected:
         game_id = _game_id(game)
@@ -196,6 +201,37 @@ def collect_with_dependencies(
             continue
 
         odds_calls += 1
+        if schema_probe:
+            for bookmaker in _bookmaker_records(odds):
+                for market in bookmaker.get("markets") or []:
+                    if not isinstance(market, dict):
+                        continue
+                    market_name = str(market.get("name") or "").strip()
+                    if not market_name:
+                        continue
+                    schema_market_names.add(market_name)
+                    normalized = " ".join(
+                        market_name.casefold().replace("_", " ").replace("-", " ").split()
+                    )
+                    if any(
+                        token in normalized
+                        for token in (
+                            "moneyline",
+                            "money line",
+                            "winner",
+                            "result",
+                            "home away",
+                            "home/away",
+                        )
+                    ):
+                        labels = schema_candidate_values.setdefault(market_name, set())
+                        for value in market.get("values") or []:
+                            if not isinstance(value, dict):
+                                continue
+                            label = str(value.get("value") or "").strip()
+                            if label:
+                                labels.add(label)
+
         compact = compact_odds(odds)
         raw_market_rows += _market_row_count(compact)
         home, away = _team_names(game)
@@ -212,7 +248,7 @@ def collect_with_dependencies(
         canonical_rows += len(records)
         inserted += repository.append_observations(records)
 
-    return {
+    result: dict[str, int | str] = {
         "status": "collected",
         "games_seen": len(games),
         "fixture_observations": fixture_observations,
@@ -228,6 +264,22 @@ def collect_with_dependencies(
         "api_remaining": client.remaining_budget,
         "errors": errors,
     }
+    if schema_probe:
+        result["schema_market_names_json"] = json.dumps(
+            sorted(schema_market_names)[:100],
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        result["schema_candidate_values_json"] = json.dumps(
+            {
+                name: sorted(values)[:20]
+                for name, values in sorted(schema_candidate_values.items())[:50]
+            },
+            ensure_ascii=True,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+    return result
 
 
 def collect_durable_once(
@@ -338,6 +390,7 @@ def collect_durable_once(
                 repository,
                 now=cycle_now,
                 max_odds_requests=remaining_odds_requests,
+                schema_probe=execution_mode == "CANARY",
             )
             summary["fixture_observations_inserted"] = (
                 int(summary["fixture_observations_inserted"])
