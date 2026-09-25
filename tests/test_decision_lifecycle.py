@@ -202,5 +202,3 @@ def test_ready_final_quote_can_register_immutable_paper_pick() -> None:
     assert pick.paper_stake_minor == 30_000
     assert pick.currency == "RSD"
     assert pick.state == "REGISTERED"
-
-
