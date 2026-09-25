@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 
 import psycopg
@@ -7,6 +8,7 @@ import pytest
 
 from quantbot.baseball.db import apply_migrations
 from quantbot.baseball.evidence import OddsObservation
+from quantbot.baseball.operational import FixtureObservation
 from quantbot.baseball.postgres_repository import PostgreSQLEvidenceRepository
 
 
@@ -48,3 +50,38 @@ def test_migrations_and_repository_are_idempotent() -> None:
             .isoformat()
             .startswith("2026-09-20T17:00:00")
         )
+
+        fixture = FixtureObservation(
+            fixture_observation_id=str(uuid.uuid4()),
+            game_id="game-1",
+            league="MLB",
+            home_team="Home Club",
+            away_team="Away Club",
+            kickoff_at="2026-09-20T19:00:00+00:00",
+            provider_status="NS",
+            observed_at="2026-09-20T17:00:00+00:00",
+            source_payload_ref="s3://raw/games.json",
+            source_payload_checksum="b" * 64,
+        )
+        assert repository.append_fixture_observations((fixture,)) == 1
+        assert repository.append_fixture_observations((fixture,)) == 0
+
+        started = datetime(2026, 9, 20, 17, 0, tzinfo=UTC)
+        repository.append_runtime_cycle(
+            run_id=str(uuid.uuid4()),
+            started_at=started,
+            finished_at=started,
+            collection_enabled=False,
+            mode="storage-ready",
+            status="ready",
+            stats={},
+        )
+
+        health = repository.health_snapshot()
+        assert health["fixture_observations"] == 1
+        assert health["distinct_fixtures"] == 1
+        assert health["odds_observations"] == 1
+        assert health["distinct_quote_games"] == 1
+        assert health["bookmakers"] == 1
+        assert health["pick_events"] == 0
+        assert health["runtime_cycles"] == 1
