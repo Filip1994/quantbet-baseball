@@ -1390,3 +1390,12 @@ The guarded Baseball service was then re-armed for exactly one bounded diagnosti
 - `PAPER_MODE=true`.
 
 The diagnostic code records only distinct market names and candidate selection labels during CANARY execution. It does not log prices, credentials, or widen production canonicalization. The next natural cron is required to provide the exact provider market schema before any parser change is accepted.
+
+
+## 71. Second bounded schema-diagnostic canary armed — 2026-09-26
+
+After PR #16 merged the CANARY-only market-schema probe, Railway deployment `cb8f02d3-6894-4806-8e2d-da279bd9dc2a` reached SUCCESS on commit `e0f2926287c4dd269a499249f3645f684e2d048a`. A second bounded diagnostic canary was then armed with the same strict caps: 8 total provider attempts, 2 broad odds requests, 1 monitoring refresh, and 1 settlement refresh. Scheduled collection remains disabled and paper mode remains required.
+
+The variable redeployment is `d60fd5df-7b4d-495d-8255-aa2eb19edee7`; it reached SUCCESS on the same commit. The next natural cron is expected to expose only distinct market names and candidate selection labels in addition to the normal canary telemetry. No parser widening is authorized until that live schema evidence exists. Cron/start command were not changed and no helper service was created.
+
+In parallel, draft PR #17 was opened for the immutable pregame feature-snapshot contract. It is deliberately separate from operational acceptance and remains unmerged. The contract records source observed/available timestamps, archived payload provenance and feature paths, and rejects sources unavailable by the decision cutoff or snapshots generated at/after first pitch. This is the storage boundary for future verified Baseball and weather features; player-prop betting remains excluded.
