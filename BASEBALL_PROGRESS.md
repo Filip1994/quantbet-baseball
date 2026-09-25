@@ -1192,3 +1192,25 @@ Safety state at this checkpoint:
 - the next required evidence is a natural storage-ready activation-gate result with `api_key_configured=true` and a CANARY-ready verdict.
 
 No football resource was touched.
+
+
+## 67. Provider credential deployment success; natural gate pending — 2026-09-26
+
+The deployment triggered after the correctly named provider credential was added has completed:
+
+- deployment: `667487c1-6b31-4624-ae36-a655147b6f08`;
+- status: **SUCCESS**;
+- source commit: `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- pre-deploy migration output: no new migrations applied.
+
+Runtime safety remains unchanged:
+
+- `API_BASEBALL_KEY` is visible to the guarded Baseball service;
+- `BASEBALL_ENABLE_COLLECTION` has not been enabled;
+- no canary has been armed or executed;
+- cron remains `*/15 * * * *`;
+- no start-command or cron mutation was used to force execution.
+
+The deployment startup itself is not accepted as the CANARY readiness proof. The next required evidence remains the first natural cron worker run on this deployment.
+
+A one-time follow-up check was scheduled for the next cron window so the acceptance sequence can continue without manual schedule mutation. That follow-up is constrained to the same Baseball project/service and must not alter football resources or merge PR #13.
