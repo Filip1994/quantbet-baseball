@@ -682,3 +682,36 @@ Until that credential exists:
 - do not enable `BASEBALL_ENABLE_COLLECTION`;
 - do not fabricate provider evidence;
 - keep production in `PAPER_MODE=true`.
+
+
+## Handoff revalidation — 2026-09-26
+
+A fresh read-only production check reconfirmed the Package E acceptance boundary.
+
+Current production deployment:
+
+- `1466ff80-d238-4f38-9822-c4098fafc9da`;
+- status: **SUCCESS**;
+- source commit: `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- cron: `*/15 * * * *`.
+
+Current service config still contains no watch-pattern restriction, and the production
+variable-name inventory still does not contain `API_BASEBALL_KEY`.
+
+Latest completed natural cron inspected:
+
+- gate timestamp: `2026-09-25T22:00:51.824842688Z`;
+- assessment ID: `f940b8d9-0240-5269-b0be-5ebf532de2e7`;
+- `daily_request_budget=7500`;
+- `cycle_request_cap=75`;
+- `worst_case_daily_requests=7200`;
+- `request_headroom=300`;
+- `reason_codes=[API_KEY_MISSING]`;
+- `collection_enabled=false`;
+- `paper_mode=true`;
+- verdict: **`BLOCKED`**.
+
+This independently reconfirms that the budget blocker is resolved and the remaining
+production blocker is solely the absent provider credential.
+
+No canary, collection activation, watch-pattern mutation, cron mutation, redeploy, or PR merge was performed.
