@@ -751,3 +751,10 @@ Production repair:
 - no credential was fabricated or copied.
 
 Remaining blocker: create `API_BASEBALL_KEY` on the guarded Baseball production service using the real provider secret.
+
+
+## Provider credential visibility confirmed — 2026-09-26
+
+Railway now exposes `API_BASEBALL_KEY` to the guarded Baseball production service. A new deployment, `667487c1-6b31-4624-ae36-a655147b6f08`, was created by the credential change and was initially `WAITING`.
+
+No canary or scheduled collection activation was performed. The next acceptance requirement is a natural storage-ready gate proving CANARY readiness with the key configured.
