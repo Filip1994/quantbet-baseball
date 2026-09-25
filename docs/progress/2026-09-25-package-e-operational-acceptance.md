@@ -486,3 +486,34 @@ activation_gate.reason_codes includes API_KEY_MISSING
 ```
 
 This closes the operational gap without enabling collection, enabling canary, adding an HTTP admin endpoint, or modifying Railway service configuration.
+
+
+## Gate runtime hotfix CI — green
+
+Hotfix PR #10 code/doc head before this final documentation commit:
+
+- `5a135926f5bf56f91213c5a6aefcae0d74c6d8dc`.
+
+Verification:
+
+- global `Baseball tests` run `36155704541`: **SUCCESS**;
+- `Railway runtime smoke` run `36155704549`: **SUCCESS**.
+
+The PostgreSQL smoke passed:
+
+- compile;
+- focused Ruff format;
+- focused Ruff lint;
+- focused tests including runtime foundation and operational acceptance database tests.
+
+The hotfix is merge-ready from a code/database perspective.
+
+Expected production verification after merge:
+
+1. Railway deploy succeeds;
+2. migration state remains current;
+3. next storage-ready cron persists an activation assessment;
+4. worker log exposes compact `activation_gate`;
+5. expected verdict is `BLOCKED`;
+6. expected reason set includes `API_KEY_MISSING`;
+7. `collection_enabled` remains `false`.
