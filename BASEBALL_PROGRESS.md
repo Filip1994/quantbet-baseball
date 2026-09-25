@@ -970,3 +970,79 @@ The current blocker is not migration state. It is runtime provider configuration
 - budget config drift was corrected to 7,500;
 - `API_BASEBALL_KEY` remains absent;
 - collection remains disabled.
+
+
+## 61. Post-budget-fix natural cron acceptance evidence — 2026-09-25
+
+Scope remained Baseball production only:
+
+- Railway project: `believable-contentment` (`089895e8-c4b7-4f3b-9fb9-ca9be11544f4`);
+- environment: `production` (`32ceeb6e-a8a8-4f98-b757-58d63417e496`);
+- service: `quantbet-baseball` (`e6f5221e-0165-4bb6-9daf-9525ae8ebc5f`);
+- football repository/project untouched.
+
+### Docs-only deployment final status
+
+The previously observed docs-only deployment is now terminal:
+
+- deployment: `1466ff80-d238-4f38-9822-c4098fafc9da`;
+- commit: `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- status: **SUCCESS**.
+
+The service configuration still reports:
+
+- cron: `*/15 * * * *`;
+- source repository: `Filip1994/quantbet-baseball`;
+- source branch: `main`;
+- watch patterns: not configured.
+
+No watch-pattern mutation was attempted.
+
+### First natural cron after the budget correction
+
+The first normal scheduled execution observed after the production budget correction ran on the current deployment at:
+
+- container start: `2026-09-25T16:15:46.860128915Z`;
+- gate/runtime evidence: `2026-09-25T16:15:48.524278955Z`;
+- Europe/Belgrade local time: approximately `2026-09-25 18:15:48 +02:00`;
+- activation assessment ID: `93f7b3b6-c297-52ed-8ddb-ba31c5688bd1`.
+
+Persisted/logged CANARY-target gate evidence:
+
+- `daily_request_budget=7500`;
+- `cycle_request_cap=75`;
+- `cycles_per_day=96`;
+- `worst_case_daily_requests=7200`;
+- `request_headroom=300`;
+- `daily_reserve_required=250`;
+- `api_key_configured=false`;
+- `canary_passed=false`;
+- `collection_enabled=false`;
+- `migrations_current=true`;
+- `paper_mode=true`;
+- `raw_archive_configured=true`;
+- `runtime_fresh=true`;
+- reason codes: **[`API_KEY_MISSING`]**;
+- verdict: **`BLOCKED`**;
+- runtime mode: `storage-ready`.
+
+Therefore the expected correction is now proven from a real scheduled execution:
+
+- `API_BUDGET_UNSAFE` is absent;
+- `API_KEY_MISSING` remains;
+- the gate remains correctly fail-closed;
+- scheduled collection remains OFF;
+- no canary is armed or passed;
+- no provider request can be fabricated without the missing credential.
+
+### Stability check
+
+Later natural cron executions continued to emit the same safe budget and blocker state. The latest inspected execution was:
+
+- evidence timestamp: `2026-09-25T21:15:17.162099029Z` (`23:15:17 +02:00`);
+- assessment ID: `870a6ef0-fcbf-5a06-a5dc-cc760a8c8a74`;
+- reason codes: **[`API_KEY_MISSING`]**;
+- verdict: **`BLOCKED`**;
+- `collection_enabled=false`.
+
+Production acceptance is now blocked solely by the absent provider credential, not by Package A-E code, migrations, runtime freshness, archive configuration, paper-mode safety, or API budget arithmetic.
