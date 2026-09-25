@@ -431,3 +431,55 @@ Next package:
 
 > Package B — Moneyline decision chain: point-in-time prediction evidence → value evaluation → mandatory final quote verification → immutable registered paper pick.
 
+## 44. Package B — Moneyline decision chain and mandatory final quote verification — 2026-09-25
+
+Completed the second QuantBet-parity vertical slice on branch `finish/moneyline-closed-loop-20260925`.
+
+Implemented migration `004_moneyline_decision_chain.sql` and the durable lifecycle:
+
+```text
+point-in-time model prediction
+→ exact bookmaker moneyline pair
+→ de-vig/value evaluation
+→ preliminary candidate
+→ mandatory fresh exact-bookmaker quote pull
+→ final repricing
+→ READY / REJECTED verification
+→ immutable registered paper pick
+```
+
+Implemented:
+
+- versioned `model_predictions` with feature snapshot reference, source-data cutoff, prediction time, two-way probabilities and uncertainty;
+- durable `value_evaluations` for both PRELIMINARY and FINAL stages;
+- exact home/away observation provenance for every evaluation;
+- de-vigged market probability, fair odds, edge and EV persistence;
+- quote-age and uncertainty fail-closed gates;
+- `final_quote_verifications` with REQUESTED / READY / REJECTED state;
+- fresh API-Sports odds re-fetch immediately before registration;
+- exact bookmaker/selection identity preservation during final verification;
+- final price deterioration rejection;
+- `registered_picks` with exact entry observation/odds and `paper_mode = TRUE` database constraint;
+- one full-game moneyline pick per game boundary;
+- restart-safe READY replay and REJECTED replay behavior;
+- runtime health counts for predictions, evaluations, final verifications and registered picks.
+
+Verification evidence:
+
+- global Baseball compile / Ruff format / Ruff lint / pytest: **SUCCESS**;
+- Railway PostgreSQL smoke: **SUCCESS**;
+- happy-path PostgreSQL integration proves fresh-quote gated registration and replay;
+- negative PostgreSQL integration proves final price deterioration produces REJECTED verification and no pick;
+- focused Railway smoke now explicitly covers Package B source files and tests.
+
+Safety:
+
+- no real-money execution was added;
+- no automatic staking was added;
+- scheduled production collection remains disabled;
+- no football Railway project or football repository was modified.
+
+Next package:
+
+> Package C — registered-pick monitoring, active-pick API priority, deterministic opening/pick/current/closing quote checkpoints, and immutable closing finalization.
+
