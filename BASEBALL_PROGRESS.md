@@ -708,3 +708,18 @@ Compilation was already green. Lint/pytest were not reached in that run.
 Failure and exact fixes are recorded in `docs/progress/2026-09-25-package-e-operational-acceptance.md`.
 
 Production collection remains disabled.
+
+
+### Package E CI iteration 2
+
+Second PR #9 global run passed compile + formatting and failed Ruff lint on two blind `Exception` catches in `canary.py`.
+
+Fixed in `0b705da`:
+
+- expected operational errors are narrowly classified;
+- unexpected programmer errors now propagate;
+- failed-canary persistence fallback only catches PostgreSQL driver errors.
+
+Full detail is recorded in `docs/progress/2026-09-25-package-e-operational-acceptance.md`.
+
+No production canary was run. Scheduled collection remains disabled.
