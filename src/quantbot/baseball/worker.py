@@ -44,6 +44,35 @@ def _record_runtime(
         return repository.health_snapshot()
 
 
+def _operational_snapshot(
+    project_root: Path,
+    *,
+    collection_enabled: bool,
+) -> dict[str, object] | None:
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if not database_url:
+        return None
+
+    import psycopg
+
+    from .budget_policy import BaseballAPIBudgetPolicy
+    from .config import BaseballSettings
+    from .operational_repository import PostgreSQLOperationalRepository
+
+    settings = BaseballSettings.from_env(project_root)
+    budget = BaseballAPIBudgetPolicy.from_env(
+        daily_limit=settings.api_request_budget
+    )
+    with psycopg.connect(database_url) as connection:
+        repository = PostgreSQLOperationalRepository(connection)
+        return repository.dashboard_snapshot(
+            as_of=datetime.now(UTC),
+            budget_policy=budget,
+            paper_mode=settings.paper_mode,
+            collection_enabled=collection_enabled,
+        )
+
+
 def run_once(root: Path | None = None) -> dict[str, object]:
     """Apply migrations, execute one bounded cycle, and expose canonical health."""
 
@@ -73,6 +102,13 @@ def run_once(root: Path | None = None) -> dict[str, object]:
     )
     if health is not None:
         result["health"] = health
+
+    operations = _operational_snapshot(
+        project_root,
+        collection_enabled=collection_enabled,
+    )
+    if operations is not None:
+        result["operations"] = operations
 
     return result
 
