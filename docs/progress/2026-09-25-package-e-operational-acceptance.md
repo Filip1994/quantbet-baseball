@@ -715,3 +715,21 @@ This independently reconfirms that the budget blocker is resolved and the remain
 production blocker is solely the absent provider credential.
 
 No canary, collection activation, watch-pattern mutation, cron mutation, redeploy, or PR merge was performed.
+
+
+## Provider-key handoff check — 2026-09-26
+
+The operator reported adding `API_BASEBALL_KEY`.
+
+Immediate production verification found:
+
+- new deployment `59cccc85-cc41-45aa-8b46-9760c3945cd6` entered `BUILDING`;
+- guarded service/environment are correct;
+- the Railway variable inventory exposed to `quantbet-baseball` still does not list `API_BASEBALL_KEY`.
+
+Safety response:
+
+- no canary arming;
+- no collection activation;
+- no cron/config mutation;
+- wait for the deployment/variable state to become independently observable, then require the CANARY activation gate to become ready before any bounded provider request is allowed.
