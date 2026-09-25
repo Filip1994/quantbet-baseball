@@ -1124,3 +1124,25 @@ Therefore the post-budget-fix acceptance conclusion remains stable:
 - no canary was armed or executed.
 
 No Railway configuration mutation, redeploy, cron mutation, canary action, collection activation, or PR merge was performed during this revalidation.
+
+
+## 64. Provider-key handoff check — 2026-09-26
+
+The operator reported that the Baseball provider credential had been added in Railway.
+
+A fresh read-only check was performed against the guarded Baseball production scope only.
+
+Observed immediately after the reported change:
+
+- a new deployment exists: `59cccc85-cc41-45aa-8b46-9760c3945cd6`;
+- deployment state progressed from `WAITING` to `BUILDING`;
+- service/environment IDs match the guarded Baseball production target;
+- however, the effective variable-name inventory returned for `quantbet-baseball` still does **not** contain `API_BASEBALL_KEY`;
+- `get_service_config` also does not list `API_BASEBALL_KEY` among direct service variable names;
+- no canary was armed and scheduled collection remains unchanged.
+
+Decision:
+
+> Do not arm the canary until the credential is independently visible to the Baseball service and a natural storage-ready gate reports CANARY readiness.
+
+This is treated as an unresolved Railway variable-scope/application check, not as a reason to bypass the activation gate.
