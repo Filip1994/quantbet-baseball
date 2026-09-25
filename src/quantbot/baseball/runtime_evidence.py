@@ -10,6 +10,7 @@ from typing import Any
 from .evidence import EvidenceError
 
 _ALLOWED_STATUSES = {"collected", "skipped_locked"}
+_ALLOWED_EXECUTION_MODES = {"SCHEDULED", "CANARY"}
 
 
 def _timestamp(value: str, field: str) -> datetime:
@@ -34,6 +35,7 @@ class CollectionCycle:
     started_at: str
     finished_at: str
     status: str
+    execution_mode: str
     games_seen: int
     fixture_observations_inserted: int
     pregame_games: int
@@ -57,6 +59,8 @@ class CollectionCycle:
             raise EvidenceError("finished_at cannot precede started_at")
         if self.status not in _ALLOWED_STATUSES:
             raise EvidenceError("collection cycle status is unsupported")
+        if self.execution_mode not in _ALLOWED_EXECUTION_MODES:
+            raise EvidenceError("collection cycle execution mode is unsupported")
         for field in (
             "games_seen",
             "fixture_observations_inserted",
@@ -86,12 +90,14 @@ class CollectionCycle:
         started_at: datetime,
         finished_at: datetime,
         summary: dict[str, int | str],
+        execution_mode: str = "SCHEDULED",
     ) -> CollectionCycle:
         return cls(
             cycle_id=cycle_id,
             started_at=started_at.isoformat(),
             finished_at=finished_at.isoformat(),
             status=str(summary["status"]),
+            execution_mode=execution_mode,
             games_seen=int(summary.get("games_seen", 0)),
             fixture_observations_inserted=int(
                 summary.get("fixture_observations_inserted", 0)
