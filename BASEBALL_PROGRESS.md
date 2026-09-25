@@ -723,3 +723,21 @@ Fixed in `0b705da`:
 Full detail is recorded in `docs/progress/2026-09-25-package-e-operational-acceptance.md`.
 
 No production canary was run. Scheduled collection remains disabled.
+
+
+### Package E code gates green — 2026-09-25
+
+Package E code head `2129cf4` passed:
+
+- global Baseball tests run `36154788452`: **SUCCESS**;
+- Railway/PostgreSQL smoke run `36154788449`: **SUCCESS**.
+
+Package E is ready for merge from a code/CI perspective.
+
+Activation remains deliberately separate:
+
+- no production canary has been run;
+- `BASEBALL_ENABLE_CANARY` has not been enabled;
+- `BASEBALL_ENABLE_COLLECTION` remains disabled.
+
+After merge: verify migration 007 in Baseball Railway, then run the read-only CANARY readiness assessment before any canary execution.
