@@ -14,11 +14,11 @@ BEGIN
     IF NOT EXISTS (
         SELECT 1
         FROM pg_constraint
-        WHERE conname = 'registered_picks_paper_stake_positive'
+        WHERE conname = 'registered_picks_fixed_paper_stake'
     ) THEN
         ALTER TABLE registered_picks
-            ADD CONSTRAINT registered_picks_paper_stake_positive
-            CHECK (paper_stake_minor > 0);
+            ADD CONSTRAINT registered_picks_fixed_paper_stake
+            CHECK (paper_stake_minor = 30000);
     END IF;
 
     IF NOT EXISTS (
