@@ -1324,3 +1324,35 @@ Mapper diagnosis found a concrete compatibility gap: the strict full-game moneyl
 The repair also removes legacy player-prop target tokens from compact market targeting while preserving the complete raw provider response in object storage. Bounded market/bookmaker-name diagnostics are added so the next canary reports the actual live provider labels rather than relying on assumptions.
 
 No collection activation will occur before PR #15 passes CI, deploys, and a fresh bounded canary passes.
+
+
+## 69. First live canary failed safely at canonical odds ingestion — 2026-09-26
+
+Natural cron on deployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634` executed the bounded canary at `2026-09-25T23:16:05.657939242Z`.
+
+Observed canary evidence:
+
+- canary id: `e52931fc-e7ab-56cc-be44-9f175c20f1e8`;
+- collection cycle id: `dbddfcb8-6a6f-412b-b46a-017b986286f3`;
+- execution mode: `CANARY`;
+- status: `FAILED`;
+- provider attempts: 4 of max 8;
+- schedule/game discovery: 66 games seen, 38 pregame games, 2 games selected;
+- fixture observations inserted: 66;
+- odds calls: 2;
+- compact raw market value rows observed: 1387;
+- canonical odds rows: 0;
+- PostgreSQL odds observations inserted: 0;
+- provider/API errors: 0;
+- failure reasons: `POSTGRES_WRITES_NOT_VERIFIED`, `RAW_ARCHIVE_NOT_VERIFIED`.
+
+Interpretation: provider connectivity, raw schedule ingestion, fixture canonicalization and raw odds retrieval all worked. The failure is localized to the strict moneyline canonicalization path: the odds payload produced many market rows but none matched the current canonical moneyline contract, so the canary correctly refused activation.
+
+Immediate safety action:
+
+- `BASEBALL_ENABLE_CANARY=false` was set after the failed run;
+- `BASEBALL_ENABLE_COLLECTION=false` was reasserted;
+- `PAPER_MODE=true` was reasserted;
+- Railway deployed this safe state as `2c42711f-e4b2-4410-a05f-407cdb767113`, commit `dd423761e9146c1ea674a483ae8b12c3fe84fc50`, status SUCCESS.
+
+No scheduled collection is authorized. Next step is exact market-schema diagnostics, then a parser fix proven by tests and a second bounded canary.
