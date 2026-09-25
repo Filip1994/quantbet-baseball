@@ -32,21 +32,23 @@ class FakeClient:
             response = [
                 {
                     "id": 10,
-                "date": "2030-09-18T19:00:00+00:00",
-                "teams": {
-                    "home": {"name": "Home Club"},
-                    "away": {"name": "Away Club"},
-                },
-                "league": {"name": "MLB"},
+                    "date": "2030-09-18T19:00:00+00:00",
+                    "teams": {
+                        "home": {"id": 101, "name": "Home Club"},
+                        "away": {"id": 202, "name": "Away Club"},
+                    },
+                    "league": {"name": "MLB"},
+                    "status": {"short": "NS"},
                 },
                 {
                     "id": 11,
-                "date": "2030-09-18T16:00:00+00:00",
-                "teams": {
-                    "home": {"name": "Started Home"},
-                    "away": {"name": "Started Away"},
-                },
-                "league": {"name": "MLB"},
+                    "date": "2030-09-18T16:00:00+00:00",
+                    "teams": {
+                        "home": {"id": 303, "name": "Started Home"},
+                        "away": {"id": 404, "name": "Started Away"},
+                    },
+                    "league": {"name": "MLB"},
+                    "status": {"short": "FT"},
                 },
             ]
         return (
@@ -103,7 +105,7 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
 
     assert result["games_seen"] == 2
     assert result["fixture_observations"] == 2
-    assert result["fixtures_inserted"] == 2
+    assert result["fixture_observations_inserted"] == 2
     assert result["pregame_games"] == 1
     assert result["games_selected"] == 1
     assert result["odds_calls"] == 1
@@ -112,3 +114,4 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
     assert {record.selection for record in repository.records} == {"home", "away"}
     assert all(record.game_id == "10" for record in repository.records)
     assert {record.game_id for record in repository.fixtures} == {"10", "11"}
+    assert {record.home_team_id for record in repository.fixtures} == {101, 303}
