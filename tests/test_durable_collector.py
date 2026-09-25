@@ -1,3 +1,4 @@
+import json
 from datetime import UTC, datetime
 
 from quantbot.baseball.durable_collector import (
@@ -118,6 +119,31 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
     assert all(record.game_id == "10" for record in repository.records)
     assert {record.game_id for record in repository.fixtures} == {"10", "11"}
     assert {record.home_team_id for record in repository.fixtures} == {101, 303}
+    assert "schema_market_names_json" not in result
+    assert "schema_candidate_values_json" not in result
+
+
+def test_canary_schema_probe_reports_market_names_without_prices() -> None:
+    now = datetime(2030, 9, 18, 17, 0, tzinfo=UTC)
+    client = FakeClient()
+    repository = FakeRepository()
+
+    result = collect_with_dependencies(
+        client,
+        repository,
+        now=now,
+        max_odds_requests=10,
+        clock=lambda: now,
+        schema_probe=True,
+    )
+
+    market_names = json.loads(result["schema_market_names_json"])
+    candidates = json.loads(result["schema_candidate_values_json"])
+
+    assert market_names == ["Moneyline"]
+    assert candidates == {"Moneyline": ["Away", "Home"]}
+    assert "1.90" not in result["schema_candidate_values_json"]
+    assert "2.10" not in result["schema_candidate_values_json"]
 
 
 def test_shared_cycle_budget_reduces_broad_odds_capacity() -> None:
