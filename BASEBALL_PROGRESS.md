@@ -1146,3 +1146,30 @@ Decision:
 > Do not arm the canary until the credential is independently visible to the Baseball service and a natural storage-ready gate reports CANARY readiness.
 
 This is treated as an unresolved Railway variable-scope/application check, not as a reason to bypass the activation gate.
+
+
+## 65. Provider URL restored after credential misplacement — 2026-09-26
+
+The operator identified that the provider API key had been pasted into `API_BASEBALL_BASE_URL` instead of a new `API_BASEBALL_KEY` variable.
+
+Repository configuration was re-read and confirms the canonical Baseball provider base URL is:
+
+- `https://v1.baseball.api-sports.io`.
+
+Production correction applied only to the guarded Baseball service:
+
+- restored `API_BASEBALL_BASE_URL=https://v1.baseball.api-sports.io`;
+- used a no-redeploy variable update;
+- did not set or invent `API_BASEBALL_KEY`;
+- did not enable canary;
+- did not enable scheduled collection;
+- did not change cron or paper mode.
+
+The remaining operator action is to create `API_BASEBALL_KEY` on the same Baseball production service with the actual provider credential.
+
+After that, the next required sequence remains:
+
+1. verify the key name is visible to the service;
+2. let Railway deploy naturally;
+3. require the storage-ready activation gate to become ready for CANARY;
+4. only then arm one bounded canary.
