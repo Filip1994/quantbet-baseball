@@ -288,6 +288,7 @@ def test_moneyline_candidate_requires_fresh_quote_before_registration() -> None:
         assert replay.pick == registered.pick
         assert replay.verification == registered.verification
 
+
 class _DeterioratedFreshQuoteClient:
     def odds_with_receipt(self, game_id):
         assert game_id == 3
