@@ -128,6 +128,8 @@ jobs:
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
+          tests/test_monitoring_lifecycle.py
+          tests/test_monitoring_postgres_integration.py
           tests/test_postgres_integration.py
           tests/test_raw_archive.py
           tests/test_runtime_foundation.py
