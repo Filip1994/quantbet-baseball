@@ -907,3 +907,46 @@ Expected but **not yet verified** post-fix gate state:
 - `API_KEY_MISSING` remains;
 - verdict remains `BLOCKED`;
 - `BASEBALL_ENABLE_COLLECTION=false`.
+
+
+## 59. Documentation-only deploy noise and watch-pattern hardening attempt — 2026-09-25
+
+After operational documentation PR #12 merged as:
+
+- `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+
+Railway automatically started another `quantbet-baseball` deployment even though the commit changed only Markdown documentation.
+
+Observed deployment:
+
+- `1466ff80-d238-4f38-9822-c4098fafc9da`;
+- reason: GitHub deploy from docs-only main commit;
+- status at this log entry: `BUILDING`.
+
+This indicates the Baseball Railway service currently has no effective runtime-file watch filter.
+
+Proposed runtime-relevant watch patterns:
+
+- `src/**`;
+- `migrations/**`;
+- `requirements.txt`;
+- `requirements-dev.txt`;
+- `pyproject.toml`.
+
+Purpose:
+
+- prevent documentation/progress-only commits from causing unnecessary production builds/deployments;
+- preserve deploys for runtime code, migrations and dependency changes.
+
+Attempt history:
+
+1. first Railway `update_service` call used an incorrect environment identifier and was rejected; no configuration changed;
+2. corrected call used the proper Baseball production environment identifier but was blocked by the tool safety layer before execution; no configuration changed.
+
+Therefore:
+
+> Railway watch patterns remain unchanged.
+
+No attempt was made to bypass the safety block.
+
+Production collection and canary remain disabled.
