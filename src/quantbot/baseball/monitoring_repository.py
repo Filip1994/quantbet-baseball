@@ -67,7 +67,9 @@ class PostgreSQLMoneylineMonitoringRepository:
     ) -> FixtureObservation:
         fixture = self.decisions.latest_fixture_observation(game_id, as_of=as_of)
         if fixture is None:
-            raise MonitoringConflictError("no fixture observation exists as of requested time")
+            raise MonitoringConflictError(
+                "no fixture observation exists as of requested time"
+            )
         return fixture
 
     @staticmethod
@@ -345,7 +347,9 @@ class PostgreSQLMoneylineMonitoringRepository:
                 existing = self._closing(pick_id)
                 if existing is not None:
                     return existing
-                raise MonitoringConflictError("monitoring already closed without finalization")
+                raise MonitoringConflictError(
+                    "monitoring already closed without finalization"
+                )
 
             pick = self._pick(pick_id)
             fixture = self._fixture(pick.game_id, as_of=finalized)
