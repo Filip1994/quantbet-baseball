@@ -238,6 +238,21 @@ class BaseballAPIClient:
     def game(self, game_id: int) -> list[dict[str, Any]]:
         return self.get("games", {"id": game_id}, ttl_seconds=120)
 
+    def game_with_receipt(
+        self,
+        game_id: int,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt]:
+        """Fetch one game fresh and require durable raw evidence."""
+
+        response, receipt = self.get_with_receipt(
+            "games",
+            {"id": game_id},
+            use_cache=False,
+        )
+        if receipt is None:
+            raise BaseballAPIError("Fresh game response was not archived")
+        return response, receipt
+
     def games_by_league_season(
         self,
         league_id: int,
