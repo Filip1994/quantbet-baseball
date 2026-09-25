@@ -783,3 +783,21 @@ PR #14 introduced the safe one-shot execution mechanism required to run the exis
 The guarded Baseball service was then armed with explicit caps: 8 total provider attempts, 2 odds requests, 1 monitoring refresh, and 1 settlement refresh. `BASEBALL_ENABLE_COLLECTION=false` and `PAPER_MODE=true` were explicitly reasserted. Railway created redeployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634`.
 
 Acceptance remains pending the natural cron evidence. PASS is not assumed in advance.
+
+
+## First bounded provider canary result — FAILED safely — 2026-09-26
+
+Natural cron executed the one-shot canary at `2026-09-25T23:16:05.657939242Z`.
+
+Observed evidence:
+
+- `status=FAILED`;
+- 4 provider requests, bounded below the cap of 8;
+- 66 games/fixtures seen and 66 fixture observations persisted;
+- 2 odds calls returned 1387 raw market rows;
+- 0 canonical odds observations were produced or inserted;
+- no provider/collector errors;
+- archive/db verification therefore remained false;
+- failure reasons: `POSTGRES_WRITES_NOT_VERIFIED`, `RAW_ARCHIVE_NOT_VERIFIED`.
+
+Interpretation: provider connectivity and fixture persistence are proven. Live odds payload mapping is not. Collection remains disabled and no activation claim is made. Next action is to diagnose the real provider odds shape against the canonical mapper, repair with regression fixtures/tests, deploy, and rerun one bounded canary.
