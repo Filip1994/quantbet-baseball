@@ -612,7 +612,8 @@ class RegisteredPick:
     registered_at: str
     paper_mode: bool
     state: str
-    schema_version: str = "1.0"
+    paper_stake_rsd: int = 300
+    schema_version: str = "1.1"
 
     def __post_init__(self) -> None:
         for field in (
@@ -636,6 +637,12 @@ class RegisteredPick:
             raise EvidenceError("registered pick state is invalid")
         if self.paper_mode is not True:
             raise EvidenceError("this project only registers paper picks")
+        if (
+            isinstance(self.paper_stake_rsd, bool)
+            or not isinstance(self.paper_stake_rsd, int)
+            or self.paper_stake_rsd <= 0
+        ):
+            raise EvidenceError("paper_stake_rsd must be a positive integer")
         if _finite(self.entry_odds, "entry_odds") <= 1.0:
             raise EvidenceError("entry_odds must be greater than 1")
         _probability(self.model_probability, "model_probability")
@@ -662,6 +669,7 @@ def build_registered_pick(
     prediction: ModelPrediction,
     entry_observation: OddsObservation,
     registered_at: str,
+    paper_stake_rsd: int = 300,
 ) -> RegisteredPick:
     if verification.status != "READY":
         raise EvidenceError("registered pick requires ready final verification")
@@ -676,7 +684,16 @@ def build_registered_pick(
         or entry_observation.selection != verification.selection
     ):
         raise EvidenceError("registration provenance mismatch")
-    identity = {"verification_id": verification.verification_id}
+    if (
+        isinstance(paper_stake_rsd, bool)
+        or not isinstance(paper_stake_rsd, int)
+        or paper_stake_rsd <= 0
+    ):
+        raise EvidenceError("paper_stake_rsd must be a positive integer")
+    identity = {
+        "verification_id": verification.verification_id,
+        "paper_stake_rsd": paper_stake_rsd,
+    }
     return RegisteredPick(
         pick_id=_uuid(_PICK_NAMESPACE, identity),
         verification_id=verification.verification_id,
@@ -701,4 +718,5 @@ def build_registered_pick(
         registered_at=registered_at,
         paper_mode=True,
         state="REGISTERED",
+        paper_stake_rsd=paper_stake_rsd,
     )
