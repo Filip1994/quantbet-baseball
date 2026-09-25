@@ -49,10 +49,11 @@ class PostgreSQLOperationalRepository:
                 "INSERT INTO collection_canary_runs "
                 "(canary_id, started_at, finished_at, max_api_requests, "
                 "max_odds_requests, status, api_requests, "
-                "fixture_observations_inserted, observations_inserted, errors, "
+                "fixture_observations_inserted, observations_inserted, "
+                "archive_objects_verified, archive_verification_failures, errors, "
                 "passed, reason_codes, schema_version, canonical_record) "
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, "
-                "%s::jsonb) ON CONFLICT DO NOTHING",
+                "%s, %s, %s::jsonb) ON CONFLICT DO NOTHING",
                 (
                     record.canary_id,
                     record.started_at,
@@ -63,6 +64,8 @@ class PostgreSQLOperationalRepository:
                     record.api_requests,
                     record.fixture_observations_inserted,
                     record.observations_inserted,
+                    record.archive_objects_verified,
+                    record.archive_verification_failures,
                     record.errors,
                     record.passed,
                     list(record.reason_codes),
@@ -88,6 +91,34 @@ class PostgreSQLOperationalRepository:
             )
         self.connection.commit()
         return inserted
+
+    def archive_evidence_sample(
+        self,
+        *,
+        observed_after: datetime,
+        limit: int = 20,
+    ) -> tuple[tuple[str, str], ...]:
+        cutoff = _utc(observed_after, "observed_after")
+        if limit < 1:
+            return ()
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT source_payload_ref, source_payload_checksum FROM ("
+                "SELECT source_payload_ref, source_payload_checksum, observed_at "
+                "FROM fixture_observations WHERE observed_at >= %s "
+                "UNION ALL "
+                "SELECT source_payload_ref, source_payload_checksum, observed_at "
+                "FROM odds_observations WHERE observed_at >= %s "
+                "UNION ALL "
+                "SELECT source_payload_ref, source_payload_checksum, observed_at "
+                "FROM game_result_facts WHERE observed_at >= %s"
+                ") evidence "
+                "WHERE source_payload_ref LIKE 's3://%%' "
+                "ORDER BY observed_at DESC, source_payload_ref "
+                "LIMIT %s",
+                (cutoff, cutoff, cutoff, limit),
+            )
+            return tuple((str(row[0]), str(row[1])) for row in cursor.fetchall())
 
     def latest_canary(self) -> CollectionCanaryRun | None:
         with self.connection.cursor() as cursor:
