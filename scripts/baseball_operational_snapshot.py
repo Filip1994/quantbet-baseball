@@ -27,6 +27,12 @@ def main() -> None:
 
     with psycopg.connect(database_url_from_env()) as connection:
         repository = PostgreSQLOperationalRepository(connection)
+        acceptance = repository.acceptance_report(
+            as_of=now,
+            budget_policy=budget,
+            paper_mode=settings.paper_mode,
+        )
+        repository.append_acceptance(acceptance)
         payload = {
             "dashboard": repository.dashboard_snapshot(
                 as_of=now,
@@ -35,6 +41,10 @@ def main() -> None:
                 collection_enabled=_enabled("BASEBALL_ENABLE_COLLECTION"),
             ),
             "bulletin": repository.daily_bulletin(as_of=now),
+            "acceptance_recorded": {
+                "acceptance_id": acceptance.acceptance_id,
+                "status": acceptance.status,
+            },
         }
 
     print(json.dumps(payload, sort_keys=True, indent=2))
