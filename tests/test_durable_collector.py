@@ -30,24 +30,24 @@ class FakeClient:
         response = []
         if date_iso == "2030-09-18":
             response = [
-            {
-                "id": 10,
+                {
+                    "id": 10,
                 "date": "2030-09-18T19:00:00+00:00",
                 "teams": {
                     "home": {"name": "Home Club"},
                     "away": {"name": "Away Club"},
                 },
                 "league": {"name": "MLB"},
-            },
-            {
-                "id": 11,
+                },
+                {
+                    "id": 11,
                 "date": "2030-09-18T16:00:00+00:00",
                 "teams": {
                     "home": {"name": "Started Home"},
                     "away": {"name": "Started Away"},
                 },
                 "league": {"name": "MLB"},
-            },
+                },
             ]
         return (
             response,
