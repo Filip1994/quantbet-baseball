@@ -219,7 +219,9 @@ class MoneylineEvaluation:
             raise EvidenceError("min_edge must be non-negative")
         _finite(self.min_expected_value, "min_expected_value")
         selected = (
-            self.home_observation_id if self.selection == "home" else self.away_observation_id
+            self.home_observation_id
+            if self.selection == "home"
+            else self.away_observation_id
         )
         if self.selected_observation_id != selected:
             raise EvidenceError("selected observation does not match selection")
@@ -486,7 +488,9 @@ def requested_verification(
     requested_at: str,
 ) -> FinalQuoteVerification:
     if preliminary.stage != "PRELIMINARY" or preliminary.outcome != "CANDIDATE":
-        raise EvidenceError("only preliminary candidates can request final verification")
+        raise EvidenceError(
+            "only preliminary candidates can request final verification"
+        )
     identity = {"preliminary_evaluation_id": preliminary.evaluation_id}
     return FinalQuoteVerification(
         verification_id=_uuid(_VERIFICATION_NAMESPACE, identity),
@@ -576,7 +580,9 @@ def rejected_verification(
         reason_codes=tuple(reason_codes),
         returned_home_observation_id=None if home is None else home.observation_id,
         returned_away_observation_id=None if away is None else away.observation_id,
-        final_evaluation_id=None if final_evaluation is None else final_evaluation.evaluation_id,
+        final_evaluation_id=None
+        if final_evaluation is None
+        else final_evaluation.evaluation_id,
         decided_at=decided_at,
     )
 
