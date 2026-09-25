@@ -808,3 +808,12 @@ Interpretation: provider connectivity and fixture persistence are proven. Live o
 The failed canary was immediately disarmed to avoid re-running provider requests every 15 minutes. Deployment `2c42711f-e4b2-4410-a05f-407cdb767113` succeeded with canary and scheduled collection disabled and paper mode retained.
 
 PR #15 repairs the observed live-moneyline mapping boundary by admitting API-Sports `Home/Away` as a full-game two-way moneyline alias, removes legacy player-prop target tokens from compact game-line processing, and adds bounded live market-name diagnostics. Full raw payload archiving remains unchanged.
+
+
+## First live canary result: safe failure in canonical odds ingestion — 2026-09-26
+
+The first natural bounded canary executed at `2026-09-25T23:16:05.657939242Z` and failed closed. It used 4/8 allowed provider attempts with 0 API errors, inserted 66 fixture observations, made 2 odds calls and observed 1387 compact market value rows, but produced 0 canonical odds rows and 0 PostgreSQL odds observations. Canary id: `e52931fc-e7ab-56cc-be44-9f175c20f1e8`; collection cycle: `dbddfcb8-6a6f-412b-b46a-017b986286f3`.
+
+Reason codes were `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`. This localizes the acceptance failure to odds canonicalization rather than provider connectivity or fixture storage.
+
+The canary flag was immediately disarmed after the failed run, with collection kept false and paper mode true. Deployment `2c42711f-e4b2-4410-a05f-407cdb767113` now represents that safe state.
