@@ -199,4 +199,5 @@ def test_ready_final_quote_can_register_immutable_paper_pick() -> None:
     assert pick.entry_observation_id == final_home.observation_id
     assert pick.entry_odds == 2.00
     assert pick.paper_mode is True
+    assert pick.paper_stake_rsd == 300
     assert pick.state == "REGISTERED"
