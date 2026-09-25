@@ -517,3 +517,44 @@ Expected production verification after merge:
 5. expected verdict is `BLOCKED`;
 6. expected reason set includes `API_KEY_MISSING`;
 7. `collection_enabled` remains `false`.
+
+
+## Production configuration drift correction
+
+Live storage-ready gate output after the runtime hotfix proved the gate is reachable and persisted.
+
+Observed production assessment:
+
+- verdict: `BLOCKED`;
+- reasons:
+  - `API_BUDGET_UNSAFE`;
+  - `API_KEY_MISSING`.
+
+The budget blocker was traced to Railway configuration drift:
+
+- `BASEBALL_API_REQUEST_BUDGET=78`.
+
+This value was historical per-run configuration. Package E now interprets the variable as the provider daily subscription ceiling.
+
+The repository contract and Package E budget design use:
+
+- daily ceiling: `7500`;
+- per-cycle hard cap: `75`;
+- 96 cycles/day;
+- worst-case: `7200`;
+- reserve requirement: `250`;
+- theoretical safe headroom: `300`.
+
+Production correction applied:
+
+- `BASEBALL_API_REQUEST_BUDGET=7500`.
+
+Railway deployment triggered by the variable change:
+
+- `ea40064f-a02c-4228-9d1f-5792402e48e2`.
+
+At the time of writing it was still initializing.
+
+No API key was added, no canary was armed, and scheduled collection remains OFF.
+
+The expected next readiness state is `BLOCKED` only by `API_KEY_MISSING`, pending verification from the redeployed worker log.
