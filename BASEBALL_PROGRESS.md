@@ -1356,3 +1356,18 @@ Immediate safety action:
 - Railway deployed this safe state as `2c42711f-e4b2-4410-a05f-407cdb767113`, commit `dd423761e9146c1ea674a483ae8b12c3fe84fc50`, status SUCCESS.
 
 No scheduled collection is authorized. Next step is exact market-schema diagnostics, then a parser fix proven by tests and a second bounded canary.
+
+
+## 70. Canary-only odds schema probe merged — 2026-09-26
+
+To avoid widening the production moneyline parser based on guesses, PR #16 added a CANARY-only schema probe. The probe records only distinct market names and candidate selection labels in the canary summary; it deliberately excludes odds/prices and secrets. It does not change canonical ingestion, pick selection, cron cadence, API budget, or scheduled collection behavior.
+
+Validation:
+
+- initial formatting check failed and no merge occurred;
+- formatting was corrected on the branch;
+- Baseball tests then passed;
+- Railway runtime smoke then passed;
+- PR #16 was squash-merged to `main` as `e0f2926287c4dd269a499249f3645f684e2d048a`.
+
+Production remains safe pending Railway deployment of that commit: canary disabled, scheduled collection disabled, paper mode required. After deployment success, one bounded diagnostic canary may be re-armed with the existing 8/2/1/1 caps to capture the exact live market labels responsible for the zero-canonical-row failure.
