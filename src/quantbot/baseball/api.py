@@ -31,9 +31,16 @@ class BaseballAPIClient:
         settings: BaseballSettings,
         *,
         raw_archive: RawPayloadArchive | None = None,
+        request_limit: int | None = None,
     ) -> None:
         settings.validate()
+        if request_limit is not None and request_limit < 1:
+            raise ValueError("request_limit must be positive")
         self.settings = settings
+        self.request_budget = min(
+            settings.api_request_budget,
+            request_limit if request_limit is not None else settings.api_request_budget,
+        )
         self.request_count = 0
         self.cache_hits = 0
         self.raw_archive = raw_archive or LocalRawPayloadArchive(
@@ -43,7 +50,7 @@ class BaseballAPIClient:
 
     @property
     def remaining_budget(self) -> int:
-        return max(0, self.settings.api_request_budget - self.request_count)
+        return max(0, self.request_budget - self.request_count)
 
     def _cache_path(self, endpoint: str, params: dict[str, Any]) -> Path:
         canonical = json.dumps(
@@ -124,10 +131,10 @@ class BaseballAPIClient:
 
         if not self.settings.api_key:
             raise BaseballAPIError("API_BASEBALL_KEY is not configured")
-        if self.request_count >= self.settings.api_request_budget:
+        if self.request_count >= self.request_budget:
             raise BaseballAPIBudgetExceeded(
                 "Baseball API budget exhausted at "
-                f"{self.settings.api_request_budget} requests"
+                f"{self.request_budget} requests"
             )
 
         query = urlencode(params)
@@ -137,10 +144,10 @@ class BaseballAPIClient:
 
         raw = ""
         for attempt in range(self.settings.api_max_attempts):
-            if self.request_count >= self.settings.api_request_budget:
+            if self.request_count >= self.request_budget:
                 raise BaseballAPIBudgetExceeded(
                     "Baseball API budget exhausted at "
-                    f"{self.settings.api_request_budget} requests"
+                    f"{self.request_budget} requests"
                 )
             request = Request(
                 url,
