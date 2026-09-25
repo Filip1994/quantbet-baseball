@@ -177,7 +177,9 @@ class ClosingFinalization:
             raise EvidenceError("closing candidate pair must be complete")
         if self.outcome == "CAPTURED":
             if not pair_complete or self.closing_observation_id is None:
-                raise EvidenceError("CAPTURED closing requires quote pair and selected close")
+                raise EvidenceError(
+                    "CAPTURED closing requires quote pair and selected close"
+                )
         elif self.outcome == "STALE_QUOTE":
             if not pair_complete or self.closing_observation_id is not None:
                 raise EvidenceError("STALE_QUOTE cannot expose closing observation")
