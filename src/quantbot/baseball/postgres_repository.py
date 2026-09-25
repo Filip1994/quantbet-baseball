@@ -53,7 +53,7 @@ def _canonical_text(value: Any) -> str:
     )
 
 
-def __iso_or_none(value: datetime | None) -> str | None:
+def _iso_or_none(value: datetime | None) -> str | None:
     return value.isoformat() if value is not None else None
 
 
