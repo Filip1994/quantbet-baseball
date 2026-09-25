@@ -137,9 +137,7 @@ class FixtureObservation:
         if len(checksum) != 64 or any(
             char not in "0123456789abcdefABCDEF" for char in checksum
         ):
-            raise EvidenceError(
-                "source_payload_checksum must be a SHA-256 hex digest"
-            )
+            raise EvidenceError("source_payload_checksum must be a SHA-256 hex digest")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -164,9 +162,7 @@ def canonical_fixture_observation(
     """
 
     try:
-        provider_game_id = _positive_int(
-            _game_value(game, "id"), "provider_game_id"
-        )
+        provider_game_id = _positive_int(_game_value(game, "id"), "provider_game_id")
         kickoff_raw = _game_value(game, "date")
         if isinstance(kickoff_raw, dict):
             kickoff_raw = kickoff_raw.get("date")
