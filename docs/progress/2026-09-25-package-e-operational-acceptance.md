@@ -429,3 +429,36 @@ Next operational sequence:
 4. execute/persist the read-only CANARY readiness assessment;
 5. document the exact verdict/reason codes;
 6. only if readiness is READY, decide whether to arm one bounded canary.
+
+
+## Production prerequisite audit — API key blocker found
+
+A read-only Railway variable-name audit was performed against the Baseball service while the Package E deployment was building.
+
+Verified variable names present:
+
+- `DATABASE_URL`;
+- `PAPER_MODE`;
+- `BASEBALL_ENABLE_COLLECTION`;
+- `BASEBALL_RAW_BUCKET`;
+- `BASEBALL_RAW_REGION`;
+- `BASEBALL_RAW_ENDPOINT`;
+- `BASEBALL_RAW_ACCESS_KEY_ID`;
+- `BASEBALL_RAW_SECRET_ACCESS_KEY`;
+- API base URL / retry / daily budget settings.
+
+Missing required variable name:
+
+- `API_BASEBALL_KEY`.
+
+A second scan of every API/Baseball-related variable name confirmed there is no alternate provider-key variable currently attached to `quantbet-baseball`.
+
+Operational consequence:
+
+> The deployed CANARY readiness gate should return `BLOCKED` with `API_KEY_MISSING` until the provider key is configured on the Baseball service.
+
+No secret value was requested or exposed by the connector; only variable-name presence was inspected.
+
+No Railway variable was changed.
+
+Raw archive configuration appears structurally complete by variable-name presence. PostgreSQL is configured. Scheduled collection remains disabled.
