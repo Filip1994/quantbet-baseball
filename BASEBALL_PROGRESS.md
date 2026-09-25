@@ -1410,3 +1410,21 @@ Draft PR #17 (`Add immutable pregame feature snapshot contract`) establishes a r
 Draft PR #19 (`Add point-in-time stadium weather capture`) is also staged independently. It uses Open-Meteo forecast evidence at supplied stadium coordinates, archives the raw response in a separate `open-meteo` namespace, selects the weather sample nearest first pitch, and carries temperature, humidity, dew point, precipitation probability/amount, pressure, cloud cover, wind speed/direction/gusts plus explicit roof state. Closed-roof/dome contexts retain the evidence but mark weather as non-applicable to play. It is not wired into production picks or collection yet.
 
 Player-prop betting remains excluded. Player/team information may later be admitted only as game-level model inputs when live Baseball provider coverage is actually verified.
+
+
+## 71. Research weather and feature provenance foundation merged — 2026-09-26
+
+PR #18 `Add point-in-time Baseball weather evidence contract` passed the Baseball test workflow and was squash-merged to main as `1f8b535f8a70b5f58a0db88e864c5f3a5b0902cf`.
+
+Research-layer additions:
+
+- Open-Meteo first-pitch forecast evidence at stadium coordinates;
+- full raw weather response archival before canonicalization;
+- roof-aware weather applicability (closed/fixed indoor roof skips weather);
+- pregame-only weather cutoff enforcement;
+- canonical weather fields for temperature, humidity, dew point, precipitation, pressure, cloud cover, wind speed/direction/gusts, and weather code;
+- immutable feature-source and feature-snapshot provenance contracts;
+- explicit raw-retain/model-admit policy in `docs/BASEBALL_RESEARCH_FEATURE_REGISTRY.md`;
+- player statistics may only support game-level feature construction; player-prop betting remains excluded.
+
+This merge does not integrate weather into the production collector, does not change pick thresholds, does not enable scheduled collection, and adds no database migration. Production remains paper-only. The main deploy created by this merge is also the next clean opportunity for the already configured bounded schema-probe canary to load its runtime variables naturally.
