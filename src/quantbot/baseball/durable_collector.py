@@ -217,20 +217,33 @@ def collect_durable_once(
     root: Path,
     *,
     now: datetime | None = None,
+    request_limit: int | None = None,
+    max_odds_requests_override: int | None = None,
 ) -> dict[str, int | str]:
     """Run one production collection cycle with DB locking and remote archive."""
 
     settings = BaseballSettings.from_env(root)
+    if not settings.paper_mode:
+        raise RuntimeError("Baseball durable collection requires PAPER_MODE=true")
     budget_policy = BaseballAPIBudgetPolicy.from_env(
         daily_limit=settings.api_request_budget
     )
+    effective_request_limit = budget_policy.per_run_hard_limit
+    if request_limit is not None:
+        if request_limit < 1:
+            raise ValueError("request_limit must be positive")
+        effective_request_limit = min(effective_request_limit, request_limit)
     archive = archive_from_env(settings.raw_archive_dir, require_remote=True)
     client = BaseballAPIClient(
         settings,
         raw_archive=archive,
-        request_limit=budget_policy.per_run_hard_limit,
+        request_limit=effective_request_limit,
     )
-    max_odds_requests = int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
+    max_odds_requests = (
+        int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
+        if max_odds_requests_override is None
+        else max_odds_requests_override
+    )
     max_monitoring_refreshes = int(os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10"))
     max_settlement_refreshes = int(os.getenv("BASEBALL_MAX_SETTLEMENT_REFRESHES", "10"))
     if max_odds_requests < 1:
@@ -344,7 +357,7 @@ def collect_durable_once(
             summary["monitoring_closing_no_valid_quote"] = int(
                 monitoring["closing_no_valid_quote"]
             )
-            summary["api_per_run_hard_limit"] = budget_policy.per_run_hard_limit
+            summary["api_per_run_hard_limit"] = effective_request_limit
             summary["api_daily_headroom"] = budget_policy.effective_headroom
             repository.append_collection_cycle(
                 CollectionCycle.from_summary(
