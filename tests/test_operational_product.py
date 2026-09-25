@@ -2,7 +2,9 @@ from datetime import UTC, datetime
 
 import pytest
 
+from quantbot.baseball.api import BaseballAPIClient
 from quantbot.baseball.budget_policy import BaseballAPIBudgetPolicy
+from quantbot.baseball.config import BaseballSettings
 from quantbot.baseball.operational_product import (
     AcceptanceCriterion,
     build_acceptance_run,
@@ -101,3 +103,21 @@ def test_acceptance_status_is_derived_only_from_all_criteria() -> None:
 
     assert ready.status == "READY"
     assert blocked.status == "BLOCKED"
+
+
+def test_api_client_uses_explicit_per_run_limit(tmp_path) -> None:
+    settings = BaseballSettings(
+        api_key="test",
+        api_base_url="https://example.invalid",
+        api_request_budget=7500,
+        api_max_attempts=3,
+        api_retry_base_seconds=0.0,
+        cache_dir=tmp_path / "cache",
+        raw_archive_dir=tmp_path / "raw",
+        timezone_name="Europe/Belgrade",
+        paper_mode=True,
+    )
+    client = BaseballAPIClient(settings, request_limit=70)
+
+    assert client.request_budget == 70
+    assert client.remaining_budget == 70
