@@ -54,7 +54,11 @@ class RegistrationResult:
 
 
 def _utc(value: datetime, field: str) -> datetime:
-    if not isinstance(value, datetime) or value.tzinfo is None or value.utcoffset() is None:
+    if (
+        not isinstance(value, datetime)
+        or value.tzinfo is None
+        or value.utcoffset() is None
+    ):
         raise ValueError(f"{field} must be timezone-aware")
     return value.astimezone(UTC)
 
