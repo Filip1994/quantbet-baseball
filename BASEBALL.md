@@ -1,60 +1,139 @@
 # QuantBet Baseball v1
 
-Standalone Baseball engine for QuantBet.
+Standalone Baseball data, modelling, decision and paper-evaluation engine.
 
-## Current live-data phase
+## Current production architecture
 
-- API-Sports Baseball client at `https://v1.baseball.api-sports.io`
-- persistent response cache
-- per-run request budget and retry/backoff
-- scheduled 30-minute Baseball ingestion during the active day
-- up to 199 odds calls per run plus the daily schedule call
-- league-diversity sampling so smaller leagues are not starved by MLB
-- compact historical snapshots under `data/baseball/snapshots/`
-- bookmaker and market coverage inventory under `data/baseball/market_coverage.json`
-- Baseball intraday signal schema and paper alert layer
+- **Runtime:** Railway.
+- **Transactional memory:** Railway PostgreSQL.
+- **Raw provider evidence:** Railway object storage.
+- **Source control / CI:** GitHub.
+- **Provider:** API-Sports Baseball.
+- **Runtime clock:** Railway cron every 15 minutes.
+- **Start command:** `PYTHONPATH=src python -m quantbot.baseball.worker`.
+- **Safety:** `PAPER_MODE=true`.
+- **Current production collection state:** intentionally disabled behind `BASEBALL_ENABLE_COLLECTION`.
 
-The first live payload must be used to audit actual bookmaker and market names before we claim coverage for any specific local bookmaker.
+The live runtime currently proves deployment/storage readiness. It does not yet prove a complete betting lifecycle.
 
-## Budget policy
+## Canonical operating pattern
 
-The production subscription is 7,500 requests/day. The scheduled collector is capped at 200 requests per run and runs every 30 minutes from 06:00 through 23:30 Europe/Belgrade. That is 7,200 scheduled requests/day before retries; the remaining daily headroom is a safety reserve.
+Baseball follows QuantBet's production lifecycle pattern:
 
-## Model direction
+```text
+discover
+→ observe
+→ model
+→ evaluate
+→ verify final quote
+→ register immutable pick
+→ monitor
+→ close odds
+→ acquire result
+→ settle
+→ calculate CLV
+→ evaluate
+```
 
-Baseball reuses the QuantBet operating pattern where structurally sound:
+Football-specific model mathematics are not reused.
 
-1. scheduled baseline screening;
-2. persistent prediction and odds snapshots;
-3. frequent intraday refreshes;
-4. immutable signal timestamps;
-5. CLV capture and settlement;
-6. paper-first alerts;
-7. production gating only after calibration and walk-forward validation.
+## Current implemented foundation
 
-The Baseball model is not a copy of the Football model. The feature surface will include starting pitcher, handedness, expected/confirmed lineup, batter/pitcher splits, bullpen availability and workload, park, weather, rest/travel, team offensive/defensive rates, market state and player-level features where the feed supports them.
+Implemented:
+
+- bounded API client with retry/budget controls;
+- raw payload archiving;
+- strict pregame moneyline canonicalization;
+- deterministic immutable observation identities;
+- PostgreSQL migration runner;
+- PostgreSQL evidence repository;
+- Railway worker and advisory lock;
+- moneyline market/de-vig primitives;
+- Poisson moneyline baseline primitive;
+- value/EV/edge primitives;
+- fail-closed decision/signal primitives;
+- tests around the evidence and model primitives.
+
+Not yet closed in production:
+
+- fixture/status persistence;
+- durable prediction/evaluation events;
+- mandatory final quote verification;
+- registered-pick monitoring;
+- closing finalization;
+- results/finality;
+- settlement;
+- realized CLV;
+- DB-backed bulletin/dashboard;
+- launch-grade walk-forward validation.
+
+## API budget policy
+
+The subscription ceiling is 7,500 requests/day.
+
+The current Railway design uses a 15-minute clock and a bounded per-run request budget. Collection must remain disabled until runtime telemetry and the downstream closed loop are ready, because enabling a near-ceiling schedule merely to accumulate unused evidence is wasteful.
+
+The exact safe cadence must include retry consumption and active-pick priority.
 
 ## Market scope
 
-Initial market classes:
+### V1
 
-- Moneyline / game winner
-- Run line / spread
-- Game total runs
-- player props only after live coverage and settlement semantics are validated
+- full-game moneyline;
+- full-game totals with explicit line identity and sufficient real coverage.
 
-## Entry Decision
+### Postponed
 
-The eventual Entry Decision Engine will evaluate each snapshot independently and may emit `WAIT`, `UPLATI SADA` or `SKIP`. An issued signal is never silently rewritten by later refreshes.
+- run line;
+- first five innings;
+- team totals;
+- NRFI/YRFI;
+- inning markets;
+- alternate lines;
+- futures;
+- parlays/SGPs;
+- live betting;
+- automated staking.
 
-The initial implementation is paper-only. The learning target is the optimal information/market state for entry, rather than a hardcoded number of hours before first pitch.
+### Permanently excluded
 
-## Next stages
+- **player props**.
 
-1. Validate live odds payloads and bookmaker/market schemas.
-2. Normalize games, teams, pitchers, lineups, player stats and odds.
-3. Build Baseball probability/fair-odds models.
-4. Add calibration and walk-forward evaluation.
-5. Feed predictions into the intraday scanner and paper alert layer.
-6. Add Baseball-specific ledger, CLV tracking and outcome settlement.
-7. Learn the Entry Decision policy from the collected footprint.
+## Model direction
+
+The Baseball model is its own probability system.
+
+Candidate inputs include:
+
+- starting pitcher quality/handedness/workload;
+- bullpen state;
+- expected/confirmed lineups;
+- offense/defense;
+- split information;
+- park;
+- weather/roof;
+- rest/travel/doubleheaders;
+- market state.
+
+Every production feature must be point-in-time and replayable. Model complexity is added only when chronological out-of-sample evidence shows improvement.
+
+## Immediate target
+
+The next completion target is **Moneyline Closed Loop v1**:
+
+```text
+fixture evidence
+→ moneyline quote evidence
+→ versioned probability
+→ value evaluation
+→ final quote verification
+→ immutable paper pick
+→ monitoring
+→ closing
+→ result
+→ settlement
+→ realized CLV
+→ evaluation
+```
+
+See `docs/BASEBALL_COMPLETION_AUDIT_2026-09-25.md` for the canonical audit and `docs/BASEBALL_MASTER_PLAN.md` for execution gates.
