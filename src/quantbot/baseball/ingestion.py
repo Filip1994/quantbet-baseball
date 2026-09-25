@@ -113,16 +113,27 @@ def canonical_moneyline_observations(
             if _norm(market_name) not in _MONEYLINE_MARKETS:
                 continue
 
-            for value in market.get("values") or []:
-                if not isinstance(value, dict):
-                    continue
-                side = _selection_side(
+            market_values = market.get("values") or []
+            if not isinstance(market_values, list):
+                continue
+            mapped_sides = [
+                _selection_side(
                     value.get("value"),
                     home=home,
                     away=away,
                 )
+                if isinstance(value, dict)
+                else None
+                for value in market_values
+            ]
+            if any(side is None for side in mapped_sides):
+                continue
+
+            for value, side in zip(market_values, mapped_sides, strict=True):
+                assert isinstance(value, dict)
+                assert side is not None
                 price = _decimal_odds(value.get("odd"))
-                if side is None or price is None:
+                if price is None:
                     continue
 
                 raw_price = str(value.get("odd")).strip()
