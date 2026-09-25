@@ -91,6 +91,19 @@ def test_maps_team_name_to_away_side() -> None:
     assert rows[0].selection == "away"
 
 
+def test_rejects_three_way_match_winner_as_two_way_moneyline() -> None:
+    three_way = snapshot(market="Match Winner")
+    three_way["odds"]["bookmakers"][0]["markets"][0]["values"] = [
+        {"value": "Home", "odd": "2.10"},
+        {"value": "Draw", "odd": "8.00"},
+        {"value": "Away", "odd": "1.85"},
+    ]
+
+    rows = canonical_moneyline_observations(three_way, receipt())
+
+    assert rows == ()
+
+
 def test_rejects_non_full_game_winner_market() -> None:
     rows = canonical_moneyline_observations(
         snapshot(market="Winner - First Five Innings"),
