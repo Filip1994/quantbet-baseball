@@ -78,7 +78,9 @@ class FeatureSource:
         ):
             raise EvidenceError("source_payload_checksum must be SHA-256 hex")
         if not self.feature_paths:
-            raise EvidenceError("feature source must identify at least one feature path")
+            raise EvidenceError(
+                "feature source must identify at least one feature path"
+            )
         for path in self.feature_paths:
             _text(path, "feature_path")
 
