@@ -211,7 +211,10 @@ def collect_with_dependencies(
                         continue
                     schema_market_names.add(market_name)
                     normalized = " ".join(
-                        market_name.casefold().replace("_", " ").replace("-", " ").split()
+                        market_name.casefold()
+                        .replace("_", " ")
+                        .replace("-", " ")
+                        .split()
                     )
                     if any(
                         token in normalized
