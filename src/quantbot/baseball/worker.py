@@ -19,6 +19,7 @@ def _record_activation_gate(
     root: Path,
     *,
     assessed_at: datetime,
+    target: str = "CANARY",
 ) -> dict[str, object] | None:
     if not os.getenv("DATABASE_URL", "").strip():
         return None
@@ -27,7 +28,7 @@ def _record_activation_gate(
 
     assessment = assess_activation_gate(
         root,
-        target="CANARY",
+        target=target,
         now=assessed_at,
     )
     return {
@@ -38,6 +39,45 @@ def _record_activation_gate(
         "budget": assessment["budget"],
         "checks": assessment["checks"],
     }
+
+
+def _run_armed_canary(
+    root: Path,
+    *,
+    started_at: datetime,
+    activation_gate: dict[str, object] | None,
+) -> dict[str, object]:
+    """Run at most one bounded canary while a recent PASSED canary is absent."""
+
+    if activation_gate is None:
+        return {
+            "status": "BLOCKED",
+            "reason_codes": ["DATABASE_URL_MISSING"],
+        }
+
+    if activation_gate.get("verdict") != "READY":
+        return {
+            "status": "BLOCKED",
+            "reason_codes": list(activation_gate.get("reason_codes") or ()),
+        }
+
+    checks = activation_gate.get("checks")
+    if not isinstance(checks, dict):
+        return {
+            "status": "BLOCKED",
+            "reason_codes": ["ACTIVATION_GATE_CHECKS_INVALID"],
+        }
+
+    if bool(checks.get("canary_passed")):
+        return {
+            "status": "ALREADY_PASSED",
+            "canary_id": checks.get("latest_canary_id"),
+            "reason_codes": [],
+        }
+
+    from .canary import run_canary_once
+
+    return dict(run_canary_once(root, now=started_at))
 
 
 def _record_runtime(
@@ -76,21 +116,54 @@ def run_once(root: Path | None = None) -> dict[str, object]:
     project_root = root or Path.cwd()
     applied = apply_migrations(project_root)
     collection_enabled = _enabled("BASEBALL_ENABLE_COLLECTION")
+    canary_enabled = _enabled("BASEBALL_ENABLE_CANARY")
 
     result: dict[str, object] = {
         "status": "ready",
         "migrations_applied": list(applied),
         "collection_enabled": collection_enabled,
+        "canary_enabled": canary_enabled,
     }
 
-    if not collection_enabled:
+    # Fail closed if both paths are armed. A canary must never coexist with
+    # scheduled collection.
+    if collection_enabled and canary_enabled:
+        result["mode"] = "storage-ready"
+        result["status"] = "blocked"
+        result["canary"] = {
+            "status": "BLOCKED",
+            "reason_codes": ["COLLECTION_AND_CANARY_CONFLICT"],
+        }
+    elif not collection_enabled:
         result["mode"] = "storage-ready"
         activation_gate = _record_activation_gate(
             project_root,
             assessed_at=started_at,
+            target="CANARY",
         )
         if activation_gate is not None:
             result["activation_gate"] = activation_gate
+
+        if canary_enabled:
+            canary = _run_armed_canary(
+                project_root,
+                started_at=started_at,
+                activation_gate=activation_gate,
+            )
+            result["canary"] = canary
+            if canary.get("status") == "FAILED":
+                result["status"] = "canary-failed"
+            elif canary.get("status") == "BLOCKED":
+                result["status"] = "blocked"
+
+            if canary.get("status") in {"PASSED", "ALREADY_PASSED"}:
+                scheduled_gate = _record_activation_gate(
+                    project_root,
+                    assessed_at=datetime.now(UTC),
+                    target="SCHEDULED_COLLECTION",
+                )
+                if scheduled_gate is not None:
+                    result["scheduled_collection_gate"] = scheduled_gate
     else:
         from .durable_collector import collect_durable_once
 
