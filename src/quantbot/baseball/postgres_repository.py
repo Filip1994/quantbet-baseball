@@ -9,6 +9,7 @@ from typing import Any, Protocol, Self
 
 from .evidence import OddsObservation, PickEvent, canonical_json
 from .evidence_repository import RepositoryStats
+from .operational import FixtureObservation, fixture_canonical_json, iso_or_none
 
 
 class CursorLike(Protocol):
@@ -121,9 +122,12 @@ class PostgreSQLEvidenceRepository:
         *,
         commit: bool = True,
     ) -> bool:
-        identity_column = (
-            "observation_id" if table == "odds_observations" else "pick_id"
-        )
+        identity_columns = {
+            "odds_observations": "observation_id",
+            "pick_events": "pick_id",
+            "fixture_observations": "fixture_observation_id",
+        }
+        identity_column = identity_columns[table]
         placeholders = ["%s"] * len(values)
         placeholders[-1] = "%s::jsonb"
         insert = (
@@ -249,6 +253,94 @@ class PostgreSQLEvidenceRepository:
             raise
         return inserted
 
+    def append_fixture_observations(
+        self,
+        records: Iterable[FixtureObservation],
+    ) -> int:
+        batch = tuple(records)
+        if not batch:
+            return 0
+
+        columns = (
+            "fixture_observation_id",
+            "game_id",
+            "league",
+            "home_team",
+            "away_team",
+            "kickoff_at",
+            "provider_status",
+            "observed_at",
+            "source_payload_ref",
+            "source_payload_checksum",
+            "schema_version",
+            "canonical_record",
+        )
+
+        inserted = 0
+        try:
+            for record in batch:
+                values = (
+                    record.fixture_observation_id,
+                    record.game_id,
+                    record.league,
+                    record.home_team,
+                    record.away_team,
+                    record.kickoff_at,
+                    record.provider_status,
+                    record.observed_at,
+                    record.source_payload_ref,
+                    record.source_payload_checksum,
+                    record.schema_version,
+                    fixture_canonical_json(record),
+                )
+                if self._append(
+                    "fixture_observations",
+                    record.fixture_observation_id,
+                    values,
+                    columns,
+                    commit=False,
+                ):
+                    inserted += 1
+            self._connection.commit()
+        except Exception:
+            self._connection.rollback()
+            raise
+        return inserted
+
+    def append_runtime_cycle(
+        self,
+        *,
+        run_id: str,
+        started_at: datetime,
+        finished_at: datetime,
+        collection_enabled: bool,
+        mode: str,
+        status: str,
+        stats: dict[str, Any],
+    ) -> None:
+        payload = json.dumps(
+            stats,
+            sort_keys=True,
+            separators=(",", ":"),
+            ensure_ascii=True,
+        )
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO runtime_cycles (run_id, started_at, finished_at, "
+                "collection_enabled, mode, status, stats) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s::jsonb)",
+                (
+                    run_id,
+                    started_at,
+                    finished_at,
+                    collection_enabled,
+                    mode,
+                    status,
+                    payload,
+                ),
+            )
+        self._connection.commit()
+
     def get_observation(self, observation_id: str) -> OddsObservation | None:
         with self._connection.cursor() as cursor:
             cursor.execute(
@@ -299,6 +391,40 @@ class PostgreSQLEvidenceRepository:
             )
             rows = cursor.fetchall()
         return {str(game_id): observed_at for game_id, observed_at in rows}
+
+    def health_snapshot(self) -> dict[str, Any]:
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT game_id), MAX(observed_at) "
+                "FROM fixture_observations"
+            )
+            fixture_count, fixture_games, latest_fixture = cursor.fetchone()
+
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT game_id), "
+                "COUNT(DISTINCT bookmaker), MAX(observed_at) "
+                "FROM odds_observations"
+            )
+            odds_count, odds_games, bookmakers, latest_odds = cursor.fetchone()
+
+            cursor.execute("SELECT COUNT(*) FROM pick_events")
+            pick_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*), MAX(finished_at) FROM runtime_cycles")
+            runtime_count, latest_runtime = cursor.fetchone()
+
+        return {
+            "fixture_observations": int(fixture_count),
+            "distinct_fixtures": int(fixture_games),
+            "odds_observations": int(odds_count),
+            "distinct_quote_games": int(odds_games),
+            "bookmakers": int(bookmakers),
+            "pick_events": int(pick_count),
+            "runtime_cycles": int(runtime_count),
+            "latest_fixture_observed_at": iso_or_none(latest_fixture),
+            "latest_odds_observed_at": iso_or_none(latest_odds),
+            "latest_runtime_finished_at": iso_or_none(latest_runtime),
+        }
 
     def stats(self) -> RepositoryStats:
         with self._connection.cursor() as cursor:
