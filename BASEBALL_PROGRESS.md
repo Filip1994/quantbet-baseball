@@ -1279,3 +1279,31 @@ Production variables were then explicitly set on only the guarded Baseball servi
 - `PAPER_MODE=true`.
 
 Railway created variable redeployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634`. No production canary result is claimed until a natural cron run records the persisted canary evidence.
+
+
+## 69. First live bounded canary failed safely on canonical odds mapping — 2026-09-26
+
+The first armed production canary executed naturally on deployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634` at `2026-09-25T23:16:05.657939242Z`.
+
+Pre-run CANARY gate remained `READY` with no blocker codes and all safety checks green.
+
+Canary fact:
+
+- canary ID: `e52931fc-e7ab-56cc-be44-9f175c20f1e8`;
+- collection cycle: `dbddfcb8-6a6f-412b-b46a-017b986286f3`;
+- status: `FAILED`;
+- provider requests: 4 of maximum 8;
+- games seen: 66;
+- pregame games: 38;
+- games selected for odds: 2;
+- odds calls: 2;
+- raw market rows observed: 1387;
+- fixture observations inserted: 66;
+- canonical odds rows: 0;
+- odds observations inserted: 0;
+- provider/collector errors: 0;
+- reason codes: `POSTGRES_WRITES_NOT_VERIFIED`, `RAW_ARCHIVE_NOT_VERIFIED`;
+- scheduled collection remained disabled;
+- paper mode remained enabled.
+
+Health after the canary proves fixture persistence worked: 66 distinct fixtures / 66 fixture observations and one collection cycle are present. The failure is therefore downstream of successful provider access and fixture ingestion, specifically at the live odds canonicalization/persistence boundary. The system correctly failed closed and scheduled collection must remain OFF until this mapper/provenance issue is repaired and a fresh bounded canary passes.
