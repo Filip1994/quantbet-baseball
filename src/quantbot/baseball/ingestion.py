@@ -17,6 +17,8 @@ _MONEYLINE_MARKETS = {
     "game winner",
     "match result",
     "game result",
+    "home/away",
+    "home away",
 }
 _OBSERVATION_NAMESPACE = uuid.uuid5(
     uuid.NAMESPACE_URL,
