@@ -1173,3 +1173,22 @@ After that, the next required sequence remains:
 2. let Railway deploy naturally;
 3. require the storage-ready activation gate to become ready for CANARY;
 4. only then arm one bounded canary.
+
+
+## 66. Provider credential visible on guarded Baseball service — 2026-09-26
+
+Fresh Railway verification now confirms that `API_BASEBALL_KEY` is present in the effective variable-name inventory for the guarded `quantbet-baseball` production service.
+
+Observed deployment triggered by the credential change:
+
+- deployment: `667487c1-6b31-4624-ae36-a655147b6f08`;
+- state at first inspection: `WAITING`;
+- source remains main commit `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`.
+
+Safety state at this checkpoint:
+
+- scheduled collection remains disabled;
+- no canary has been armed or executed;
+- the next required evidence is a natural storage-ready activation-gate result with `api_key_configured=true` and a CANARY-ready verdict.
+
+No football resource was touched.
