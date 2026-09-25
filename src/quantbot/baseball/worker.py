@@ -15,6 +15,31 @@ def _enabled(name: str) -> bool:
     return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _record_activation_gate(
+    root: Path,
+    *,
+    assessed_at: datetime,
+) -> dict[str, object] | None:
+    if not os.getenv("DATABASE_URL", "").strip():
+        return None
+
+    from .activation_gate import assess_activation_gate
+
+    assessment = assess_activation_gate(
+        root,
+        target="CANARY",
+        now=assessed_at,
+    )
+    return {
+        "assessment_id": assessment["assessment_id"],
+        "target": assessment["target"],
+        "verdict": assessment["verdict"],
+        "reason_codes": assessment["reason_codes"],
+        "budget": assessment["budget"],
+        "checks": assessment["checks"],
+    }
+
+
 def _record_runtime(
     result: dict[str, object],
     *,
@@ -60,6 +85,12 @@ def run_once(root: Path | None = None) -> dict[str, object]:
 
     if not collection_enabled:
         result["mode"] = "storage-ready"
+        activation_gate = _record_activation_gate(
+            project_root,
+            assessed_at=started_at,
+        )
+        if activation_gate is not None:
+            result["activation_gate"] = activation_gate
     else:
         from .durable_collector import collect_durable_once
 
