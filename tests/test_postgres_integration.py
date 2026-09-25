@@ -410,4 +410,3 @@ def test_final_price_deterioration_rejects_registration() -> None:
         )
         assert replay.verification == result.verification
         assert replay.pick is None
-
