@@ -54,6 +54,8 @@ class CollectionCanaryRun:
     api_requests: int
     fixture_observations_inserted: int
     observations_inserted: int
+    archive_objects_verified: int
+    archive_verification_failures: int
     errors: int
     passed: bool
     reason_codes: tuple[str, ...]
@@ -72,6 +74,8 @@ class CollectionCanaryRun:
             "api_requests",
             "fixture_observations_inserted",
             "observations_inserted",
+            "archive_objects_verified",
+            "archive_verification_failures",
             "errors",
         ):
             value = getattr(self, field)
@@ -84,6 +88,8 @@ class CollectionCanaryRun:
             and self.errors == 0
             and self.fixture_observations_inserted > 0
             and self.observations_inserted > 0
+            and self.archive_objects_verified > 0
+            and self.archive_verification_failures == 0
         )
         if self.passed != expected_pass:
             raise EvidenceError("canary pass flag does not match evidence")
@@ -163,6 +169,10 @@ def build_canary_run(
     api_requests = int(summary.get("api_requests", 0))
     fixtures = int(summary.get("fixture_observations_inserted", 0))
     observations = int(summary.get("observations_inserted", 0))
+    archive_objects_verified = int(summary.get("archive_objects_verified", 0))
+    archive_verification_failures = int(
+        summary.get("archive_verification_failures", 0)
+    )
     errors = int(summary.get("errors", 0))
     reasons: list[str] = []
     if status != "collected":
@@ -173,6 +183,10 @@ def build_canary_run(
         reasons.append("NO_FIXTURE_WRITES")
     if observations <= 0:
         reasons.append("NO_MONEYLINE_WRITES")
+    if archive_objects_verified <= 0:
+        reasons.append("NO_ARCHIVE_READBACK")
+    if archive_verification_failures:
+        reasons.append("ARCHIVE_READBACK_FAILED")
     if api_requests > max_api_requests:
         reasons.append("API_LIMIT_EXCEEDED")
     passed = not reasons
@@ -193,6 +207,8 @@ def build_canary_run(
         api_requests=api_requests,
         fixture_observations_inserted=fixtures,
         observations_inserted=observations,
+        archive_objects_verified=archive_objects_verified,
+        archive_verification_failures=archive_verification_failures,
         errors=errors,
         passed=passed,
         reason_codes=tuple(reasons),
