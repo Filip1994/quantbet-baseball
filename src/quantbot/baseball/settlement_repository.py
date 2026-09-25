@@ -242,6 +242,8 @@ class PostgreSQLMoneylineSettlementRepository:
                 "settled_at",
                 "outcome",
                 "profit_per_unit",
+                "paper_stake_rsd",
+                "paper_profit_rsd",
                 "closing_outcome",
                 "closing_observation_id",
                 "closing_odds",
@@ -263,6 +265,8 @@ class PostgreSQLMoneylineSettlementRepository:
                 record.settled_at,
                 record.outcome,
                 record.profit_per_unit,
+                record.paper_stake_rsd,
+                record.paper_profit_rsd,
                 record.closing_outcome,
                 record.closing_observation_id,
                 record.closing_odds,
@@ -311,6 +315,7 @@ class PostgreSQLMoneylineSettlementRepository:
             cursor.execute(
                 "SELECT registered_picks, closing_finalizations, settled_picks, "
                 "pending_settlement, wins, losses, pushes, realized_profit_per_unit, "
+                "realized_paper_profit_rsd, total_paper_staked_rsd, "
                 "clv_available, clv_unavailable, average_clv_probability_delta, "
                 "average_clv_price_ratio FROM baseball_moneyline_dashboard"
             )
@@ -326,10 +331,12 @@ class PostgreSQLMoneylineSettlementRepository:
             "losses": int(row[5]),
             "pushes": int(row[6]),
             "realized_profit_per_unit": float(row[7]),
-            "clv_available": int(row[8]),
-            "clv_unavailable": int(row[9]),
+            "realized_paper_profit_rsd": float(row[8]),
+            "total_paper_staked_rsd": int(row[9]),
+            "clv_available": int(row[10]),
+            "clv_unavailable": int(row[11]),
             "average_clv_probability_delta": (
-                None if row[10] is None else float(row[10])
+                None if row[12] is None else float(row[12])
             ),
-            "average_clv_price_ratio": None if row[11] is None else float(row[11]),
+            "average_clv_price_ratio": None if row[13] is None else float(row[13]),
         }
