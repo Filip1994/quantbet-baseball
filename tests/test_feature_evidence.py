@@ -8,7 +8,9 @@ from quantbot.baseball.feature_evidence import (
 )
 
 
-def _source(*, available_at: str = "2026-09-26T16:55:00+00:00") -> FeatureSource:
+def _source(
+    *, available_at: str = "2026-09-26T16:55:00+00:00"
+) -> FeatureSource:
     return FeatureSource(
         provider="api-sports-baseball",
         source_type="team_statistics",
@@ -52,7 +54,9 @@ def test_rejects_source_not_available_by_cutoff() -> None:
             generated_at="2026-09-26T17:00:30+00:00",
             kickoff_at="2026-09-26T19:00:00+00:00",
             features={"home": {"rating": 1.0}},
-            sources=(_source(available_at="2026-09-26T17:01:00+00:00"),),
+            sources=(
+                _source(available_at="2026-09-26T17:01:00+00:00"),
+            ),
         )
 
 
