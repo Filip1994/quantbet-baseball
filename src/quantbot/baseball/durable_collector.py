@@ -22,6 +22,7 @@ from .config import BaseballSettings
 from .db import database_url_from_env
 from .evidence import OddsObservation
 from .ingestion import canonical_moneyline_observations
+from .operational import FixtureObservation, fixture_observation_from_game
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .raw_archive import archive_from_env
 from .scheduler import build_scheduler_record, is_observation_due
@@ -34,12 +35,20 @@ class CollectorRepository(Protocol):
 
     def append_observations(self, records: tuple[OddsObservation, ...]) -> int: ...
 
+    def append_fixture_observations(
+        self,
+        records: tuple[FixtureObservation, ...],
+    ) -> int: ...
+
 
 class CollectorClient(Protocol):
     request_count: int
     remaining_budget: int
 
-    def games_by_date(self, date_iso: str) -> list[dict[str, Any]]: ...
+    def games_by_date_with_receipt(
+        self,
+        date_iso: str,
+    ) -> tuple[list[dict[str, Any]], Any]: ...
 
     def odds_with_receipt(self, game_id: int) -> tuple[list[dict[str, Any]], Any]: ...
 
@@ -68,15 +77,28 @@ def collect_with_dependencies(
     games: list[dict[str, Any]] = []
     seen_game_ids: set[int] = set()
     errors = 0
+    fixture_observations = 0
+    fixtures_inserted = 0
 
     for date_value in (now.date(), now.date() + timedelta(days=1)):
         try:
-            date_games = client.games_by_date(date_value.isoformat())
+            date_games, schedule_receipt = client.games_by_date_with_receipt(
+                date_value.isoformat()
+            )
         except BaseballAPIBudgetExceeded:
             break
         except BaseballAPIError:
             errors += 1
             continue
+
+        fixture_records = tuple(
+            record
+            for game in date_games
+            if (record := fixture_observation_from_game(game, schedule_receipt))
+            is not None
+        )
+        fixture_observations += len(fixture_records)
+        fixtures_inserted += repository.append_fixture_observations(fixture_records)
 
         for game in date_games:
             game_id = _game_id(game)
@@ -168,6 +190,8 @@ def collect_with_dependencies(
     return {
         "status": "collected",
         "games_seen": len(games),
+        "fixture_observations": fixture_observations,
+        "fixtures_inserted": fixtures_inserted,
         "pregame_games": len(learning),
         "due_events": len(due),
         "games_selected": len(selected),
