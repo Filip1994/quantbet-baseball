@@ -124,6 +124,7 @@ def test_migrations_and_repository_are_idempotent() -> None:
         assert health["collection_cycles"] == 1
         assert health["runtime_cycles"] == 1
 
+
 class _FreshQuoteClient:
     def odds_with_receipt(self, game_id):
         assert game_id == 2
