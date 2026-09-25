@@ -22,7 +22,7 @@ def test_compact_odds_keeps_local_bookmakers_and_target_markets() -> None:
                     "name": "OtherBook",
                     "bets": [
                         {
-                            "name": "Moneyline",
+                            "name": "Home/Away",
                             "values": [{"value": "Away", "odd": "2.10"}],
                         },
                         {
@@ -43,4 +43,4 @@ def test_compact_odds_keeps_local_bookmakers_and_target_markets() -> None:
         "Player Strikeouts",
     }
     other = next(item for item in result["bookmakers"] if item["name"] == "OtherBook")
-    assert [item["name"] for item in other["markets"]] == ["Moneyline"]
+    assert [item["name"] for item in other["markets"]] == ["Home/Away"]
