@@ -35,6 +35,8 @@ class RawPayloadArchive(Protocol):
         captured_at: datetime | None = None,
     ) -> ArchiveReceipt: ...
 
+    def verify(self, ref: str, checksum: str) -> bool: ...
+
 
 def _archive_document(
     endpoint: str,
@@ -125,6 +127,20 @@ class LocalRawPayloadArchive:
             captured_at=captured.isoformat(),
         )
 
+    def verify(self, ref: str, checksum: str) -> bool:
+        expected_prefix = "file://"
+        if not ref.startswith(expected_prefix):
+            return False
+        from urllib.parse import unquote, urlparse
+
+        parsed = urlparse(ref)
+        path = Path(unquote(parsed.path))
+        try:
+            body = path.read_bytes()
+        except OSError:
+            return False
+        return hashlib.sha256(body).hexdigest() == checksum
+
 
 class S3RawPayloadArchive:
     """S3-compatible archive used by the Railway worker."""
@@ -159,6 +175,20 @@ class S3RawPayloadArchive:
             checksum=checksum,
             captured_at=captured.isoformat(),
         )
+
+    def verify(self, ref: str, checksum: str) -> bool:
+        prefix = f"s3://{self.bucket}/"
+        if not ref.startswith(prefix):
+            return False
+        key = ref[len(prefix) :]
+        if not key:
+            return False
+        try:
+            response = self.client.get_object(Bucket=self.bucket, Key=key)
+            body = response["Body"].read()
+        except Exception:
+            return False
+        return hashlib.sha256(body).hexdigest() == checksum
 
 
 _S3_ENV = (
