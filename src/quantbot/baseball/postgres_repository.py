@@ -502,6 +502,18 @@ class PostgreSQLEvidenceRepository:
             cursor.execute("SELECT COUNT(*) FROM pick_events")
             pick_count = cursor.fetchone()[0]
 
+            cursor.execute("SELECT COUNT(*) FROM model_predictions")
+            prediction_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM value_evaluations")
+            evaluation_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM final_quote_verifications")
+            verification_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM registered_picks")
+            registered_pick_count = cursor.fetchone()[0]
+
             cursor.execute("SELECT COUNT(*), MAX(finished_at) FROM collection_cycles")
             collection_count, latest_collection = cursor.fetchone()
 
@@ -515,6 +527,10 @@ class PostgreSQLEvidenceRepository:
             "distinct_quote_games": int(odds_games),
             "bookmakers": int(bookmakers),
             "pick_events": int(pick_count),
+            "model_predictions": int(prediction_count),
+            "value_evaluations": int(evaluation_count),
+            "final_quote_verifications": int(verification_count),
+            "registered_picks": int(registered_pick_count),
             "collection_cycles": int(collection_count),
             "runtime_cycles": int(runtime_count),
             "latest_fixture_observed_at": _iso_or_none(latest_fixture),

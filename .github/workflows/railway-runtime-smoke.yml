@@ -5,8 +5,11 @@ on:
     paths:
       - "src/quantbot/baseball/api.py"
       - "src/quantbot/baseball/db.py"
+      - "src/quantbot/baseball/decision_lifecycle.py"
+      - "src/quantbot/baseball/decision_repository.py"
       - "src/quantbot/baseball/durable_collector.py"
       - "src/quantbot/baseball/ingestion.py"
+      - "src/quantbot/baseball/moneyline_registration.py"
       - "src/quantbot/baseball/postgres_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
@@ -14,6 +17,7 @@ on:
       - "requirements.txt"
       - "requirements-dev.txt"
       - "pyproject.toml"
+      - "tests/test_decision_lifecycle.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_postgres_integration.py"
@@ -24,8 +28,11 @@ on:
     paths:
       - "src/quantbot/baseball/api.py"
       - "src/quantbot/baseball/db.py"
+      - "src/quantbot/baseball/decision_lifecycle.py"
+      - "src/quantbot/baseball/decision_repository.py"
       - "src/quantbot/baseball/durable_collector.py"
       - "src/quantbot/baseball/ingestion.py"
+      - "src/quantbot/baseball/moneyline_registration.py"
       - "src/quantbot/baseball/postgres_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
@@ -33,6 +40,7 @@ on:
       - "requirements.txt"
       - "requirements-dev.txt"
       - "pyproject.toml"
+      - "tests/test_decision_lifecycle.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_postgres_integration.py"
@@ -72,11 +80,15 @@ jobs:
           ruff format --check
           src/quantbot/baseball/api.py
           src/quantbot/baseball/db.py
+          src/quantbot/baseball/decision_lifecycle.py
+          src/quantbot/baseball/decision_repository.py
           src/quantbot/baseball/durable_collector.py
           src/quantbot/baseball/ingestion.py
+          src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/postgres_repository.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
+          tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_postgres_integration.py
@@ -87,11 +99,15 @@ jobs:
           ruff check
           src/quantbot/baseball/api.py
           src/quantbot/baseball/db.py
+          src/quantbot/baseball/decision_lifecycle.py
+          src/quantbot/baseball/decision_repository.py
           src/quantbot/baseball/durable_collector.py
           src/quantbot/baseball/ingestion.py
+          src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/postgres_repository.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
+          tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_postgres_integration.py
@@ -104,5 +120,6 @@ jobs:
           tests/test_evidence_store.py
           tests/test_raw_archive.py
           tests/test_ingestion.py
+          tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_postgres_integration.py
