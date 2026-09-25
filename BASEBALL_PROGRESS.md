@@ -391,3 +391,43 @@ Next implementation package:
 
 Scheduled production collection remains disabled until the canary/observability acceptance gate is met.
 
+## 43. Package A — canonical runtime truth and fixture evidence — 2026-09-25
+
+Completed the first QuantBet-parity completion slice on branch `finish/quantbet-parity-20260925`.
+
+Implemented:
+
+- canonical stable `fixtures` identity table with API-Sports Baseball provider game/team identifiers;
+- append-only `fixture_observations` preserving kickoff/status/name evidence and raw-payload provenance;
+- durable `collection_cycles` for actual collector attempts;
+- separate `runtime_cycles` for every Railway worker invocation, including storage-ready runs while collection is disabled;
+- DB-backed `health_snapshot()` exposing fixture/quote/pick counts, bookmaker coverage, latest evidence timestamps, collection-cycle count, and Railway runtime-cycle count;
+- fresh schedule retrieval with durable raw archive receipts;
+- fixture persistence before odds-selection decisions;
+- collection-cycle persistence around advisory-lock and collection execution paths;
+- PostgreSQL integration coverage for fixture replay/idempotency, collection cycles, runtime cycles, and health projection.
+
+Reconciled duplicate implementation work:
+
+- retained the richer canonical fixture model in `fixture_evidence.py` with provider/team identities and the stable `fixtures` table;
+- removed the temporary duplicate minimal operational fixture implementation;
+- retained two telemetry layers intentionally:
+  - `collection_cycles` = actual collector attempts;
+  - `runtime_cycles` = every Railway cron invocation.
+
+CI evidence:
+
+- Railway runtime smoke: **SUCCESS**;
+- global Baseball tests: **SUCCESS**;
+- compile, Ruff format, Ruff lint, pytest, migrations and PostgreSQL integration are green.
+
+Safety / production state:
+
+- `BASEBALL_ENABLE_COLLECTION` remains disabled;
+- no production API collection was enabled during this package;
+- no football Railway project or football repository was modified.
+
+Next package:
+
+> Package B — Moneyline decision chain: point-in-time prediction evidence → value evaluation → mandatory final quote verification → immutable registered paper pick.
+
