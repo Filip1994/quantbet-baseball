@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS collection_canary_runs (
     api_requests INTEGER NOT NULL,
     fixture_observations_inserted INTEGER NOT NULL,
     observations_inserted INTEGER NOT NULL,
+    archive_objects_verified INTEGER NOT NULL,
+    archive_verification_failures INTEGER NOT NULL,
     errors INTEGER NOT NULL,
     passed BOOLEAN NOT NULL,
     reason_codes TEXT[] NOT NULL DEFAULT '{}',
@@ -28,6 +30,8 @@ CREATE TABLE IF NOT EXISTS collection_canary_runs (
         api_requests >= 0
         AND fixture_observations_inserted >= 0
         AND observations_inserted >= 0
+        AND archive_objects_verified >= 0
+        AND archive_verification_failures >= 0
         AND errors >= 0
     ),
     CONSTRAINT collection_canary_status_valid
