@@ -13,6 +13,7 @@ from .raw_archive import ArchiveReceipt
 
 _MONEYLINE_MARKETS = {
     "moneyline",
+    "home/away",
     "match winner",
     "game winner",
     "match result",
