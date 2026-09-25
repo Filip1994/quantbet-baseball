@@ -741,3 +741,24 @@ Activation remains deliberately separate:
 - `BASEBALL_ENABLE_COLLECTION` remains disabled.
 
 After merge: verify migration 007 in Baseball Railway, then run the read-only CANARY readiness assessment before any canary execution.
+
+
+### Package E production deploy + gate runtime hotfix — 2026-09-25
+
+Verified:
+
+- Package E main commit: `d1e7b82f5006507200f6f9ebe652e60533455538`;
+- Baseball Railway deployment `26d1ed34-70d7-4aaa-a23f-e0452ac35133`: **SUCCESS**;
+- production deploy log applied `007_operational_acceptance.sql`.
+
+Production prerequisite audit found:
+
+- PostgreSQL present;
+- raw archive variable set complete;
+- `API_BASEBALL_KEY` missing.
+
+An operational reachability gap was also found: Railway exposes no arbitrary `exec` into the deployed cron container, so the activation-gate CLI could not be invoked without a config change.
+
+Hotfix branch `package-e-gate-runtime-20260925` now makes the storage-ready worker automatically persist and emit the CANARY readiness verdict while scheduled collection is OFF.
+
+No provider API call is made by that assessment. Collection and canary remain disabled.
