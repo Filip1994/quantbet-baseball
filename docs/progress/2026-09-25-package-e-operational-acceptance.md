@@ -758,3 +758,12 @@ Remaining blocker: create `API_BASEBALL_KEY` on the guarded Baseball production 
 Railway now exposes `API_BASEBALL_KEY` to the guarded Baseball production service. A new deployment, `667487c1-6b31-4624-ae36-a655147b6f08`, was created by the credential change and was initially `WAITING`.
 
 No canary or scheduled collection activation was performed. The next acceptance requirement is a natural storage-ready gate proving CANARY readiness with the key configured.
+
+
+## Credential deployment success; natural CANARY gate pending — 2026-09-26
+
+The credential-triggered deployment `667487c1-6b31-4624-ae36-a655147b6f08` completed with **SUCCESS**. No migration was newly applied during pre-deploy.
+
+The API key is now visible to the correct Baseball service, but deployment startup is not being treated as a readiness substitute. No canary or scheduled collection was enabled. The next accepted proof is the first natural `*/15` storage-ready worker execution on this deployment.
+
+A one-time follow-up verification is scheduled for the next cron window; it must only proceed toward bounded canary execution if the natural CANARY activation gate is ready and a safe existing one-shot execution path is available.
