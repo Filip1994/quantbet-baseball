@@ -121,18 +121,27 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
 
 
 def test_shared_cycle_budget_reduces_broad_odds_capacity() -> None:
-    assert remaining_broad_odds_capacity(
-        cycle_request_cap=75,
-        requests_used=0,
-        max_odds_requests=76,
-    ) == 73
-    assert remaining_broad_odds_capacity(
-        cycle_request_cap=75,
-        requests_used=30,
-        max_odds_requests=76,
-    ) == 43
-    assert remaining_broad_odds_capacity(
-        cycle_request_cap=75,
-        requests_used=74,
-        max_odds_requests=76,
-    ) == 0
+    assert (
+        remaining_broad_odds_capacity(
+            cycle_request_cap=75,
+            requests_used=0,
+            max_odds_requests=76,
+        )
+        == 73
+    )
+    assert (
+        remaining_broad_odds_capacity(
+            cycle_request_cap=75,
+            requests_used=30,
+            max_odds_requests=76,
+        )
+        == 43
+    )
+    assert (
+        remaining_broad_odds_capacity(
+            cycle_request_cap=75,
+            requests_used=74,
+            max_odds_requests=76,
+        )
+        == 0
+    )
