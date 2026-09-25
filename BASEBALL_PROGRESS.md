@@ -741,3 +741,22 @@ Activation remains deliberately separate:
 - `BASEBALL_ENABLE_COLLECTION` remains disabled.
 
 After merge: verify migration 007 in Baseball Railway, then run the read-only CANARY readiness assessment before any canary execution.
+
+
+### Package E merged; production acceptance pending — 2026-09-25
+
+PR #9 merged to main:
+
+- commit `d1e7b82f5006507200f6f9ebe652e60533455538`.
+
+Final PR head was fully green:
+
+- Baseball tests `36154921320`: SUCCESS;
+- Railway/PostgreSQL smoke `36154921203`: SUCCESS.
+
+Baseball Railway auto-deploy:
+
+- deployment `26d1ed34-70d7-4aaa-a23f-e0452ac35133`;
+- observed status at this checkpoint: WAITING.
+
+Migration 007 has not yet been claimed as applied. Scheduled collection remains disabled and no canary has been run.
