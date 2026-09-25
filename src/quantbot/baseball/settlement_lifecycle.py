@@ -314,7 +314,13 @@ def build_pick_settlement(
         outcome = "WIN"
     else:
         outcome = "LOSS"
-    profit = pick.entry_odds - 1.0 if outcome == "WIN" else -1.0 if outcome == "LOSS" else 0.0
+    profit = (
+        pick.entry_odds - 1.0
+        if outcome == "WIN"
+        else -1.0
+        if outcome == "LOSS"
+        else 0.0
+    )
 
     closing_observation_id: str | None = None
     closing_odds: float | None = None
