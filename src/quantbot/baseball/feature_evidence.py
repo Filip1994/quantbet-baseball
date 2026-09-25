@@ -156,7 +156,12 @@ def build_pregame_feature_snapshot(
     )
     return PregameFeatureSnapshot(
         feature_snapshot_id=str(uuid.uuid5(_FEATURE_NAMESPACE, canonical)),
-        **identity,
+        game_id=game_id,
+        feature_set_version=feature_set_version,
+        source_data_cutoff_at=source_data_cutoff_at,
+        generated_at=generated_at,
+        kickoff_at=kickoff_at,
+        features=features,
         sources=sources,
     )
 
