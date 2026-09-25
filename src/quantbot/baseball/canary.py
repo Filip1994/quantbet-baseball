@@ -138,28 +138,28 @@ def run_canary_once(
             "summary": summary,
             "evidence": evidence,
         }
-    except Exception as exc:
+    except (RuntimeError, ValueError, psycopg.Error) as exc:
         finished_at = current_time().astimezone(UTC)
         reason = f"CANARY_EXCEPTION_{type(exc).__name__.upper()}"
+        fact = build_canary_fact(
+            cycle_id=None,
+            started_at=started_at.isoformat(),
+            finished_at=finished_at.isoformat(),
+            status="FAILED",
+            max_api_requests=max_api_requests,
+            api_requests=0,
+            fixture_observations_inserted=0,
+            observations_inserted=0,
+            errors=1,
+            archive_verified=False,
+            db_write_verified=False,
+            reason_codes=(reason,),
+        )
         try:
             with psycopg.connect(database_url_from_env()) as connection:
                 repository = PostgreSQLOperationalAcceptanceRepository(connection)
-                fact = build_canary_fact(
-                    cycle_id=None,
-                    started_at=started_at.isoformat(),
-                    finished_at=finished_at.isoformat(),
-                    status="FAILED",
-                    max_api_requests=max_api_requests,
-                    api_requests=0,
-                    fixture_observations_inserted=0,
-                    observations_inserted=0,
-                    errors=1,
-                    archive_verified=False,
-                    db_write_verified=False,
-                    reason_codes=(reason,),
-                )
                 repository.append_canary(fact)
-        except Exception:
+        except psycopg.Error:
             raise exc
         return {
             "status": "FAILED",
