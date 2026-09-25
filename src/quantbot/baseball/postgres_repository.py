@@ -515,8 +515,7 @@ class PostgreSQLEvidenceRepository:
             registered_pick_count = cursor.fetchone()[0]
 
             cursor.execute(
-                "SELECT COUNT(*) FROM pick_monitoring_states "
-                "WHERE state = 'MONITORING'"
+                "SELECT COUNT(*) FROM pick_monitoring_states WHERE state = 'MONITORING'"
             )
             monitored_pick_count = cursor.fetchone()[0]
 
