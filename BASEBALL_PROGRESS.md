@@ -732,3 +732,321 @@ Open Package D gates before merge:
 5. merge only when Package D is green;
 6. verify Railway production deployment and migration `006_moneyline_settlement_clv.sql`;
 7. keep collection disabled after deploy unless separately audited and explicitly enabled.
+
+
+## 46. Package C production deployment closure — 2026-09-25
+
+Verified the Baseball Railway deployment for Package C.
+
+Railway target:
+
+- project: `believable-contentment`;
+- project ID: `089895e8-c4b7-4f3b-9fb9-ca9be11544f4`;
+- environment: `production`;
+- environment ID: `32ceeb6e-a8a8-4f98-b757-58d63417e496`;
+- service: `quantbet-baseball`;
+- service ID: `e6f5221e-0165-4bb6-9daf-9525ae8ebc5f`;
+- deployment ID: `1cc8cd65-238e-4c50-986c-9882ab39e281`;
+- deployed commit: `8bb4aed32b66dc044436c2e2c28d8dadab848483`.
+
+Verified:
+
+- Railway deployment status: **SUCCESS**;
+- deploy logs explicitly report:
+  - `{'migrations_applied': ('005_moneyline_monitoring_closing.sql',)}`;
+- later cron runs report:
+  - `collection_enabled=false`;
+  - `mode="storage-ready"`;
+  - `status="ready"`;
+- runtime health exposes Package C counters:
+  - `monitored_picks`;
+  - `closing_finalizations`.
+
+Safety:
+
+- production collection remains disabled;
+- no Baseball production variable was changed;
+- no football Railway project or football repository was modified.
+
+This closes Package C deployment verification.
+
+## 47. Package D branch and design boundary — 2026-09-25
+
+Created Baseball-only branch:
+
+- `finish/settlement-clv-dashboard-20260925`.
+
+Package D target:
+
+```text
+registered paper pick
+→ immutable closing finalization
+→ fresh authoritative provider game result
+→ immutable game result fact
+→ deterministic paper settlement
+→ realized CLV only when closing outcome = CAPTURED
+→ read-only operational/dashboard projections
+```
+
+Design decisions:
+
+- authoritative result evidence is separated from settlement facts;
+- result evidence is provider-sourced and references the exact final fixture observation and raw payload provenance;
+- settlement is append-only and restart-safe;
+- CLV is never fabricated:
+  - `CAPTURED` close → CLV may be computed from exact closing home/away pair;
+  - `STALE_QUOTE` → explicit `UNAVAILABLE_STALE_QUOTE`;
+  - `NO_VALID_QUOTE` → explicit `UNAVAILABLE_NO_VALID_QUOTE`;
+- settlement is paper-only by construction because it only consumes immutable `registered_picks`;
+- dashboard surfaces are projections/views and do not mutate lifecycle facts.
+
+## 48. Package D schema implementation — 2026-09-25
+
+Added migration:
+
+- `migrations/006_moneyline_settlement_clv.sql`.
+
+New immutable tables:
+
+### `game_result_facts`
+
+Stores authoritative terminal provider result evidence:
+
+- `result_id`;
+- `game_id`;
+- exact `fixture_observation_id`;
+- terminal provider status;
+- result observation timestamp;
+- final home / away score;
+- winner;
+- raw source payload reference and SHA-256 checksum;
+- canonical JSON record.
+
+Database invariants:
+
+- non-negative scores;
+- explicit winner in `home|away|tie`;
+- winner must match the stored final score;
+- canonical record must be a JSON object;
+- one result fact per exact final fixture observation.
+
+### `pick_settlements`
+
+Stores immutable paper settlement and realized CLV facts:
+
+- exact registered `pick_id`;
+- exact `result_id`;
+- exact `closing_finalization_id`;
+- selection and entry odds;
+- settlement outcome `WIN|LOSS|PUSH`;
+- `profit_per_unit`;
+- closing outcome;
+- exact closing observation ID and closing odds only when available;
+- de-vigged closing market probability;
+- CLV probability delta;
+- CLV price ratio;
+- explicit CLV availability status.
+
+CLV status contract:
+
+- `AVAILABLE`;
+- `UNAVAILABLE_STALE_QUOTE`;
+- `UNAVAILABLE_NO_VALID_QUOTE`.
+
+Database constraints ensure unavailable CLV states cannot contain invented closing metrics.
+
+Append-only triggers reuse the Package C mutation-rejection function for:
+
+- `game_result_facts`;
+- `pick_settlements`.
+
+New read-only projections:
+
+- `baseball_moneyline_pick_projection`;
+- `baseball_moneyline_dashboard`.
+
+Dashboard projection exposes:
+
+- registered picks;
+- closing finalizations;
+- settled picks;
+- pending settlement;
+- wins / losses / pushes;
+- realized profit per unit;
+- CLV available / unavailable counts;
+- average probability-space CLV;
+- average price-ratio CLV.
+
+## 49. Package D settlement domain implementation — 2026-09-25
+
+Added:
+
+- `src/quantbot/baseball/settlement_lifecycle.py`.
+
+Implemented:
+
+- `GameResultFact`;
+- `PickSettlement`;
+- deterministic UUID identities;
+- canonical immutable JSON serialization;
+- terminal provider-status validation;
+- final-score extraction;
+- deterministic moneyline settlement;
+- explicit push handling if a terminal provider score is tied;
+- exact closing-pair de-vigging for realized CLV;
+- probability-space CLV:
+  - `closing_market_probability - entry_market_probability`;
+- price-ratio CLV:
+  - `entry_odds / closing_odds - 1`;
+- strict provenance validation between pick, result, closing finalization and closing quote pair.
+
+Important fail-closed rule:
+
+> A stale or missing close cannot produce a numeric CLV.
+
+## 50. Package D PostgreSQL repository and dashboard projection — 2026-09-25
+
+Added:
+
+- `src/quantbot/baseball/settlement_repository.py`.
+
+Implemented:
+
+- append-only result persistence with immutable identity conflict checks;
+- append-only settlement persistence with immutable identity conflict checks;
+- restart-safe `settle(...)`;
+- pending-settlement pick discovery;
+- exact registered-pick lookup;
+- exact closing-finalization lookup;
+- exact closing quote pair reconstruction;
+- result lookup;
+- dashboard snapshot reader over `baseball_moneyline_dashboard`.
+
+Updated:
+
+- `src/quantbot/baseball/postgres_repository.py`.
+
+Runtime health now additionally exposes:
+
+- `game_result_facts`;
+- `settled_picks`;
+- `clv_available`.
+
+## 51. Package D production collector wiring — 2026-09-25
+
+Added:
+
+- `src/quantbot/baseball/moneyline_settlement.py`.
+
+Implemented the post-game priority lane:
+
+```text
+closed registered pick
+→ fresh single-game API result refresh
+→ persist final fixture observation
+→ require terminal provider result + final score
+→ persist immutable result fact
+→ settle paper pick
+→ persist explicit CLV availability
+```
+
+Updated:
+
+- `src/quantbot/baseball/durable_collector.py`.
+
+Collection-cycle execution order is now:
+
+1. post-game settlement refresh for closed, unsettled picks;
+2. active registered-pick monitoring / closing refresh;
+3. broad pregame market collection.
+
+New environment guard:
+
+- `BASEBALL_MAX_SETTLEMENT_REFRESHES`;
+- default: `10`;
+- must be positive.
+
+Collection summary now includes:
+
+- settlement due picks;
+- settlement game calls;
+- inserted result facts;
+- settlement count;
+- wins / losses / pushes;
+- CLV available / unavailable;
+- nonterminal result checks.
+
+Production collection is still disabled, so this path is deployed only after Package D CI/deploy acceptance.
+
+## 52. Package D test coverage — 2026-09-25
+
+Added unit tests:
+
+- `tests/test_settlement_lifecycle.py`;
+- `tests/test_moneyline_settlement.py`.
+
+Covered:
+
+- captured close → numeric CLV;
+- stale close → no fabricated CLV;
+- missing close → no fabricated CLV;
+- moneyline win / loss;
+- explicit push behavior;
+- terminal provider result → settlement;
+- nonterminal provider state → no settlement.
+
+Added PostgreSQL end-to-end test:
+
+- `tests/test_settlement_postgres_integration.py`.
+
+The test exercises:
+
+```text
+fixture evidence
+→ prediction
+→ preliminary evaluation
+→ mandatory final quote
+→ registered pick
+→ monitoring
+→ immutable captured close
+→ final provider result evidence
+→ settlement
+→ realized CLV
+→ dashboard projection
+→ health projection
+```
+
+It also verifies restart-safe settlement replay and uses baseline-relative dashboard / health assertions to avoid shared-database test-order fragility.
+
+## 53. Package D Railway smoke coverage update — 2026-09-25
+
+Updated:
+
+- `.github/workflows/railway-runtime-smoke.yml`.
+
+Package D files are being added to the Railway/PostgreSQL smoke gate for:
+
+- path triggering;
+- compile validation;
+- Ruff formatting;
+- Ruff lint;
+- focused pytest;
+- PostgreSQL integration.
+
+Files covered include:
+
+- `moneyline_settlement.py`;
+- `settlement_lifecycle.py`;
+- `settlement_repository.py`;
+- Package D unit tests;
+- Package D PostgreSQL integration test;
+- migration `006_moneyline_settlement_clv.sql`.
+
+Current state:
+
+- implementation is on branch `finish/settlement-clv-dashboard-20260925`;
+- CI/format/lint verification is the next gate;
+- no PR has been merged yet;
+- migration `006` has **not** been applied to Railway production yet;
+- production collection remains disabled;
+- football project remains untouched.
