@@ -340,3 +340,48 @@ Fix commit:
 This correction improves observability rather than merely satisfying lint: coding defects now surface instead of being silently classified as provider/runtime canary failures.
 
 Production collection remains disabled and no production canary has been executed.
+
+
+## CI iteration 3 — Package E code gates green
+
+Package E code head before this documentation-only update:
+
+- `2129cf441153e570aba5a069d258a874ce35fde9`.
+
+Verification:
+
+- `Baseball tests` workflow run `36154788452`: **SUCCESS**;
+- `Railway runtime smoke` workflow run `36154788449`: **SUCCESS**.
+
+Railway smoke job `108136579056` passed every required step:
+
+- PostgreSQL container startup;
+- checkout/setup;
+- dependency installation;
+- Python compile;
+- focused Ruff formatting;
+- focused Ruff lint;
+- focused pytest including Package E PostgreSQL integration;
+- clean container shutdown.
+
+Therefore the Package E implementation has passed both global repository validation and PostgreSQL-backed runtime validation.
+
+### Package E merge readiness
+
+The implementation is now code-ready for merge.
+
+Still intentionally **not performed**:
+
+- no production canary execution;
+- no `BASEBALL_ENABLE_CANARY` variable change;
+- no `BASEBALL_ENABLE_COLLECTION` variable change;
+- no scheduled production collection activation.
+
+Post-merge sequence remains:
+
+1. verify Railway deploy of Package E;
+2. verify migration `007_operational_acceptance.sql` is applied in production;
+3. run the deployed `CANARY` activation assessment while collection remains OFF;
+4. document the exact READY/BLOCKED result;
+5. only if CANARY readiness is READY, separately decide whether to arm and execute one bounded canary;
+6. scheduled collection remains OFF until the canary passes and the `SCHEDULED_COLLECTION` gate is READY.
