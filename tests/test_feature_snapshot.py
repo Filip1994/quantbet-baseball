@@ -91,9 +91,7 @@ def test_rejects_source_observed_after_snapshot_generation() -> None:
             generated_at="2030-07-04T16:05:00+00:00",
             kickoff_at="2030-07-04T19:20:00+00:00",
             features={"home_rest_hours": 48.0},
-            sources=(
-                _source(observed_at="2030-07-04T16:06:00+00:00"),
-            ),
+            sources=(_source(observed_at="2030-07-04T16:06:00+00:00"),),
         )
 
 
