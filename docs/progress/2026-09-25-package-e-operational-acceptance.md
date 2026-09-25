@@ -834,3 +834,10 @@ The canary-only schema probe is now on main as `e0f2926287c4dd269a499249f3645f68
 ## Second bounded schema-diagnostic canary — 2026-09-26
 
 Schema-probe commit `e0f2926287c4dd269a499249f3645f684e2d048a` deployed successfully. The diagnostic canary was re-armed with caps 8/2/1/1 while `BASEBALL_ENABLE_COLLECTION=false` and `PAPER_MODE=true`. Redeployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` reached SUCCESS. Acceptance remains pending the next natural cron; no market-name hypothesis is treated as proven before that evidence is emitted.
+
+
+## Second bounded canary diagnostic result — 2026-09-26
+
+The schema-probe canary ran naturally at `2026-09-25T23:46:33.726660077Z` (canary `e7e10245-4941-55c1-8cdd-f7b662047dca`, cycle `eaf76e67-fea3-42e3-90ee-b40f8dddb488`). It used 4/8 provider requests with zero API errors, inserted 66 fixture observations, but the two selected odds calls produced 0 compact market rows and therefore 0 canonical/PostgreSQL odds observations. Both schema-name diagnostic fields were empty.
+
+No parser widening is justified by this run. Canary was disarmed again and collection remains disabled. The next probe will distinguish an empty odds response from an unrecognized response shape and may inspect up to four games under the same 8-request ceiling.
