@@ -1050,3 +1050,34 @@ Current state:
 - migration `006` has **not** been applied to Railway production yet;
 - production collection remains disabled;
 - football project remains untouched.
+
+
+## 54. Package D PR and verification gate — 2026-09-25
+
+Opened:
+
+- PR #11 — `Finish Package D: settlement, CLV and dashboard projections`;
+- branch head at PR creation: `9f2a01d20298953ec91ab04254ec57ef0b5da393`.
+
+Verified the Railway runtime smoke workflow on the Package D branch now explicitly includes:
+
+- `src/quantbot/baseball/moneyline_settlement.py`;
+- `src/quantbot/baseball/settlement_lifecycle.py`;
+- `src/quantbot/baseball/settlement_repository.py`;
+- `tests/test_moneyline_settlement.py`;
+- `tests/test_settlement_lifecycle.py`;
+- `tests/test_settlement_postgres_integration.py`;
+
+across:
+
+- push path filters;
+- pull-request path filters;
+- Ruff formatting;
+- Ruff lint;
+- focused pytest.
+
+PR #11 currently reports no completed GitHub status checks yet, so Package D is **not** considered CI-green at this point.
+
+A local clone/compile attempt from the assistant execution container could not be performed because the container has no network/DNS access to `github.com`. This is an execution-environment limitation, not evidence of a repository failure. GitHub Actions remains the authoritative executable CI gate.
+
+No merge or Railway production deployment has been performed for Package D yet.
