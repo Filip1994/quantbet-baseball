@@ -87,7 +87,9 @@ def monitor_due_moneyline_picks(
 
     due = repository.due_pick_ids(as_of=current, limit=max_refreshes)
     fixture_calls = 0
+    fixture_observations_inserted = 0
     odds_calls = 0
+    canonical_rows = 0
     observations_inserted = 0
     exact_pair_refreshes = 0
     finalizations = 0
@@ -113,7 +115,9 @@ def monitor_due_moneyline_picks(
             if fixture_record is None:
                 errors += 1
                 continue
-            repository.append_fixture_observations((fixture_record,))
+            fixture_observations_inserted += repository.append_fixture_observations(
+                (fixture_record,)
+            )
             _, fixture = repository.refresh_context(pick_id, as_of=current)
 
             cutoff = datetime.fromisoformat(fixture.kickoff_at).astimezone(UTC)
@@ -148,6 +152,7 @@ def monitor_due_moneyline_picks(
                 "odds": compact,
             }
             records = canonical_moneyline_observations(snapshot, odds_receipt)
+            canonical_rows += len(records)
             observations_inserted += repository.append_observations(records)
             if _has_exact_pair(records, pick.bookmaker):
                 exact_pair_refreshes += 1
@@ -163,7 +168,9 @@ def monitor_due_moneyline_picks(
         "monitoring_started": started,
         "due_picks": len(due),
         "fixture_calls": fixture_calls,
+        "fixture_observations_inserted": fixture_observations_inserted,
         "odds_calls": odds_calls,
+        "canonical_rows": canonical_rows,
         "observations_inserted": observations_inserted,
         "exact_pair_refreshes": exact_pair_refreshes,
         "finalizations": finalizations,
