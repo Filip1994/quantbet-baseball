@@ -48,21 +48,11 @@ def assess_activation_gate(
     settings = BaseballSettings.from_env(project_root)
     settings.validate()
 
-    cycle_request_cap = int(
-        os.getenv("BASEBALL_MAX_API_REQUESTS_PER_CYCLE", "75")
-    )
-    cron_interval_minutes = int(
-        os.getenv("BASEBALL_CRON_INTERVAL_MINUTES", "15")
-    )
-    daily_reserve_required = int(
-        os.getenv("BASEBALL_API_DAILY_RESERVE", "250")
-    )
-    runtime_max_age_minutes = int(
-        os.getenv("BASEBALL_RUNTIME_MAX_AGE_MINUTES", "45")
-    )
-    canary_max_age_hours = int(
-        os.getenv("BASEBALL_CANARY_MAX_AGE_HOURS", "24")
-    )
+    cycle_request_cap = int(os.getenv("BASEBALL_MAX_API_REQUESTS_PER_CYCLE", "75"))
+    cron_interval_minutes = int(os.getenv("BASEBALL_CRON_INTERVAL_MINUTES", "15"))
+    daily_reserve_required = int(os.getenv("BASEBALL_API_DAILY_RESERVE", "250"))
+    runtime_max_age_minutes = int(os.getenv("BASEBALL_RUNTIME_MAX_AGE_MINUTES", "45"))
+    canary_max_age_hours = int(os.getenv("BASEBALL_CANARY_MAX_AGE_HOURS", "24"))
 
     budget = build_budget_projection(
         daily_request_budget=settings.api_request_budget,
