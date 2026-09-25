@@ -829,3 +829,8 @@ This change does not widen the full-game moneyline parser. A second bounded cana
 ## Canary schema probe re-armed — 2026-09-26
 
 The canary-only schema probe is now on main as `e0f2926287c4dd269a499249f3645f684e2d048a`; deployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` is SUCCESS. One bounded diagnostic canary was re-armed with the existing 8/2/1/1 caps while collection remains false and paper mode remains true. No parser widening is authorized until the natural canary returns the exact live market/selection schema.
+
+
+## Second bounded schema-diagnostic canary — 2026-09-26
+
+Schema-probe commit `e0f2926287c4dd269a499249f3645f684e2d048a` deployed successfully. The diagnostic canary was re-armed with caps 8/2/1/1 while `BASEBALL_ENABLE_COLLECTION=false` and `PAPER_MODE=true`. Redeployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` reached SUCCESS. Acceptance remains pending the next natural cron; no market-name hypothesis is treated as proven before that evidence is emitted.
