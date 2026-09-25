@@ -181,11 +181,14 @@ def test_registered_pick_monitoring_finalizes_exact_closing_pair() -> None:
             policy=policy,
         )
         assert state.state == "MONITORING"
-        assert monitoring.start_monitoring(
-            pick.pick_id,
-            started_at=datetime(2026, 9, 20, 17, 4, tzinfo=UTC),
-            policy=policy,
-        ) == state
+        assert (
+            monitoring.start_monitoring(
+                pick.pick_id,
+                started_at=datetime(2026, 9, 20, 17, 4, tzinfo=UTC),
+                policy=policy,
+            )
+            == state
+        )
 
         close_home = _observation(
             "00000000-0000-0000-0000-000000000203",
@@ -207,10 +210,13 @@ def test_registered_pick_monitoring_finalizes_exact_closing_pair() -> None:
         )
         assert finalization.outcome == "CAPTURED"
         assert finalization.closing_observation_id == close_home.observation_id
-        assert monitoring.finalize_closing(
-            pick.pick_id,
-            finalized_at=datetime(2026, 9, 20, 19, 1, tzinfo=UTC),
-        ) == finalization
+        assert (
+            monitoring.finalize_closing(
+                pick.pick_id,
+                finalized_at=datetime(2026, 9, 20, 19, 1, tzinfo=UTC),
+            )
+            == finalization
+        )
 
         lifecycle = monitoring.read_lifecycle(
             pick.pick_id,
