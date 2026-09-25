@@ -610,3 +610,125 @@ Next package:
 
 > Package E — canary/operational acceptance, settled-pick performance evaluation, CLV diagnostics and the explicit production collection enablement gate. Collection must remain disabled until that gate passes.
 
+
+
+## 46. Package C production closure and Package D settlement / CLV implementation — 2026-09-25
+
+Production verification completed before beginning Package D.
+
+Railway target verified:
+
+- project: `believable-contentment`;
+- project ID: `089895e8-c4b7-4f3b-9fb9-ca9be11544f4`;
+- environment: `production`;
+- service: `quantbet-baseball`;
+- service ID: `e6f5221e-0165-4bb6-9daf-9525ae8ebc5f`;
+- Package C deployment: `1cc8cd65-238e-4c50-986c-9882ab39e281`;
+- deployed commit: `8bb4aed32b66dc044436c2e2c28d8dadab848483`;
+- deployment status: **SUCCESS**;
+- runtime log explicitly confirmed:
+  - `{'migrations_applied': ('005_moneyline_monitoring_closing.sql',)}`;
+- subsequent cron invocations reported:
+  - `collection_enabled=false`;
+  - `mode="storage-ready"`;
+  - `status="ready"`.
+
+Therefore Package C is closed in production and migration `005_moneyline_monitoring_closing.sql` is verified applied.
+
+Package D branch:
+
+- `finish/settlement-clv-dashboard-20260925`.
+
+Package D target lifecycle:
+
+```text
+registered paper pick
+→ immutable closing finalization
+→ fresh single-game provider result refresh
+→ terminal fixture evidence
+→ immutable authoritative game result fact
+→ deterministic paper settlement
+→ realized profit per unit
+→ CLV only from exact CAPTURED closing pair
+→ operational pick projection
+→ aggregate dashboard projection
+```
+
+Implemented so far:
+
+- migration `006_moneyline_settlement_clv.sql`;
+- new immutable `game_result_facts` table;
+- new immutable `pick_settlements` table;
+- append-only triggers for result and settlement facts;
+- `baseball_moneyline_pick_projection` read model;
+- `baseball_moneyline_dashboard` aggregate read model;
+- deterministic result domain in `settlement_lifecycle.py`;
+- PostgreSQL result / settlement / CLV repository in `settlement_repository.py`;
+- priority post-game refresh loop in `moneyline_settlement.py`;
+- durable collector wiring so post-game settlement work runs before broad market collection;
+- new `BASEBALL_MAX_SETTLEMENT_REFRESHES` bounded work control;
+- runtime health counts for:
+  - authoritative game result facts;
+  - settled picks;
+  - picks with computable CLV;
+- CLV fail-closed behavior:
+  - `CAPTURED` close → exact pair de-vig + realized CLV;
+  - `STALE_QUOTE` → explicit `UNAVAILABLE_STALE_QUOTE`;
+  - `NO_VALID_QUOTE` → explicit `UNAVAILABLE_NO_VALID_QUOTE`;
+  - no synthetic/interpolated close is permitted;
+- deterministic moneyline settlement:
+  - WIN → `entry_odds - 1` profit per unit;
+  - LOSS → `-1`;
+  - tied final score → explicit PUSH / `0` profit per unit;
+- restart-safe settlement lookup before insertion;
+- unit coverage for:
+  - captured-close CLV;
+  - stale-close no-CLV;
+  - no-valid-close no-CLV;
+  - explicit push;
+  - terminal-result settlement loop;
+  - nonterminal result does not settle;
+- PostgreSQL end-to-end test covering:
+  - registration;
+  - monitoring;
+  - captured close;
+  - final provider result;
+  - result persistence;
+  - immutable settlement;
+  - realized CLV;
+  - dashboard projection;
+  - health projection;
+  - replay idempotency;
+- Railway runtime smoke workflow expanded to include Package D source and tests.
+
+Package D commits created during this work session include:
+
+- `5893263` — add immutable settlement and CLV schema;
+- `d992a43` — add deterministic result settlement and CLV facts;
+- `fb8797a` — add PostgreSQL settlement repository and projections;
+- `4c7f55f` — add priority result refresh and settlement loop;
+- `b855166` — test deterministic settlement and CLV lifecycle;
+- `2d6792d` — wire authoritative result settlement into durable collector;
+- `014a017` — expose settlement and CLV health counts;
+- `4cb0dc6` — test authoritative result settlement loop;
+- `f47f712` — add PostgreSQL settlement CLV integration coverage;
+- `298c6b7` — cover settlement CLV package in Railway smoke;
+- `fc20c5d` — clean settlement loop test imports.
+
+Safety state:
+
+- production collection is still disabled;
+- no real-money execution exists;
+- no automatic staking exists;
+- no football repository was modified;
+- no football Railway project was modified.
+
+Open Package D gates before merge:
+
+1. inspect exact branch diff;
+2. run / observe global CI and PostgreSQL Railway smoke;
+3. correct formatting, lint, schema, or integration failures;
+4. document every correction in Markdown;
+5. merge only when Package D is green;
+6. verify Railway production deployment and migration `006_moneyline_settlement_clv.sql`;
+7. keep collection disabled after deploy unless separately audited and explicitly enabled.
