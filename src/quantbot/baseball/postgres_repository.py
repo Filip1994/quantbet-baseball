@@ -9,7 +9,8 @@ from typing import Any, Protocol, Self
 
 from .evidence import OddsObservation, PickEvent, canonical_json
 from .evidence_repository import RepositoryStats
-from .operational import FixtureObservation, fixture_canonical_json, iso_or_none
+from .fixture_evidence import FixtureObservation, canonical_fixture_json
+from .runtime_evidence import CollectionCycle, canonical_collection_cycle_json
 
 
 class CursorLike(Protocol):
@@ -50,6 +51,10 @@ def _canonical_text(value: Any) -> str:
         separators=(",", ":"),
         ensure_ascii=True,
     )
+
+
+def __iso_or_none(value: datetime | None) -> str | None:
+    return value.isoformat() if value is not None else None
 
 
 def _canonical_object(value: Any) -> dict[str, Any]:
@@ -126,6 +131,7 @@ class PostgreSQLEvidenceRepository:
             "odds_observations": "observation_id",
             "pick_events": "pick_id",
             "fixture_observations": "fixture_observation_id",
+            "collection_cycles": "cycle_id",
         }
         identity_column = identity_columns[table]
         placeholders = ["%s"] * len(values)
@@ -264,9 +270,13 @@ class PostgreSQLEvidenceRepository:
         columns = (
             "fixture_observation_id",
             "game_id",
+            "provider",
+            "provider_game_id",
             "league",
-            "home_team",
-            "away_team",
+            "home_team_id",
+            "home_team_name",
+            "away_team_id",
+            "away_team_name",
             "kickoff_at",
             "provider_status",
             "observed_at",
@@ -279,19 +289,53 @@ class PostgreSQLEvidenceRepository:
         inserted = 0
         try:
             for record in batch:
+                with self._connection.cursor() as cursor:
+                    cursor.execute(
+                        "INSERT INTO fixtures (game_id, provider, provider_game_id, "
+                        "home_team_id, away_team_id) VALUES (%s, %s, %s, %s, %s) "
+                        "ON CONFLICT DO NOTHING",
+                        (
+                            record.game_id,
+                            record.provider,
+                            record.provider_game_id,
+                            record.home_team_id,
+                            record.away_team_id,
+                        ),
+                    )
+                    cursor.execute(
+                        "SELECT provider, provider_game_id, home_team_id, away_team_id "
+                        "FROM fixtures WHERE game_id = %s",
+                        (record.game_id,),
+                    )
+                    fixture = cursor.fetchone()
+                expected = (
+                    record.provider,
+                    record.provider_game_id,
+                    record.home_team_id,
+                    record.away_team_id,
+                )
+                if fixture is None or tuple(fixture) != expected:
+                    raise EvidenceConflictError(
+                        f"conflicting fixture identity: {record.game_id}"
+                    )
+
                 values = (
                     record.fixture_observation_id,
                     record.game_id,
+                    record.provider,
+                    record.provider_game_id,
                     record.league,
-                    record.home_team,
-                    record.away_team,
+                    record.home_team_id,
+                    record.home_team_name,
+                    record.away_team_id,
+                    record.away_team_name,
                     record.kickoff_at,
                     record.provider_status,
                     record.observed_at,
                     record.source_payload_ref,
                     record.source_payload_checksum,
                     record.schema_version,
-                    fixture_canonical_json(record),
+                    canonical_fixture_json(record),
                 )
                 if self._append(
                     "fixture_observations",
@@ -306,6 +350,54 @@ class PostgreSQLEvidenceRepository:
             self._connection.rollback()
             raise
         return inserted
+
+    def append_collection_cycle(self, record: CollectionCycle) -> bool:
+        columns = (
+            "cycle_id",
+            "started_at",
+            "finished_at",
+            "status",
+            "games_seen",
+            "fixture_observations_inserted",
+            "pregame_games",
+            "due_events",
+            "games_selected",
+            "odds_calls",
+            "raw_market_rows",
+            "canonical_rows",
+            "observations_inserted",
+            "api_requests",
+            "api_remaining",
+            "errors",
+            "schema_version",
+            "canonical_record",
+        )
+        values = (
+            record.cycle_id,
+            record.started_at,
+            record.finished_at,
+            record.status,
+            record.games_seen,
+            record.fixture_observations_inserted,
+            record.pregame_games,
+            record.due_events,
+            record.games_selected,
+            record.odds_calls,
+            record.raw_market_rows,
+            record.canonical_rows,
+            record.observations_inserted,
+            record.api_requests,
+            record.api_remaining,
+            record.errors,
+            record.schema_version,
+            canonical_collection_cycle_json(record),
+        )
+        return self._append(
+            "collection_cycles",
+            record.cycle_id,
+            values,
+            columns,
+        )
 
     def append_runtime_cycle(
         self,
@@ -410,6 +502,9 @@ class PostgreSQLEvidenceRepository:
             cursor.execute("SELECT COUNT(*) FROM pick_events")
             pick_count = cursor.fetchone()[0]
 
+            cursor.execute("SELECT COUNT(*), MAX(finished_at) FROM collection_cycles")
+            collection_count, latest_collection = cursor.fetchone()
+
             cursor.execute("SELECT COUNT(*), MAX(finished_at) FROM runtime_cycles")
             runtime_count, latest_runtime = cursor.fetchone()
 
@@ -420,10 +515,12 @@ class PostgreSQLEvidenceRepository:
             "distinct_quote_games": int(odds_games),
             "bookmakers": int(bookmakers),
             "pick_events": int(pick_count),
+            "collection_cycles": int(collection_count),
             "runtime_cycles": int(runtime_count),
-            "latest_fixture_observed_at": iso_or_none(latest_fixture),
-            "latest_odds_observed_at": iso_or_none(latest_odds),
-            "latest_runtime_finished_at": iso_or_none(latest_runtime),
+            "latest_fixture_observed_at": _iso_or_none(latest_fixture),
+            "latest_odds_observed_at": _iso_or_none(latest_odds),
+            "latest_collection_finished_at": _iso_or_none(latest_collection),
+            "latest_runtime_finished_at": _iso_or_none(latest_runtime),
         }
 
     def stats(self) -> RepositoryStats:
