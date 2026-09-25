@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS registered_picks (
     model_version TEXT NOT NULL,
     feature_snapshot_ref TEXT NOT NULL,
     source_data_cutoff_at TIMESTAMPTZ NOT NULL,
+    kickoff_at TIMESTAMPTZ NOT NULL,
     registered_at TIMESTAMPTZ NOT NULL,
     paper_mode BOOLEAN NOT NULL,
     state TEXT NOT NULL,
@@ -229,6 +230,8 @@ CREATE TABLE IF NOT EXISTS registered_picks (
         CHECK (state = 'REGISTERED'),
     CONSTRAINT registered_picks_cutoff_valid
         CHECK (source_data_cutoff_at <= registered_at),
+    CONSTRAINT registered_picks_before_kickoff
+        CHECK (registered_at < kickoff_at),
     CONSTRAINT registered_picks_canonical_object
         CHECK (jsonb_typeof(canonical_record) = 'object'),
     CONSTRAINT registered_picks_one_moneyline_per_game
