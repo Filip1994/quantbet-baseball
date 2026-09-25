@@ -65,6 +65,8 @@ def _object_key(
     params: Mapping[str, Any],
     captured: datetime,
     checksum: str,
+    *,
+    namespace: str = "api-sports-baseball",
 ) -> str:
     safe_endpoint = endpoint.strip("/").replace("/", "_") or "root"
     request_identity = json.dumps(
@@ -75,8 +77,9 @@ def _object_key(
     request_digest = hashlib.sha256(request_identity).hexdigest()[:12]
     stamp = captured.strftime("%Y%m%dT%H%M%S.%fZ")
     day = captured.strftime("%Y-%m-%d")
+    safe_namespace = namespace.strip("/").replace("/", "_") or "raw"
     return (
-        f"api-sports-baseball/{day}/{stamp}_{safe_endpoint}_"
+        f"{safe_namespace}/{day}/{stamp}_{safe_endpoint}_"
         f"{request_digest}_{checksum[:12]}.json"
     )
 
@@ -84,8 +87,14 @@ def _object_key(
 class LocalRawPayloadArchive:
     """Atomic local archive retained for development and replay tooling."""
 
-    def __init__(self, root: Path) -> None:
+    def __init__(
+        self,
+        root: Path,
+        *,
+        namespace: str = "api-sports-baseball",
+    ) -> None:
         self.root = root
+        self.namespace = namespace
 
     def archive(
         self,
@@ -101,7 +110,13 @@ class LocalRawPayloadArchive:
             payload,
             captured_at=captured_at,
         )
-        path = self.root / _object_key(endpoint, params, captured, checksum)
+        path = self.root / _object_key(
+            endpoint,
+            params,
+            captured,
+            checksum,
+            namespace=self.namespace,
+        )
         path.parent.mkdir(parents=True, exist_ok=True)
 
         fd, temp_name = tempfile.mkstemp(
@@ -129,9 +144,16 @@ class LocalRawPayloadArchive:
 class S3RawPayloadArchive:
     """S3-compatible archive used by the Railway worker."""
 
-    def __init__(self, *, client: Any, bucket: str) -> None:
+    def __init__(
+        self,
+        *,
+        client: Any,
+        bucket: str,
+        namespace: str = "api-sports-baseball",
+    ) -> None:
         self.client = client
         self.bucket = bucket
+        self.namespace = namespace
 
     def archive(
         self,
@@ -147,7 +169,13 @@ class S3RawPayloadArchive:
             payload,
             captured_at=captured_at,
         )
-        key = _object_key(endpoint, params, captured, checksum)
+        key = _object_key(
+            endpoint,
+            params,
+            captured,
+            checksum,
+            namespace=self.namespace,
+        )
         self.client.put_object(
             Bucket=self.bucket,
             Key=key,
@@ -174,6 +202,7 @@ def archive_from_env(
     local_root: Path,
     *,
     require_remote: bool = False,
+    namespace: str = "api-sports-baseball",
 ) -> RawPayloadArchive:
     """Build the archive adapter and fail closed on partial S3 configuration."""
 
@@ -198,9 +227,10 @@ def archive_from_env(
         return S3RawPayloadArchive(
             client=client,
             bucket=values["BASEBALL_RAW_BUCKET"],
+            namespace=namespace,
         )
 
     if require_remote:
         raise RuntimeError("Railway raw payload bucket configuration is required")
 
-    return LocalRawPayloadArchive(local_root)
+    return LocalRawPayloadArchive(local_root, namespace=namespace)
