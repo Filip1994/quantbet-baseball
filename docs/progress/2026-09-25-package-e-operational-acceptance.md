@@ -824,3 +824,8 @@ The canary flag was immediately disarmed after the failed run, with collection k
 PR #16 added a diagnostic-only extension to the bounded canary path. It exposes distinct provider market names and selection labels while excluding odds values and credentials. CI initially caught formatting drift; no merge occurred until it was fixed. Final Baseball tests and Railway runtime smoke both passed. The PR was squash-merged as `e0f2926287c4dd269a499249f3645f684e2d048a`.
 
 This change does not widen the full-game moneyline parser. A second bounded canary is required to obtain exact live provider naming before the parser is changed.
+
+
+## Canary schema probe re-armed — 2026-09-26
+
+The canary-only schema probe is now on main as `e0f2926287c4dd269a499249f3645f684e2d048a`; deployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` is SUCCESS. One bounded diagnostic canary was re-armed with the existing 8/2/1/1 caps while collection remains false and paper mode remains true. No parser widening is authorized until the natural canary returns the exact live market/selection schema.
