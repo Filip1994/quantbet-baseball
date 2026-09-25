@@ -1070,3 +1070,57 @@ Railway production also remains unchanged:
 - source branch: `main`.
 
 Therefore the audit logging work did **not** mutate Baseball production and did not merge PR #13.
+
+
+## 63. Package E handoff revalidation — 2026-09-26
+
+Performed a fresh read-only Baseball production revalidation for the current handoff.
+
+Railway scope remained strictly:
+
+- project: `believable-contentment` (`089895e8-c4b7-4f3b-9fb9-ca9be11544f4`);
+- environment: `production` (`32ceeb6e-a8a8-4f98-b757-58d63417e496`);
+- service: `quantbet-baseball` (`e6f5221e-0165-4bb6-9daf-9525ae8ebc5f`).
+
+No football repository or Railway project was modified.
+
+Fresh verification:
+
+- current Baseball deployment `1466ff80-d238-4f38-9822-c4098fafc9da` is `SUCCESS`;
+- deployment source remains main commit `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- cron remains `*/15 * * * *`;
+- service source remains `Filip1994/quantbet-baseball` branch `main`;
+- no watch patterns are configured in the returned service config;
+- production variable names still do **not** include `API_BASEBALL_KEY`.
+
+The latest completed natural cron visible in this revalidation emitted gate evidence at
+`2026-09-25T22:00:51.824842688Z` (local Europe/Belgrade date: 2026-09-26), assessment
+`f940b8d9-0240-5269-b0be-5ebf532de2e7`.
+
+Its activation gate again reports:
+
+- `daily_request_budget=7500`;
+- `cycle_request_cap=75`;
+- `cycles_per_day=96`;
+- `worst_case_daily_requests=7200`;
+- `request_headroom=300`;
+- `daily_reserve_required=250`;
+- `api_key_configured=false`;
+- `canary_passed=false`;
+- `collection_enabled=false`;
+- `migrations_current=true`;
+- `paper_mode=true`;
+- `raw_archive_configured=true`;
+- `runtime_fresh=true`;
+- reason codes: `[API_KEY_MISSING]`;
+- verdict: `BLOCKED`.
+
+Therefore the post-budget-fix acceptance conclusion remains stable:
+
+- `API_BUDGET_UNSAFE` is absent;
+- the budget correction is still effective;
+- the only live CANARY-target blocker is the missing provider credential;
+- scheduled collection remains disabled;
+- no canary was armed or executed.
+
+No Railway configuration mutation, redeploy, cron mutation, canary action, collection activation, or PR merge was performed during this revalidation.
