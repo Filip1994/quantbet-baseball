@@ -610,3 +610,134 @@ Next package:
 
 > Package E — canary/operational acceptance, settled-pick performance evaluation, CLV diagnostics and the explicit production collection enablement gate. Collection must remain disabled until that gate passes.
 
+
+
+## 47. Package E — operational acceptance / canary gate started — 2026-09-25
+
+Package D was independently verified after merge before starting Package E.
+
+Verified Package D production evidence:
+
+- PR #8 `Finish Package D: settlement CLV and dashboard projections` is merged;
+- Package D head CI:
+  - `Baseball tests`: **SUCCESS**;
+  - `Railway runtime smoke`: **SUCCESS**;
+- main commit: `0f1126fec305de58562c5551b0d81f36df7a2b9a`;
+- Baseball Railway deployment: `1fc35c1d-9c1c-4843-b52e-154cb60411f9`;
+- Railway deployment status: **SUCCESS**;
+- deploy log explicitly applied:
+  - `006_moneyline_settlement_clv.sql`;
+- later cron runs remain:
+  - `collection_enabled=false`;
+  - `mode="storage-ready"`;
+  - `status="ready"`.
+
+Package E branch:
+
+- `finish/package-e-canary-acceptance-20260925`.
+
+Package E objectives:
+
+1. machine-readable operational activation gate;
+2. bounded one-shot canary mode distinct from scheduled production collection;
+3. settled-pick performance evaluation;
+4. CLV coverage / diagnostics;
+5. explicit evidence for why scheduled collection is READY or BLOCKED;
+6. keep scheduled collection disabled until the gate is proven.
+
+Important finding discovered during Package E audit:
+
+> The old `BASEBALL_MAX_ODDS_REQUESTS=76` budget was calibrated around 2 schedule requests + 76 odds requests per 15-minute cycle, which is 78 requests/cycle × 96 cycles/day = 7,488 requests/day. Package C and D added monitoring and settlement provider calls. Those calls share the same API client but are not all subtracted from the old broad-odds cap. Therefore the new worst-case request budget can exceed the 7,500/day subscription ceiling.
+
+This means the activation gate must remain BLOCKED until a shared total per-cycle provider request cap is implemented.
+
+Required Package E correction:
+
+- bound **all fresh provider attempts** through one total cycle cap;
+- include retries because `BaseballAPIClient.request_count` increments per HTTP attempt;
+- prioritize settlement and active-pick monitoring;
+- give broad schedule/odds collection only the remaining capacity;
+- make daily worst-case request math mechanically auditable.
+
+Safety:
+
+- no production collection variable has been enabled;
+- no canary has been executed yet;
+- no football repository or Railway project has been modified.
+
+
+### Package E implementation checkpoint — 2026-09-25
+
+Implemented on `finish/package-e-canary-acceptance-20260925`:
+
+- shared **75 total provider attempts/cycle** hard cap;
+- 15-minute worst-case budget reduced to 7,200/day;
+- 300/day theoretical headroom against the 7,500 subscription budget;
+- default activation reserve requirement of 250/day;
+- all retries and lifecycle/broad requests share the same request counter;
+- broad odds capacity now consumes only what remains after settlement + monitoring and two reserved schedule calls;
+- explicit `SCHEDULED` / `CANARY` collection-cycle execution modes;
+- migration `007_operational_acceptance.sql`;
+- immutable canary-run evidence;
+- immutable activation-gate assessments;
+- performance/CLV diagnostic SQL projections;
+- bounded explicit canary runner;
+- machine-readable CANARY and SCHEDULED_COLLECTION gates;
+- unit + PostgreSQL integration tests;
+- Railway smoke workflow coverage;
+- `.env.example` activation/budget controls.
+
+No production canary has been executed and `BASEBALL_ENABLE_COLLECTION` remains disabled.
+
+Next gate:
+
+> Global CI + Railway PostgreSQL smoke must be green before PR merge or any production canary.
+
+
+### Package E CI iteration 1
+
+PR #9 initial global test run failed only at Ruff formatting.
+
+Fixed:
+
+- `activation_gate.py` formatting;
+- shared-cycle budget test formatting.
+
+Compilation was already green. Lint/pytest were not reached in that run.
+
+Failure and exact fixes are recorded in `docs/progress/2026-09-25-package-e-operational-acceptance.md`.
+
+Production collection remains disabled.
+
+
+### Package E CI iteration 2
+
+Second PR #9 global run passed compile + formatting and failed Ruff lint on two blind `Exception` catches in `canary.py`.
+
+Fixed in `0b705da`:
+
+- expected operational errors are narrowly classified;
+- unexpected programmer errors now propagate;
+- failed-canary persistence fallback only catches PostgreSQL driver errors.
+
+Full detail is recorded in `docs/progress/2026-09-25-package-e-operational-acceptance.md`.
+
+No production canary was run. Scheduled collection remains disabled.
+
+
+### Package E code gates green — 2026-09-25
+
+Package E code head `2129cf4` passed:
+
+- global Baseball tests run `36154788452`: **SUCCESS**;
+- Railway/PostgreSQL smoke run `36154788449`: **SUCCESS**.
+
+Package E is ready for merge from a code/CI perspective.
+
+Activation remains deliberately separate:
+
+- no production canary has been run;
+- `BASEBALL_ENABLE_CANARY` has not been enabled;
+- `BASEBALL_ENABLE_COLLECTION` remains disabled.
+
+After merge: verify migration 007 in Baseball Railway, then run the read-only CANARY readiness assessment before any canary execution.

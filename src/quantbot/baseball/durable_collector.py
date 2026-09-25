@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import uuid
 from collections.abc import Callable
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol
@@ -58,6 +59,23 @@ class CollectorClient(Protocol):
     ) -> tuple[list[dict[str, Any]], Any]: ...
 
     def odds_with_receipt(self, game_id: int) -> tuple[list[dict[str, Any]], Any]: ...
+
+
+def remaining_broad_odds_capacity(
+    *,
+    cycle_request_cap: int,
+    requests_used: int,
+    max_odds_requests: int,
+    schedule_request_reserve: int = 2,
+) -> int:
+    if cycle_request_cap < 1:
+        raise ValueError("cycle_request_cap must be positive")
+    if requests_used < 0 or max_odds_requests < 0 or schedule_request_reserve < 0:
+        raise ValueError("request counts cannot be negative")
+    return min(
+        max_odds_requests,
+        max(0, cycle_request_cap - requests_used - schedule_request_reserve),
+    )
 
 
 def _market_row_count(compact: dict[str, Any]) -> int:
@@ -216,15 +234,47 @@ def collect_durable_once(
     root: Path,
     *,
     now: datetime | None = None,
+    execution_mode: str = "SCHEDULED",
+    max_api_requests_per_cycle: int | None = None,
+    max_odds_requests_override: int | None = None,
+    max_monitoring_refreshes_override: int | None = None,
+    max_settlement_refreshes_override: int | None = None,
 ) -> dict[str, int | str]:
     """Run one production collection cycle with DB locking and remote archive."""
 
     settings = BaseballSettings.from_env(root)
+    if execution_mode not in {"SCHEDULED", "CANARY"}:
+        raise ValueError("execution_mode must be SCHEDULED or CANARY")
+
+    cycle_request_cap = (
+        max_api_requests_per_cycle
+        if max_api_requests_per_cycle is not None
+        else int(os.getenv("BASEBALL_MAX_API_REQUESTS_PER_CYCLE", "75"))
+    )
+    if cycle_request_cap < 1:
+        raise ValueError("BASEBALL_MAX_API_REQUESTS_PER_CYCLE must be positive")
+    effective_request_cap = min(cycle_request_cap, settings.api_request_budget)
+
     archive = archive_from_env(settings.raw_archive_dir, require_remote=True)
-    client = BaseballAPIClient(settings, raw_archive=archive)
-    max_odds_requests = int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
-    max_monitoring_refreshes = int(os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10"))
-    max_settlement_refreshes = int(os.getenv("BASEBALL_MAX_SETTLEMENT_REFRESHES", "10"))
+    client = BaseballAPIClient(
+        replace(settings, api_request_budget=effective_request_cap),
+        raw_archive=archive,
+    )
+    max_odds_requests = (
+        max_odds_requests_override
+        if max_odds_requests_override is not None
+        else int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
+    )
+    max_monitoring_refreshes = (
+        max_monitoring_refreshes_override
+        if max_monitoring_refreshes_override is not None
+        else int(os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10"))
+    )
+    max_settlement_refreshes = (
+        max_settlement_refreshes_override
+        if max_settlement_refreshes_override is not None
+        else int(os.getenv("BASEBALL_MAX_SETTLEMENT_REFRESHES", "10"))
+    )
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
     if max_monitoring_refreshes < 1:
@@ -245,8 +295,11 @@ def collect_durable_once(
         if locked is None or not bool(locked[0]):
             summary = {
                 "status": "skipped_locked",
+                "cycle_id": cycle_id,
+                "execution_mode": execution_mode,
+                "cycle_request_cap": effective_request_cap,
                 "api_requests": 0,
-                "api_remaining": settings.api_request_budget,
+                "api_remaining": effective_request_cap,
             }
             repository.append_collection_cycle(
                 CollectionCycle.from_summary(
@@ -254,6 +307,7 @@ def collect_durable_once(
                     started_at=cycle_started_at,
                     finished_at=datetime.now(UTC),
                     summary=summary,
+                    execution_mode=execution_mode,
                 )
             )
             return summary
@@ -274,9 +328,10 @@ def collect_durable_once(
                 policy=OddsLifecyclePolicy(),
                 max_refreshes=max_monitoring_refreshes,
             )
-            remaining_odds_requests = max(
-                0,
-                max_odds_requests - int(monitoring["odds_calls"]),
+            remaining_odds_requests = remaining_broad_odds_capacity(
+                cycle_request_cap=effective_request_cap,
+                requests_used=client.request_count,
+                max_odds_requests=max_odds_requests,
             )
             summary = collect_with_dependencies(
                 client,
@@ -325,12 +380,16 @@ def collect_durable_once(
             summary["monitoring_closing_no_valid_quote"] = int(
                 monitoring["closing_no_valid_quote"]
             )
+            summary["cycle_id"] = cycle_id
+            summary["execution_mode"] = execution_mode
+            summary["cycle_request_cap"] = effective_request_cap
             repository.append_collection_cycle(
                 CollectionCycle.from_summary(
                     cycle_id=cycle_id,
                     started_at=cycle_started_at,
                     finished_at=datetime.now(UTC),
                     summary=summary,
+                    execution_mode=execution_mode,
                 )
             )
             return summary
