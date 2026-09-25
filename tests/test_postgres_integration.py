@@ -119,24 +119,16 @@ def test_migrations_and_repository_are_idempotent() -> None:
 
         health = repository.health_snapshot()
         assert (
-            health["fixture_observations"]
-            == before_health["fixture_observations"] + 1
+            health["fixture_observations"] == before_health["fixture_observations"] + 1
         )
         assert health["distinct_fixtures"] == before_health["distinct_fixtures"] + 1
+        assert health["odds_observations"] == before_health["odds_observations"] + 1
         assert (
-            health["odds_observations"]
-            == before_health["odds_observations"] + 1
-        )
-        assert (
-            health["distinct_quote_games"]
-            == before_health["distinct_quote_games"] + 1
+            health["distinct_quote_games"] == before_health["distinct_quote_games"] + 1
         )
         assert health["bookmakers"] >= before_health["bookmakers"]
         assert health["pick_events"] == before_health["pick_events"]
-        assert (
-            health["collection_cycles"]
-            == before_health["collection_cycles"] + 1
-        )
+        assert health["collection_cycles"] == before_health["collection_cycles"] + 1
         assert health["runtime_cycles"] == before_health["runtime_cycles"] + 1
 
 
