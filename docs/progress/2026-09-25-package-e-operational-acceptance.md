@@ -817,3 +817,10 @@ The first natural bounded canary executed at `2026-09-25T23:16:05.657939242Z` an
 Reason codes were `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`. This localizes the acceptance failure to odds canonicalization rather than provider connectivity or fixture storage.
 
 The canary flag was immediately disarmed after the failed run, with collection kept false and paper mode true. Deployment `2c42711f-e4b2-4410-a05f-407cdb767113` now represents that safe state.
+
+
+## Canary-only odds schema probe merged — 2026-09-26
+
+PR #16 added a diagnostic-only extension to the bounded canary path. It exposes distinct provider market names and selection labels while excluding odds values and credentials. CI initially caught formatting drift; no merge occurred until it was fixed. Final Baseball tests and Railway runtime smoke both passed. The PR was squash-merged as `e0f2926287c4dd269a499249f3645f684e2d048a`.
+
+This change does not widen the full-game moneyline parser. A second bounded canary is required to obtain exact live provider naming before the parser is changed.
