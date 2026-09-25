@@ -10,6 +10,9 @@ on:
       - "src/quantbot/baseball/durable_collector.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
+      - "src/quantbot/baseball/moneyline_monitoring.py"
+      - "src/quantbot/baseball/monitoring_lifecycle.py"
+      - "src/quantbot/baseball/monitoring_repository.py"
       - "src/quantbot/baseball/postgres_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
@@ -20,6 +23,8 @@ on:
       - "tests/test_decision_lifecycle.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
+      - "tests/test_monitoring_lifecycle.py"
+      - "tests/test_monitoring_postgres_integration.py"
       - "tests/test_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
@@ -33,6 +38,9 @@ on:
       - "src/quantbot/baseball/durable_collector.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
+      - "src/quantbot/baseball/moneyline_monitoring.py"
+      - "src/quantbot/baseball/monitoring_lifecycle.py"
+      - "src/quantbot/baseball/monitoring_repository.py"
       - "src/quantbot/baseball/postgres_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
@@ -43,6 +51,8 @@ on:
       - "tests/test_decision_lifecycle.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
+      - "tests/test_monitoring_lifecycle.py"
+      - "tests/test_monitoring_postgres_integration.py"
       - "tests/test_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
@@ -85,12 +95,17 @@ jobs:
           src/quantbot/baseball/durable_collector.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
+          src/quantbot/baseball/moneyline_monitoring.py
+          src/quantbot/baseball/monitoring_lifecycle.py
+          src/quantbot/baseball/monitoring_repository.py
           src/quantbot/baseball/postgres_repository.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
+          tests/test_monitoring_lifecycle.py
+          tests/test_monitoring_postgres_integration.py
           tests/test_postgres_integration.py
           tests/test_raw_archive.py
           tests/test_runtime_foundation.py
@@ -122,4 +137,6 @@ jobs:
           tests/test_ingestion.py
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
+          tests/test_monitoring_lifecycle.py
+          tests/test_monitoring_postgres_integration.py
           tests/test_postgres_integration.py
