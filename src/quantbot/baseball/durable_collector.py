@@ -25,8 +25,8 @@ from .evidence import OddsObservation
 from .fixture_evidence import FixtureObservation, canonical_fixture_observation
 from .ingestion import canonical_moneyline_observations
 from .postgres_repository import PostgreSQLEvidenceRepository
-from .runtime_evidence import CollectionCycle
 from .raw_archive import archive_from_env
+from .runtime_evidence import CollectionCycle
 from .scheduler import build_scheduler_record, is_observation_due
 
 _ADVISORY_LOCK_KEY = 726478920260918
