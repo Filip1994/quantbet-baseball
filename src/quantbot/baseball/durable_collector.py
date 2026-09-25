@@ -176,6 +176,8 @@ def collect_with_dependencies(
     raw_market_rows = 0
     canonical_rows = 0
     inserted = 0
+    market_names_seen: set[str] = set()
+    bookmaker_names_seen: set[str] = set()
 
     for game in selected:
         game_id = _game_id(game)
@@ -198,6 +200,10 @@ def collect_with_dependencies(
         odds_calls += 1
         compact = compact_odds(odds)
         raw_market_rows += _market_row_count(compact)
+        market_names_seen.update(str(name) for name in compact.get("market_names") or [])
+        bookmaker_names_seen.update(
+            str(name) for name in compact.get("bookmaker_names") or []
+        )
         home, away = _team_names(game)
         snapshot = {
             "captured_at": receipt.captured_at,
@@ -222,6 +228,8 @@ def collect_with_dependencies(
         "games_selected": len(selected),
         "odds_calls": odds_calls,
         "raw_market_rows": raw_market_rows,
+        "market_names_seen": " | ".join(sorted(market_names_seen)[:100]),
+        "bookmaker_names_seen": " | ".join(sorted(bookmaker_names_seen)[:100]),
         "canonical_rows": canonical_rows,
         "observations_inserted": inserted,
         "api_requests": client.request_count,
