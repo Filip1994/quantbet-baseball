@@ -1461,3 +1461,30 @@ Safety action immediately after this result:
 - `PAPER_MODE=true`.
 
 Next bounded diagnostic design: record only response row counts and JSON key names (no odds/prices/secrets), and increase the diagnostic odds sample from 2 to at most 4 games while retaining the hard 8-request canary cap.
+
+
+## 73. Live-history moneyline semantics corrected — 2026-09-26
+
+Repository-held live API-Sports Baseball evidence established the exact full-game moneyline semantics before changing the parser.
+
+Historical live evidence:
+
+- `data/baseball/LIVE_API_AUDIT.md` records `Home/Away` in 496 snapshots and `Match Winner` in 489 snapshots;
+- a stored MLB raw odds payload for game `185853` shows market id `1`, name `Home/Away`, with exactly two selections: `Home` and `Away`, across multiple bookmakers;
+- stored MLB raw payloads also show market id `14`, name `Match Winner`, with three selections: `Home`, `Draw`, `Away`.
+
+This exposed two canonicalization defects:
+
+1. exact `Home/Away` was not accepted as moneyline and could be filtered out for non-local bookmakers;
+2. three-way `Match Winner` could be partially canonicalized by dropping `Draw`, which is invalid for two-way de-vigging.
+
+PR #22 `Canonicalize API-Sports Home/Away moneyline` passed Baseball tests and Railway runtime smoke and was squash-merged to main as `a4d20a9d624342a286603fe46bd2a4cf3dff3640`.
+
+Fix semantics:
+
+- `Home/Away` is retained by compact odds for all bookmakers and canonicalized as game-level moneyline;
+- a candidate moneyline market is rejected as a whole when any outcome cannot map to home or away;
+- therefore three-way `Match Winner` with `Draw` fails closed;
+- innings variants remain excluded by exact market-name matching.
+
+Scheduled collection remains disabled and paper mode remains mandatory. The next acceptance action is a third bounded live canary after this commit is successfully deployed, with at most 4 broad odds calls under the unchanged 8-request total canary cap.
