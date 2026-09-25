@@ -181,6 +181,12 @@ def collect_with_dependencies(
     inserted = 0
     schema_market_names: set[str] = set()
     schema_candidate_values: dict[str, set[str]] = {}
+    schema_odds_payload_rows = 0
+    schema_empty_odds_calls = 0
+    schema_nonempty_odds_calls = 0
+    schema_bookmaker_records = 0
+    schema_top_level_keys: set[str] = set()
+    schema_response_shapes: set[str] = set()
 
     for game in selected:
         game_id = _game_id(game)
@@ -202,7 +208,21 @@ def collect_with_dependencies(
 
         odds_calls += 1
         if schema_probe:
-            for bookmaker in _bookmaker_records(odds):
+            schema_odds_payload_rows += len(odds)
+            if odds:
+                schema_nonempty_odds_calls += 1
+            else:
+                schema_empty_odds_calls += 1
+            for item in odds:
+                if not isinstance(item, dict):
+                    continue
+                keys = tuple(sorted(str(key) for key in item))
+                schema_top_level_keys.update(keys)
+                schema_response_shapes.add(",".join(keys))
+
+            bookmaker_records = _bookmaker_records(odds)
+            schema_bookmaker_records += len(bookmaker_records)
+            for bookmaker in bookmaker_records:
                 for market in bookmaker.get("markets") or []:
                     if not isinstance(market, dict):
                         continue
@@ -268,6 +288,20 @@ def collect_with_dependencies(
         "errors": errors,
     }
     if schema_probe:
+        result["schema_odds_payload_rows"] = schema_odds_payload_rows
+        result["schema_empty_odds_calls"] = schema_empty_odds_calls
+        result["schema_nonempty_odds_calls"] = schema_nonempty_odds_calls
+        result["schema_bookmaker_records"] = schema_bookmaker_records
+        result["schema_top_level_keys_json"] = json.dumps(
+            sorted(schema_top_level_keys)[:100],
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
+        result["schema_response_shapes_json"] = json.dumps(
+            sorted(schema_response_shapes)[:50],
+            ensure_ascii=True,
+            separators=(",", ":"),
+        )
         result["schema_market_names_json"] = json.dumps(
             sorted(schema_market_names)[:100],
             ensure_ascii=True,
