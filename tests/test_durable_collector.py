@@ -142,8 +142,53 @@ def test_canary_schema_probe_reports_market_names_without_prices() -> None:
 
     assert market_names == ["Moneyline"]
     assert candidates == {"Moneyline": ["Away", "Home"]}
+    assert result["schema_odds_payload_rows"] == 1
+    assert result["schema_empty_odds_calls"] == 0
+    assert result["schema_nonempty_odds_calls"] == 1
+    assert result["schema_bookmaker_records"] == 1
+    assert json.loads(result["schema_top_level_keys_json"]) == ["bookmakers"]
+    assert json.loads(result["schema_response_shapes_json"]) == ["bookmakers"]
     assert "1.90" not in result["schema_candidate_values_json"]
     assert "2.10" not in result["schema_candidate_values_json"]
+
+
+class EmptyOddsClient(FakeClient):
+    def odds_with_receipt(self, game_id):
+        self.request_count += 1
+        assert game_id == 10
+        return (
+            [],
+            ArchiveReceipt(
+                ref="s3://raw/game-10-empty.json",
+                checksum="c" * 64,
+                captured_at="2030-09-18T17:00:00+00:00",
+            ),
+        )
+
+
+def test_canary_schema_probe_distinguishes_empty_odds_response() -> None:
+    now = datetime(2030, 9, 18, 17, 0, tzinfo=UTC)
+    client = EmptyOddsClient()
+    repository = FakeRepository()
+
+    result = collect_with_dependencies(
+        client,
+        repository,
+        now=now,
+        max_odds_requests=10,
+        clock=lambda: now,
+        schema_probe=True,
+    )
+
+    assert result["odds_calls"] == 1
+    assert result["schema_odds_payload_rows"] == 0
+    assert result["schema_empty_odds_calls"] == 1
+    assert result["schema_nonempty_odds_calls"] == 0
+    assert result["schema_bookmaker_records"] == 0
+    assert json.loads(result["schema_top_level_keys_json"]) == []
+    assert json.loads(result["schema_response_shapes_json"]) == []
+    assert json.loads(result["schema_market_names_json"]) == []
+    assert json.loads(result["schema_candidate_values_json"]) == {}
 
 
 def test_shared_cycle_budget_reduces_broad_odds_capacity() -> None:
