@@ -23,6 +23,7 @@ on:
       - "tests/test_decision_lifecycle.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
+      - "tests/test_moneyline_monitoring.py"
       - "tests/test_monitoring_lifecycle.py"
       - "tests/test_monitoring_postgres_integration.py"
       - "tests/test_postgres_integration.py"
@@ -51,6 +52,7 @@ on:
       - "tests/test_decision_lifecycle.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
+      - "tests/test_moneyline_monitoring.py"
       - "tests/test_monitoring_lifecycle.py"
       - "tests/test_monitoring_postgres_integration.py"
       - "tests/test_postgres_integration.py"
@@ -104,6 +106,7 @@ jobs:
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
+          tests/test_moneyline_monitoring.py
           tests/test_monitoring_lifecycle.py
           tests/test_monitoring_postgres_integration.py
           tests/test_postgres_integration.py
@@ -128,6 +131,7 @@ jobs:
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
+          tests/test_moneyline_monitoring.py
           tests/test_monitoring_lifecycle.py
           tests/test_monitoring_postgres_integration.py
           tests/test_postgres_integration.py
@@ -142,6 +146,7 @@ jobs:
           tests/test_ingestion.py
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
+          tests/test_moneyline_monitoring.py
           tests/test_monitoring_lifecycle.py
           tests/test_monitoring_postgres_integration.py
           tests/test_postgres_integration.py
