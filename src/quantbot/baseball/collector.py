@@ -9,17 +9,6 @@ from .api import BaseballAPIBudgetExceeded, BaseballAPIClient, BaseballAPIError
 from .lifecycle import flatten_market_observations
 from .scheduler import build_scheduler_record, is_observation_due
 
-LOCAL_BOOKMAKER_TOKENS = (
-    "bet365",
-    "1xbet",
-    "superbet",
-    "mozzart",
-    "maxbet",
-    "soccerbet",
-    "meridian",
-    "admiralbet",
-    "balkanbet",
-)
 TARGET_MARKET_TOKENS = (
     "moneyline",
     "winner",
