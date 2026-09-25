@@ -1307,3 +1307,20 @@ Canary fact:
 - paper mode remained enabled.
 
 Health after the canary proves fixture persistence worked: 66 distinct fixtures / 66 fixture observations and one collection cycle are present. The failure is therefore downstream of successful provider access and fixture ingestion, specifically at the live odds canonicalization/persistence boundary. The system correctly failed closed and scheduled collection must remain OFF until this mapper/provenance issue is repaired and a fresh bounded canary passes.
+
+
+## 70. Failed canary disarmed; live moneyline mapper repair in review — 2026-09-26
+
+Because the first canary FAILED, the one-shot guard correctly did not mark it as completed. To prevent repeated quota use on later cron cycles, production was explicitly returned to:
+
+- `BASEBALL_ENABLE_CANARY=false`;
+- `BASEBALL_ENABLE_COLLECTION=false`;
+- `PAPER_MODE=true`.
+
+The resulting Railway deployment `2c42711f-e4b2-4410-a05f-407cdb767113` reached `SUCCESS`.
+
+Mapper diagnosis found a concrete compatibility gap: the strict full-game moneyline allowlist did not include API-Sports' two-way `Home/Away` market label. A repair was opened as PR #15, `Fix live API-Sports Baseball moneyline mapping`, head `392858ae53714c3c7e3dfb272f80c0350537d8b1`.
+
+The repair also removes legacy player-prop target tokens from compact market targeting while preserving the complete raw provider response in object storage. Bounded market/bookmaker-name diagnostics are added so the next canary reports the actual live provider labels rather than relying on assumptions.
+
+No collection activation will occur before PR #15 passes CI, deploys, and a fresh bounded canary passes.
