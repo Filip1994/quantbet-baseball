@@ -801,3 +801,10 @@ Observed evidence:
 - failure reasons: `POSTGRES_WRITES_NOT_VERIFIED`, `RAW_ARCHIVE_NOT_VERIFIED`.
 
 Interpretation: provider connectivity and fixture persistence are proven. Live odds payload mapping is not. Collection remains disabled and no activation claim is made. Next action is to diagnose the real provider odds shape against the canonical mapper, repair with regression fixtures/tests, deploy, and rerun one bounded canary.
+
+
+## Failed canary disarmed and live odds mapper repair opened — 2026-09-26
+
+The failed canary was immediately disarmed to avoid re-running provider requests every 15 minutes. Deployment `2c42711f-e4b2-4410-a05f-407cdb767113` succeeded with canary and scheduled collection disabled and paper mode retained.
+
+PR #15 repairs the observed live-moneyline mapping boundary by admitting API-Sports `Home/Away` as a full-game two-way moneyline alias, removes legacy player-prop target tokens from compact game-line processing, and adds bounded live market-name diagnostics. Full raw payload archiving remains unchanged.
