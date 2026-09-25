@@ -483,3 +483,61 @@ Next package:
 
 > Package C — registered-pick monitoring, active-pick API priority, deterministic opening/pick/current/closing quote checkpoints, and immutable closing finalization.
 
+## 45. Package C — registered-pick monitoring and immutable closing — 2026-09-25
+
+Completed the third QuantBet-parity vertical slice on branch `finish/moneyline-monitoring-closing-20260925`.
+
+Implemented migration `005_moneyline_monitoring_closing.sql` and the active-pick odds lifecycle:
+
+```text
+registered paper pick
+→ MONITORING
+→ active-pick fixture refresh
+→ exact-bookmaker moneyline refresh
+→ OPEN / ENTRY / CURRENT lifecycle projection
+→ authoritative kickoff cutoff
+→ immutable CAPTURED / STALE_QUOTE / NO_VALID_QUOTE closing fact
+→ CLOSED_FOR_ODDS
+```
+
+Implemented:
+
+- durable `pick_monitoring_states` with restart-safe MONITORING / CLOSED_FOR_ODDS state;
+- append-only `pick_monitoring_transitions`;
+- immutable `pick_closing_finalizations`;
+- deterministic OPEN / ENTRY / CURRENT / CLOSE markers;
+- same-game, same-bookmaker complete moneyline-pair closing selection;
+- strict pre-kickoff quote eligibility;
+- explicit closing outcomes:
+  - `CAPTURED`;
+  - `STALE_QUOTE`;
+  - `NO_VALID_QUOTE`;
+- active registered picks consume API refresh priority before broad market scanning;
+- fresh single-game fixture evidence is checked before monitored odds refresh;
+- after authoritative kickoff cutoff, a due pick finalizes without another odds request;
+- monitoring and broad collection share the same per-run API request counter;
+- broad odds-call capacity is reduced by monitored-pick odds calls already consumed;
+- runtime health exposes monitored-pick and closing-finalization counts.
+
+Verification evidence:
+
+- global Baseball compile / Ruff format / Ruff lint / pytest: **SUCCESS**;
+- Railway PostgreSQL smoke: **SUCCESS**;
+- PostgreSQL integration proves registration → monitoring → quote history → closing → lifecycle markers;
+- closing domain tests prove fresh, stale and missing-quote outcomes;
+- active-pick unit tests prove fixture refresh precedes exact-bookmaker odds refresh;
+- active-pick unit tests prove post-cutoff finalization does not issue a new odds call;
+- shared PostgreSQL integration tests were made baseline-relative so test ordering cannot create false failures;
+- focused Railway smoke now includes Package C runtime modules and tests in format, lint and pytest gates.
+
+Safety:
+
+- no real-money execution was added;
+- no automatic staking was added;
+- production collection remains disabled;
+- no football Railway project or football repository was modified.
+
+Next package:
+
+> Package D — deterministic settlement / CLV evaluation and operational dashboard projections over the immutable pick + closing lifecycle.
+

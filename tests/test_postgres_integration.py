@@ -50,10 +50,13 @@ def test_migrations_and_repository_are_idempotent() -> None:
 
     with psycopg.connect(database_url) as connection:
         repository = PostgreSQLEvidenceRepository(connection)
+        before_stats = repository.stats()
+        before_health = repository.health_snapshot()
+
         assert repository.append_observation(record) is True
         assert repository.append_observation(record) is False
         assert repository.get_observation(record.observation_id) == record
-        assert repository.stats().observations == 1
+        assert repository.stats().observations == before_stats.observations + 1
         assert (
             repository.latest_observation_times()["1"]
             .isoformat()
@@ -115,14 +118,18 @@ def test_migrations_and_repository_are_idempotent() -> None:
         )
 
         health = repository.health_snapshot()
-        assert health["fixture_observations"] == 1
-        assert health["distinct_fixtures"] == 1
-        assert health["odds_observations"] == 1
-        assert health["distinct_quote_games"] == 1
-        assert health["bookmakers"] == 1
-        assert health["pick_events"] == 0
-        assert health["collection_cycles"] == 1
-        assert health["runtime_cycles"] == 1
+        assert (
+            health["fixture_observations"] == before_health["fixture_observations"] + 1
+        )
+        assert health["distinct_fixtures"] == before_health["distinct_fixtures"] + 1
+        assert health["odds_observations"] == before_health["odds_observations"] + 1
+        assert (
+            health["distinct_quote_games"] == before_health["distinct_quote_games"] + 1
+        )
+        assert health["bookmakers"] >= before_health["bookmakers"]
+        assert health["pick_events"] == before_health["pick_events"]
+        assert health["collection_cycles"] == before_health["collection_cycles"] + 1
+        assert health["runtime_cycles"] == before_health["runtime_cycles"] + 1
 
 
 class _FreshQuoteClient:
