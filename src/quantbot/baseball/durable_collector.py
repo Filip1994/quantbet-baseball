@@ -313,9 +313,7 @@ def collect_durable_once(
             summary["settlement_losses"] = int(settlement["losses"])
             summary["settlement_pushes"] = int(settlement["pushes"])
             summary["settlement_clv_available"] = int(settlement["clv_available"])
-            summary["settlement_clv_unavailable"] = int(
-                settlement["clv_unavailable"]
-            )
+            summary["settlement_clv_unavailable"] = int(settlement["clv_unavailable"])
             summary["settlement_nonterminal"] = int(settlement["nonterminal"])
             summary["monitoring_started"] = int(monitoring["monitoring_started"])
             summary["monitoring_due_picks"] = int(monitoring["due_picks"])
