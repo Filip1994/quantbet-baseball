@@ -558,3 +558,34 @@ At the time of writing it was still initializing.
 No API key was added, no canary was armed, and scheduled collection remains OFF.
 
 The expected next readiness state is `BLOCKED` only by `API_KEY_MISSING`, pending verification from the redeployed worker log.
+
+
+## Budget-fix redeploy result
+
+The Railway deployment caused by the `BASEBALL_API_REQUEST_BUDGET=7500` correction completed successfully:
+
+- deployment: `ea40064f-a02c-4228-9d1f-5792402e48e2`;
+- status: `SUCCESS`;
+- deployed commit remains `fdaf67048ac776a31774421c0f9fe31987890e8b`;
+- no new migration was required.
+
+Important cron behavior:
+
+- deployment startup/pre-deploy is not the scheduled worker execution;
+- the redeploy therefore did not immediately emit a fresh activation assessment.
+
+Railway was checked for a safe manual cron trigger. No non-mutating one-shot invocation is available.
+
+Decision:
+
+> Preserve production configuration and wait for the normal 15-minute cron instead of temporarily changing cron/service behavior merely to force the gate.
+
+Expected next live assessment remains:
+
+- budget safe at 7,500 daily ceiling / 7,200 worst-case;
+- `API_BUDGET_UNSAFE` absent;
+- `API_KEY_MISSING` present;
+- verdict `BLOCKED`;
+- collection OFF.
+
+This remains an expectation until the scheduled worker log confirms it.
