@@ -522,6 +522,17 @@ class PostgreSQLEvidenceRepository:
             cursor.execute("SELECT COUNT(*) FROM pick_closing_finalizations")
             closing_count = cursor.fetchone()[0]
 
+            cursor.execute("SELECT COUNT(*) FROM game_result_facts")
+            result_fact_count = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM pick_settlements")
+            settlement_count = cursor.fetchone()[0]
+
+            cursor.execute(
+                "SELECT COUNT(*) FROM pick_settlements WHERE clv_status = 'AVAILABLE'"
+            )
+            clv_available_count = cursor.fetchone()[0]
+
             cursor.execute("SELECT COUNT(*), MAX(finished_at) FROM collection_cycles")
             collection_count, latest_collection = cursor.fetchone()
 
@@ -541,6 +552,9 @@ class PostgreSQLEvidenceRepository:
             "registered_picks": int(registered_pick_count),
             "monitored_picks": int(monitored_pick_count),
             "closing_finalizations": int(closing_count),
+            "game_result_facts": int(result_fact_count),
+            "settled_picks": int(settlement_count),
+            "clv_available": int(clv_available_count),
             "collection_cycles": int(collection_count),
             "runtime_cycles": int(runtime_count),
             "latest_fixture_observed_at": _iso_or_none(latest_fixture),

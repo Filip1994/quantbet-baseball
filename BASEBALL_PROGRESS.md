@@ -541,3 +541,72 @@ Next package:
 
 > Package D — deterministic settlement / CLV evaluation and operational dashboard projections over the immutable pick + closing lifecycle.
 
+## 46. Package D — authoritative settlement, realized CLV and operational projections — 2026-09-25
+
+Completed the fourth QuantBet-parity vertical slice on branch `finish/settlement-clv-dashboard-20260925`.
+
+Before Package D implementation, Package C production deployment was re-audited on Railway project `believable-contentment`:
+
+- deployment `1cc8cd65-238e-4c50-986c-9882ab39e281`: **SUCCESS**;
+- production deploy log explicitly applied `005_moneyline_monitoring_closing.sql`;
+- subsequent cron invocations remained `collection_enabled=false` and `mode="storage-ready"`.
+
+Implemented migration `006_moneyline_settlement_clv.sql` and the post-game lifecycle:
+
+```text
+registered paper pick
+→ immutable closing finalization
+→ authoritative provider game refresh
+→ append-only final result fact
+→ deterministic WIN / LOSS / PUSH settlement
+→ realized CLV when exact closing evidence is CAPTURED
+→ explicit unavailable CLV when close is stale or missing
+→ read-only pick and dashboard projections
+```
+
+Implemented:
+
+- append-only `game_result_facts` with exact final fixture observation and raw-payload provenance;
+- immutable one-time `pick_settlements` referencing the registered pick, result fact and closing finalization;
+- deterministic paper P&L per unit:
+  - WIN = `entry_odds - 1`;
+  - LOSS = `-1`;
+  - PUSH = `0`;
+- exact closing-pair de-vigging before CLV evaluation;
+- realized CLV metrics only when closing outcome is `CAPTURED`:
+  - closing market probability;
+  - probability delta versus entry market probability;
+  - entry/closing price ratio;
+- explicit non-computable CLV states:
+  - `UNAVAILABLE_STALE_QUOTE`;
+  - `UNAVAILABLE_NO_VALID_QUOTE`;
+- no interpolation, synthetic closing line or fabricated CLV;
+- restart-safe/idempotent result and settlement persistence;
+- post-game settlement refresh priority before active-pick monitoring and broad market collection;
+- shared API client/request budget across settlement, monitoring and broad collection;
+- `baseball_moneyline_pick_projection` read model;
+- `baseball_moneyline_dashboard` read model for settlement, paper P&L and CLV coverage;
+- runtime health counts for result facts, settled picks and available CLV.
+
+Verification evidence:
+
+- global Baseball compile / Ruff format / Ruff lint / pytest: **SUCCESS**;
+- Railway PostgreSQL smoke: **SUCCESS**;
+- domain tests prove WIN/LOSS/PUSH settlement semantics;
+- domain tests prove stale/missing closes cannot manufacture CLV;
+- settlement-loop tests prove non-terminal provider games do not settle;
+- PostgreSQL integration proves registration → monitoring → closing → final result → settlement → CLV → dashboard projection;
+- settlement replay is deterministic and idempotent;
+- focused Railway smoke explicitly covers Package D source files, migration and tests.
+
+Safety:
+
+- no real-money execution was added;
+- no automatic staking was added;
+- production collection remains disabled;
+- no football Railway project or football repository was modified.
+
+Next package:
+
+> Package E — canary/operational acceptance, settled-pick performance evaluation, CLV diagnostics and the explicit production collection enablement gate. Collection must remain disabled until that gate passes.
+

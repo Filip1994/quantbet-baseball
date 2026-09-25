@@ -25,12 +25,14 @@ from .evidence import OddsObservation
 from .fixture_evidence import FixtureObservation, canonical_fixture_observation
 from .ingestion import canonical_moneyline_observations
 from .moneyline_monitoring import monitor_due_moneyline_picks
+from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .raw_archive import archive_from_env
 from .runtime_evidence import CollectionCycle
 from .scheduler import build_scheduler_record, is_observation_due
+from .settlement_repository import PostgreSQLMoneylineSettlementRepository
 
 _ADVISORY_LOCK_KEY = 726478920260918
 
@@ -222,10 +224,13 @@ def collect_durable_once(
     client = BaseballAPIClient(settings, raw_archive=archive)
     max_odds_requests = int(os.getenv("BASEBALL_MAX_ODDS_REQUESTS", "76"))
     max_monitoring_refreshes = int(os.getenv("BASEBALL_MAX_MONITORING_REFRESHES", "10"))
+    max_settlement_refreshes = int(os.getenv("BASEBALL_MAX_SETTLEMENT_REFRESHES", "10"))
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
     if max_monitoring_refreshes < 1:
         raise ValueError("BASEBALL_MAX_MONITORING_REFRESHES must be positive")
+    if max_settlement_refreshes < 1:
+        raise ValueError("BASEBALL_MAX_SETTLEMENT_REFRESHES must be positive")
 
     cycle_started_at = datetime.now(UTC)
     cycle_now = now or cycle_started_at
@@ -254,6 +259,13 @@ def collect_durable_once(
             return summary
 
         try:
+            settlement_repository = PostgreSQLMoneylineSettlementRepository(connection)
+            settlement = settle_due_moneyline_picks(
+                client,
+                settlement_repository,
+                now=cycle_now,
+                max_refreshes=max_settlement_refreshes,
+            )
             monitoring_repository = PostgreSQLMoneylineMonitoringRepository(connection)
             monitoring = monitor_due_moneyline_picks(
                 client,
@@ -272,9 +284,11 @@ def collect_durable_once(
                 now=cycle_now,
                 max_odds_requests=remaining_odds_requests,
             )
-            summary["fixture_observations_inserted"] = int(
-                summary["fixture_observations_inserted"]
-            ) + int(monitoring["fixture_observations_inserted"])
+            summary["fixture_observations_inserted"] = (
+                int(summary["fixture_observations_inserted"])
+                + int(settlement["fixture_observations_inserted"])
+                + int(monitoring["fixture_observations_inserted"])
+            )
             summary["odds_calls"] = int(summary["odds_calls"]) + int(
                 monitoring["odds_calls"]
             )
@@ -284,7 +298,23 @@ def collect_durable_once(
             summary["observations_inserted"] = int(
                 summary["observations_inserted"]
             ) + int(monitoring["observations_inserted"])
-            summary["errors"] = int(summary["errors"]) + int(monitoring["errors"])
+            summary["errors"] = (
+                int(summary["errors"])
+                + int(settlement["errors"])
+                + int(monitoring["errors"])
+            )
+            summary["settlement_due_picks"] = int(settlement["due_picks"])
+            summary["settlement_game_calls"] = int(settlement["game_calls"])
+            summary["settlement_result_facts_inserted"] = int(
+                settlement["result_facts_inserted"]
+            )
+            summary["settlements"] = int(settlement["settlements"])
+            summary["settlement_wins"] = int(settlement["wins"])
+            summary["settlement_losses"] = int(settlement["losses"])
+            summary["settlement_pushes"] = int(settlement["pushes"])
+            summary["settlement_clv_available"] = int(settlement["clv_available"])
+            summary["settlement_clv_unavailable"] = int(settlement["clv_unavailable"])
+            summary["settlement_nonterminal"] = int(settlement["nonterminal"])
             summary["monitoring_started"] = int(monitoring["monitoring_started"])
             summary["monitoring_due_picks"] = int(monitoring["due_picks"])
             summary["monitoring_fixture_calls"] = int(monitoring["fixture_calls"])
