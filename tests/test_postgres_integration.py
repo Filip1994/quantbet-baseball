@@ -285,4 +285,3 @@ def test_moneyline_candidate_requires_fresh_quote_before_registration() -> None:
         )
         assert replay.pick == registered.pick
         assert replay.verification == registered.verification
-
