@@ -733,3 +733,21 @@ Safety response:
 - no collection activation;
 - no cron/config mutation;
 - wait for the deployment/variable state to become independently observable, then require the CANARY activation gate to become ready before any bounded provider request is allowed.
+
+
+## Provider URL restoration after credential misplacement — 2026-09-26
+
+A credential-entry mistake was identified: the provider key had been placed in `API_BASEBALL_BASE_URL`.
+
+The canonical URL was independently verified from `config.py` and `.env.example`:
+
+- `https://v1.baseball.api-sports.io`.
+
+Production repair:
+
+- restored `API_BASEBALL_BASE_URL` to the canonical URL;
+- skipped redeploy for this repair;
+- left collection and canary disabled;
+- no credential was fabricated or copied.
+
+Remaining blocker: create `API_BASEBALL_KEY` on the guarded Baseball production service using the real provider secret.
