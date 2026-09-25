@@ -767,3 +767,10 @@ The credential-triggered deployment `667487c1-6b31-4624-ae36-a655147b6f08` compl
 The API key is now visible to the correct Baseball service, but deployment startup is not being treated as a readiness substitute. No canary or scheduled collection was enabled. The next accepted proof is the first natural `*/15` storage-ready worker execution on this deployment.
 
 A one-time follow-up verification is scheduled for the next cron window; it must only proceed toward bounded canary execution if the natural CANARY activation gate is ready and a safe existing one-shot execution path is available.
+
+
+## Natural CANARY gate READY and next execution design — 2026-09-26
+
+Natural cron executions on deployment `667487c1-6b31-4624-ae36-a655147b6f08` now prove the CANARY gate is `READY` with no blocker codes. The live budget projection remains 7500 daily / 75 per scheduled cycle / 7200 worst-case / 300 headroom, and production remains `PAPER_MODE=true`, `BASEBALL_ENABLE_COLLECTION=false`.
+
+The chosen safe execution mechanism is a DB-idempotent one-shot path inside the existing worker: an explicit canary flag may trigger one bounded canary only when the CANARY gate is READY; once a recent PASSED canary exists, later cron invocations must skip re-execution even if the flag remains armed. No cron rewrite, start-command rewrite, temporary service, or collection enablement is required.
