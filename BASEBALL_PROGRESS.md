@@ -875,3 +875,35 @@ Expected gate effect after successful redeploy:
 - collection must remain disabled.
 
 This expectation is not treated as verified until the post-redeploy runtime log is inspected.
+
+
+## 58. Budget-fix redeploy success and cron verification boundary — 2026-09-25
+
+Railway deployment triggered by the production budget-variable correction completed successfully:
+
+- deployment: `ea40064f-a02c-4228-9d1f-5792402e48e2`;
+- commit: `fdaf67048ac776a31774421c0f9fe31987890e8b`;
+- status: **SUCCESS**.
+
+Deploy-time logs show migrations are already current:
+
+- `migrations_applied: ()`.
+
+Because `quantbet-baseball` is a Railway cron service, a redeploy does not itself execute the scheduled worker body. Therefore this deployment log does not yet contain the post-fix `activation_gate` assessment.
+
+A Railway capability check confirmed there is no supported non-mutating one-shot cron invocation mechanism. Available alternatives would require waiting for the next scheduled run or mutating/redeploying service behavior.
+
+Decision:
+
+- do not alter cron configuration;
+- do not add a temporary service/function;
+- do not enable canary;
+- do not enable collection;
+- wait for the normal 15-minute Baseball cron execution to produce the next persisted readiness assessment.
+
+Expected but **not yet verified** post-fix gate state:
+
+- `API_BUDGET_UNSAFE` removed;
+- `API_KEY_MISSING` remains;
+- verdict remains `BLOCKED`;
+- `BASEBALL_ENABLE_COLLECTION=false`.
