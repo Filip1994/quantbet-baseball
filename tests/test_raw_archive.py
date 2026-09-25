@@ -79,3 +79,21 @@ def test_remote_archive_is_required_in_production(
 
     with pytest.raises(RuntimeError, match="raw payload bucket"):
         archive_from_env(tmp_path, require_remote=True)
+
+
+def test_s3_archive_supports_separate_provider_namespace() -> None:
+    client = FakeS3()
+    archive = S3RawPayloadArchive(
+        client=client,
+        bucket="baseball-raw",
+        namespace="open-meteo",
+    )
+
+    receipt = archive.archive(
+        "forecast",
+        {"latitude": 40.0, "longitude": -74.0},
+        {"hourly": {"time": ["2026-09-26T18:00"]}},
+        captured_at=datetime(2026, 9, 26, 16, 0, tzinfo=UTC),
+    )
+
+    assert receipt.ref.startswith("s3://baseball-raw/open-meteo/")
