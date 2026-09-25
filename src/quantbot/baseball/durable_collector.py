@@ -200,7 +200,9 @@ def collect_with_dependencies(
         odds_calls += 1
         compact = compact_odds(odds)
         raw_market_rows += _market_row_count(compact)
-        market_names_seen.update(str(name) for name in compact.get("market_names") or [])
+        market_names_seen.update(
+            str(name) for name in compact.get("market_names") or []
+        )
         bookmaker_names_seen.update(
             str(name) for name in compact.get("bookmaker_names") or []
         )
