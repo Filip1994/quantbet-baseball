@@ -30,6 +30,7 @@ def test_worker_is_safe_by_default(
 ) -> None:
     monkeypatch.delenv("BASEBALL_ENABLE_COLLECTION", raising=False)
     monkeypatch.setattr(worker, "apply_migrations", lambda root: ("001.sql",))
+    monkeypatch.setattr(worker, "_record_runtime", lambda *args, **kwargs: None)
 
     result = worker.run_once(tmp_path)
 
@@ -45,6 +46,7 @@ def test_worker_runs_durable_collector_only_when_enabled(
 ) -> None:
     monkeypatch.setenv("BASEBALL_ENABLE_COLLECTION", "true")
     monkeypatch.setattr(worker, "apply_migrations", lambda root: ())
+    monkeypatch.setattr(worker, "_record_runtime", lambda *args, **kwargs: None)
     monkeypatch.setattr(
         durable_collector,
         "collect_durable_once",
