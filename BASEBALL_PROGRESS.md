@@ -1399,3 +1399,14 @@ After PR #16 merged the CANARY-only market-schema probe, Railway deployment `cb8
 The variable redeployment is `d60fd5df-7b4d-495d-8255-aa2eb19edee7`; it reached SUCCESS on the same commit. The next natural cron is expected to expose only distinct market names and candidate selection labels in addition to the normal canary telemetry. No parser widening is authorized until that live schema evidence exists. Cron/start command were not changed and no helper service was created.
 
 In parallel, draft PR #17 was opened for the immutable pregame feature-snapshot contract. It is deliberately separate from operational acceptance and remains unmerged. The contract records source observed/available timestamps, archived payload provenance and feature paths, and rejects sources unavailable by the decision cutoff or snapshots generated at/after first pitch. This is the storage boundary for future verified Baseball and weather features; player-prop betting remains excluded.
+
+
+## 72. Game-level feature and weather foundations staged — 2026-09-26
+
+Model/data work continued without changing production activation state.
+
+Draft PR #17 (`Add immutable pregame feature snapshot contract`) establishes a replayable point-in-time feature boundary for game-level Baseball predictions. It records provider/source type, observed and available timestamps, raw payload ref/checksum, feature paths, decision cutoff, generation time and first pitch. Sources unavailable by the cutoff and snapshots generated at/after first pitch fail closed. PostgreSQL migration `008_pregame_feature_snapshots.sql` is included. Baseball tests and Railway runtime smoke both passed. PR #17 remains draft and unmerged while odds ingestion acceptance is unresolved.
+
+Draft PR #19 (`Add point-in-time stadium weather capture`) is also staged independently. It uses Open-Meteo forecast evidence at supplied stadium coordinates, archives the raw response in a separate `open-meteo` namespace, selects the weather sample nearest first pitch, and carries temperature, humidity, dew point, precipitation probability/amount, pressure, cloud cover, wind speed/direction/gusts plus explicit roof state. Closed-roof/dome contexts retain the evidence but mark weather as non-applicable to play. It is not wired into production picks or collection yet.
+
+Player-prop betting remains excluded. Player/team information may later be admitted only as game-level model inputs when live Baseball provider coverage is actually verified.
