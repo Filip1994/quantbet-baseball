@@ -30,9 +30,9 @@ from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .raw_archive import archive_from_env
-from .settlement_repository import PostgreSQLMoneylineSettlementRepository
 from .runtime_evidence import CollectionCycle
 from .scheduler import build_scheduler_record, is_observation_due
+from .settlement_repository import PostgreSQLMoneylineSettlementRepository
 
 _ADVISORY_LOCK_KEY = 726478920260918
 
