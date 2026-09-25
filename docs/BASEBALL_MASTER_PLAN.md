@@ -1,173 +1,283 @@
 # QuantBet Baseball — Master Plan and Execution Layout
 
 **Repository:** `Filip1994/quantbet-baseball`  
-**Legacy reference:** `Filip1994/h2h` — read-only reference only  
-**Created at:** 2026-09-15 01:05 Europe/Belgrade (UTC+02:00)  
-**Last updated:** 2026-09-15  
-**Revision:** 3.1  
-**Status:** ACTIVE PLAN — evidence architecture and Railway-first persistence direction established
+**Created at:** 2026-09-15 Europe/Belgrade  
+**Last updated:** 2026-09-25 Europe/Belgrade  
+**Revision:** 4.0  
+**Status:** ACTIVE COMPLETION PLAN — QuantBet lifecycle parity, Baseball-specific model
 
-## 0. Operating rule
+## 0. Canonical rule
 
-The project is not considered complete because code, collected data, or research notes exist. A phase is complete only when its acceptance criteria, evidence, tests, timestamps, and review decision are documented.
+The project advances by **closed vertical slices**.
 
-All material work must be recorded in `BASEBALL_PROGRESS.md` or a related MDU with an exact timestamp. No work may be claimed as verified without runtime or source evidence.
+A component is not complete because code exists. A slice is complete only when its evidence, persistence, replay behavior, tests, runtime behavior, and acceptance gate are verified.
+
+No profitability claim is permitted before chronological out-of-sample validation.
 
 ## 1. Objective
 
-Build a closed, reproducible, auditable baseball betting research and decision system that tests whether a measurable edge exists after vig, uncertainty, timing, market rules, slippage, and execution constraints.
+Build a closed, reproducible and auditable Baseball value-betting engine that can:
 
-The system must fail closed on unknown, missing, contradictory, post-kickoff, or unverifiable information. It must never invent teams, markets, odds, timestamps, statistics, results, or source evidence.
+1. discover games;
+2. preserve exact pregame market evidence;
+3. calculate a point-in-time Baseball probability;
+4. compare fair probability/price with executable market price;
+5. verify the exact quote again immediately before registration;
+6. register an immutable paper pick;
+7. monitor that pick until first pitch;
+8. finalize a valid closing quote;
+9. acquire and stabilize the authoritative result;
+10. settle the pick;
+11. calculate realized CLV;
+12. evaluate performance and calibration;
+13. reproduce every decision from stored evidence.
 
-## 2. Hard boundaries
+Railway is the production runtime/control plane. PostgreSQL is canonical transactional memory. Railway object storage preserves raw provider evidence. GitHub is source control and CI.
 
-- All new production work belongs in `quantbet-baseball`.
-- `h2h` is read-only legacy reference material and must not be modified.
-- No live betting, automated staking, or profitability claim before chronological out-of-sample validation.
-- Every market observation, prediction, pick, result, and material document must be traceable to evidence and timestamps.
-- Player props are permanently out of scope.
+## 2. Scope
 
-## 3. Scope
+### V1
 
-### V1 — in scope
-
-1. Full-game moneyline: home/away winner.
-2. Full-game totals with an explicit line, beginning only with lines actually present and sufficiently covered in the data, such as 8.5 and 9.5.
-3. Timestamped market observations.
-4. Immutable pick events.
-5. Opening/decision/closing price timeline research.
-6. Settlement and post-game evaluation.
-7. Chronological backtesting, calibration, CLV, and timing analysis.
+- full-game moneyline;
+- full-game totals with explicit line identity and sufficient historical coverage;
+- immutable quote history;
+- immutable decision/pick evidence;
+- opening/pick/current/closing quote checkpoints;
+- result acquisition and settlement;
+- realized CLV;
+- chronological backtesting, calibration and walk-forward evaluation;
+- paper-only operation.
 
 ### Postponed
 
-- Run line.
-- First-five-innings markets.
-- Team totals.
-- NRFI/YRFI and inning markets.
-- Alternate lines.
-- Futures.
-- Parlays and same-game parlays.
-- Live betting.
-- Automated staking.
+- run line;
+- first five innings;
+- team totals;
+- NRFI/YRFI;
+- inning markets;
+- alternate lines;
+- futures;
+- parlays/SGPs;
+- live betting;
+- automated staking.
 
-### Explicitly excluded — permanent project boundary
+### Permanently excluded
 
-- **Player props.** This project will not research, model, implement, backtest, or deploy player-prop markets.
+- **player props**.
 
-No excluded market may reappear in the curriculum, roadmap, implementation backlog, or future-phase scope without an explicit scope revision decision.
+## 3. Current verified state
 
-## 4. Phase execution order
+As of 2026-09-25:
 
-### Phase 1 — Audit and specification
+- Railway application service exists and deploys successfully;
+- production cron is configured every 15 minutes;
+- PostgreSQL exists and migrations are applied;
+- Railway object storage bucket exists;
+- durable canonical moneyline ingestion exists;
+- raw payloads are archived before canonicalization;
+- `odds_observations` and `pick_events` exist;
+- production `pick_events` count was observed as 0;
+- collection is currently disabled via `BASEBALL_ENABLE_COLLECTION=false`;
+- runtime therefore operates in `storage-ready` mode;
+- totals are not yet canonically ingested;
+- no closed production pick lifecycle exists yet.
 
-**Status:** PARTIALLY COMPLETE; audit baseline created.
+The canonical detailed audit is:
 
-Required outputs:
+- `docs/BASEBALL_COMPLETION_AUDIT_2026-09-25.md`.
 
-- repository audit;
-- knowledge ledger with source, retrieval timestamp, classification, limitations, and implementation consequence;
-- canonical V1 market and settlement specification;
-- explicit exclusions and postponed-market register;
-- separation of baseball-specific requirements from inherited/football-derived ideas.
+## 4. Architecture rule inherited from QuantBet
 
-Acceptance gate: all active documents agree on scope and the next implementation package is explicit.
+Baseball inherits QuantBet's lifecycle discipline:
 
-### Phase 2 — Evidence and odds-timeline foundation
+```text
+discovery
+→ immutable evidence
+→ point-in-time model
+→ evaluation
+→ preliminary candidate
+→ final quote verification
+→ immutable registration
+→ monitoring
+→ closing
+→ result finality
+→ settlement
+→ realized CLV
+→ evaluation
+```
 
-**Status:** CONTRACTS AND IN-MEMORY BOUNDARY IMPLEMENTED; durable persistence pending.
+Baseball does **not** inherit football market mathematics or football features.
 
-Implement and test:
+## 5. Completion sequence
 
-- canonical game, market, selection, line, bookmaker, and observation identities;
-- observed time, provider event time, retrieval time, ingestion time, kickoff time, decision time, and closing-observation time semantics;
-- immutable raw payload references and checksums;
-- duplicate and conflict handling;
-- stale, suspended, incomplete, post-kickoff, and contradictory observation rules;
-- opening, decision-time, subsequent, and closing observation linkage;
-- immutable pick-event records containing exact price, market snapshot, model version, feature snapshot, probability, fair price, edge, EV, uncertainty, and reason;
-- database-neutral repository boundary;
-- PostgreSQL-backed transactional persistence;
-- deterministic reads, migrations, and conflict-safe append semantics.
+### Slice A — Runtime truth and fixture evidence
 
-Acceptance gate: a historical market can be replayed from raw evidence into a decision-time pick and later closing/settlement evaluation without hidden data.
+Implement:
 
-### Phase 3 — Reliable baseball data contracts
+- canonical fixture registry;
+- append-only fixture observations;
+- kickoff/status change history;
+- runtime collection-cycle telemetry;
+- DB freshness/coverage queries;
+- controlled collector canary;
+- restart/idempotency tests.
 
-Define and validate source-backed contracts for schedules, game status, teams, probable/starting pitchers, lineups, availability, team performance, bullpen state, park factors, weather/roof, rest/travel/doubleheaders, injuries/roster changes, results, and official settlement.
+**Gate A:** one canary run proves raw archive + fixture writes + moneyline writes + telemetry with bounded API use.
 
-Raw provider responses remain immutable. Normalized records preserve source lineage, schema version, and timestamps.
+Scheduled collection remains disabled until Gate A passes.
 
-### Phase 4 — Baselines and market mathematics
+### Slice B — Moneyline decision and registration
 
-Only after evidence contracts are stable:
+Implement:
 
-- market-implied and de-vigged probabilities;
-- Elo-style team baseline;
-- pitcher/environment-adjusted run expectations;
-- justified Poisson/Skellam-style baselines;
-- calibrated models where data supports them;
-- full-game moneyline first;
-- full-game totals as distributions of total runs, never binary heuristics.
+- point-in-time feature snapshot contract;
+- versioned prediction event;
+- canonical market snapshot from stored quotes;
+- de-vigged market probability;
+- value evaluation;
+- preliminary candidate;
+- mandatory final quote verification and repricing;
+- immutable registered pick;
+- rejection reason codes;
+- end-to-end registration tests.
 
-### Phase 5 — Backtesting and timing research
+**Gate B:** a synthetic and a real paper fixture can deterministically move from stored evidence to either REGISTERED or an explicit fail-closed rejection.
 
-Use chronological train/validation/holdout splits. Measure log loss, Brier score, calibration, ROI, yield, drawdown, turnover, coverage, CLV, price movement, time-to-start, stale-odds sensitivity, slippage, rejected signals, and abstentions.
+### Slice C — Monitoring and closing
 
-Reject any result contaminated by post-kickoff data, future lineups, future odds, leakage, or unobservable prices.
+Implement:
 
-### Phase 6 — Closed replayable pipeline
+- registered-pick monitoring states;
+- API-budget priority for active picks;
+- quote refresh cadence toward first pitch;
+- first/pick/current/closing projections;
+- immutable closing finalization;
+- stale/no-valid-closing outcomes;
+- restart-safe workers.
 
-`providers → immutable raw evidence → validation/normalization → canonical storage → timestamped feature snapshots → versioned models → probabilities/fair prices → market comparison → immutable pick event → odds timeline → settlement → evaluation/reporting`
+**Gate C:** registered paper picks receive deterministic closing outcomes without mutation of entry evidence.
 
-Every stage must be replayable from stored evidence.
+### Slice D — Result, settlement and CLV
 
-### Phase 7 — Railway operations and data lifecycle
+Implement:
 
-Railway is the intended operational platform. PostgreSQL is the transactional datastore; SQLite is not part of the intended production architecture.
+- Baseball result observations;
+- result finality/stability policy;
+- moneyline settlement rules;
+- append-only settlement events;
+- paper P&L;
+- realized CLV facts;
+- correction handling.
 
-Implement only after contracts are credible:
+**Gate D:** every registered moneyline pick reaches SETTLED and a deterministic CLV availability state.
 
-- Railway service layout;
-- PostgreSQL migrations and idempotency;
-- ingestion/evaluation workers;
-- retries, rate limits, freshness checks, health checks, and audit logs;
-- automated backups and restore tests;
-- archive exports with manifests and checksums;
-- hot/warm/cold retention classes;
-- reference-aware archival and deletion;
-- rollback procedures.
+### Slice E — Operational product
 
-Long-term cold archives may be exported to external offline storage. No data may be deleted merely because it is old; export verification and restore procedures are prerequisites.
+Implement:
 
-### Phase 8 — Paper mode and launch gate
+- DB-backed Daily Bulletin;
+- operational API/dashboard projection;
+- health/freshness/budget metrics;
+- alerts;
+- replay/restore procedure;
+- archive verification.
 
-Require reproducibility, data completeness, calibration, stable operations, realistic timing behavior, untouched chronological holdout performance, and tested restore/redeploy/rollback before any limited production consideration.
+**Gate E:** dashboard and bulletin can be rebuilt from canonical storage without Git-generated operational state.
 
-## 5. Current decision
+### Slice F — Research and model promotion
 
-**STOP model expansion. GO on evidence architecture.**
+Implement:
 
-The next concrete work package is the database-neutral repository contract followed by PostgreSQL schema, migrations, and transactional append-only persistence. Do not build the full Railway deployment yet.
+- historical canonical backfill;
+- point-in-time Baseball feature dataset;
+- simple baselines before complex models;
+- calibration;
+- chronological train/validation/holdout;
+- walk-forward;
+- CLV analysis;
+- model promotion records.
 
-## 6. Documentation protocol
+**Gate F:** a production model version is accepted only after a documented untouched holdout/walk-forward decision.
 
-Every new or modified MDU must include:
+### Slice G — Totals
 
-- `Created at`;
-- `Last updated`;
-- revision;
-- status;
-- relevant commit/test/source references.
+After the moneyline loop is fully green, repeat the decision/monitoring/settlement/validation lifecycle for full-game totals.
 
-Every progress entry must include an exact timestamp. Unknown source time must be recorded as unknown, not guessed.
+**Gate G:** totals have exact line identity, line-specific monitoring, settlement semantics and validation.
 
-## 7. Related MDUs
+## 6. Model principles
 
-- `docs/BASEBALL_REPOSITORY_AUDIT.md` — repository findings, component status, limitations, and execution order.
-- `docs/BASEBALL_DATA_LIFECYCLE_AND_RAILWAY.md` — Railway-first infrastructure, retention, backup, and archival baseline.
-- `BASEBALL_PROGRESS.md` — chronological material-change log.
+Model sophistication is subordinate to evidence quality.
 
-## 8. Completion rule
+Start with transparent baselines and add complexity only when out-of-sample evidence justifies it.
 
-The project advances only through large, reviewable work packages. No isolated model feature should be added while the evidence, timeline, settlement, and replay foundations remain incomplete.
+Candidate Baseball inputs may include:
+
+- starting pitcher quality and handedness;
+- pitcher workload/rest;
+- bullpen workload and availability;
+- expected/confirmed lineups;
+- team offensive/defensive rates;
+- platoon/split information;
+- park factors;
+- weather/roof where reliable;
+- rest/travel/doubleheader context;
+- market state.
+
+Every feature used in a decision must have a point-in-time cutoff that proves it was available before the decision.
+
+## 7. Evaluation requirements
+
+At minimum record:
+
+- log loss;
+- Brier score;
+- calibration;
+- coverage/abstention;
+- ROI/yield;
+- drawdown;
+- realized CLV;
+- time-to-first-pitch;
+- stale-price sensitivity;
+- performance by league/bookmaker;
+- model version;
+- data-quality exclusions.
+
+Look-ahead leakage, survivorship bias and post-start observations invalidate an experiment.
+
+## 8. Production activation gate
+
+Do not enable the scheduled collector merely because Railway is healthy.
+
+Before `BASEBALL_ENABLE_COLLECTION=true`:
+
+1. Slice A is green;
+2. exact API budget math including retries is verified;
+3. one bounded canary succeeds;
+4. DB freshness/coverage is visible;
+5. raw archive writes are verified;
+6. no identity conflicts occur;
+7. downstream paper lifecycle is ready to consume the evidence.
+
+Production remains `PAPER_MODE=true`.
+
+## 9. Definition of done
+
+The project is finished as a paper engine when:
+
+- moneyline and approved totals traverse the full closed lifecycle;
+- every registered pick is reproducible;
+- final quote verification is mandatory;
+- closing and settlement are immutable/restart-safe;
+- realized CLV has exact provenance;
+- the operational dashboard reads canonical DB truth;
+- restore/replay is tested;
+- chronological validation is documented;
+- no excluded market has leaked back into scope.
+
+## 10. Related documents
+
+- `docs/BASEBALL_COMPLETION_AUDIT_2026-09-25.md` — current canonical audit.
+- `docs/BASEBALL_DATA_LIFECYCLE_AND_RAILWAY.md` — persistence/retention architecture.
+- `docs/BASEBALL_REPOSITORY_CONTRACT.md` — evidence repository semantics.
+- `BASEBALL_PROGRESS.md` — chronological implementation log.
