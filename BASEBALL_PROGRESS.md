@@ -1946,3 +1946,41 @@ Verified live on 2026-09-26:
 - transactions query for 2026-09-24 through 2026-09-26 returned 67 rows with date/effectiveDate/person/team/type/description fields.
 
 Lineup-capable schema is verified, but confirmed-lineup availability is not yet proven for an actual populated pregame snapshot. Expected and confirmed lineup states remain separate by contract. Historical `timecode` replay is the next bounded audit before point-in-time ingestion is approved.
+
+
+## 2026-09-26 successful-empty-poll cadence evidence and MLB replay verification
+
+### API-burn repair #2
+
+PR #41, `Persist successful empty odds polls for cadence`, passed both Baseball tests and Railway runtime smoke and was squash-merged as `527790c13a76811c7c63300b5504dcf0f7a495e4`.
+
+Migration `009_odds_poll_attempts.sql` adds immutable evidence for every successful API-Sports game-odds response, including empty responses. Each record preserves game/provider identity, actual capture time, kickoff, response/raw/canonical row counts and the raw archive ref/checksum. Scheduler cadence now keys off latest successful odds poll attempt rather than only parsed quote observations. A provider error does not create successful poll evidence.
+
+Worker deployment `008ce875-1c54-47aa-98aa-77eab7bf5bfc` is SUCCESS. Predeploy evidence at 07:55:45 UTC confirms:
+
+`{'migrations_applied': ('009_odds_poll_attempts.sql',)}`
+
+This fixes the second burn defect discovered by cycle `ee7e84d4-92d6-4017-b75d-e62035626444`, where 40/40 due odds requests were successful but returned zero market rows; before migration 009 such empty calls had no durable last-check timestamp and could become due again every cron.
+
+A natural post-migration cycle is still required to prove the new empty-response throttle in production across consecutive cron runs.
+
+### Dashboard deployment race observed and resolved
+
+The first dashboard deploy of `527790c...` failed readiness because it started before worker predeploy had created `odds_poll_attempts`; readiness correctly failed with PostgreSQL `UndefinedTable` rather than reporting a false green state. After migration 009 applied, dashboard-only redeploy `3ebfcb50-5594-4f6b-99b9-aeec2a9635d1` succeeded without code/schema changes. This was a deployment-order race, not a dashboard query defect.
+
+### Official MLB historical replay verified
+
+Audit-only PR #39 was never merged and has now been closed after evidence was harvested into canonical docs.
+
+Bounded official MLB Stats API audit passed with 136 tests / 6 skipped. Historical `timecode` replay on completed game `823570` requested `20260920_151000` for a game scheduled at `2026-09-20T17:10:00Z` and returned:
+
+- `Pre-Game` status;
+- probable pitchers for both sides;
+- populated 9-player batting orders for both teams;
+- 28 player records per team in the sampled boxscore state;
+- bullpen/pitcher identity arrays;
+- response `metaData.timeStamp=20260920_151258`.
+
+The 2m58s difference between requested timecode and response metadata timestamp is a critical anti-leakage finding. Historical feature ingestion must use the actual provider response metadata timestamp as source cutoff evidence. A requested timestamp alone is insufficient.
+
+PR #42, `Document verified official MLB source contracts`, passed tests and was squash-merged as `74eeb9cf3220225143c780425269860c2d711c31`. The canonical variable and research feature registries now record these source contracts, current scheduled-collection state and migration-009 empty-poll semantics.
