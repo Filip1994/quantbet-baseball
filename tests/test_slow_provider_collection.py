@@ -8,7 +8,7 @@ from quantbot.baseball.slow_provider_collection import collect_slow_provider_dat
 def _receipt(name, captured_at="2026-09-26T08:00:00+00:00"):
     return ArchiveReceipt(
         ref=f"s3://raw/{name}.json",
-        checksum=(name[0] if name else "a") * 64,
+        checksum="a" * 64,
         captured_at=captured_at,
     )
 
