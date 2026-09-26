@@ -10,7 +10,7 @@ import urllib.parse
 import urllib.request
 import warnings
 
-BASE = "https://statsapi.mlb.com/api/v1"
+BASE = "https://statsapi.mlb.com/api"
 
 
 def _get(path: str, params: dict[str, str] | None = None) -> dict:
@@ -32,7 +32,7 @@ def _get(path: str, params: dict[str, str] | None = None) -> dict:
 
 def test_official_mlb_structured_source_audit() -> None:
     schedule = _get(
-        "/schedule",
+        "/v1/schedule",
         {
             "sportId": "1",
             "date": "2026-09-26",
@@ -76,7 +76,7 @@ def test_official_mlb_structured_source_audit() -> None:
             "side_keys": sorted(side_data),
         }
 
-    feed = _get(f"/game/{game_pk}/feed/live")
+    feed = _get(f"/v1.1/game/{game_pk}/feed/live")
     game_data = feed.get("gameData") or {}
     live_data = feed.get("liveData") or {}
     boxscore = live_data.get("boxscore") or {}
@@ -94,7 +94,7 @@ def test_official_mlb_structured_source_audit() -> None:
     }
 
     transactions = _get(
-        "/transactions",
+        "/v1/transactions",
         {
             "startDate": "2026-09-24",
             "endDate": "2026-09-26",
@@ -112,7 +112,7 @@ def test_official_mlb_structured_source_audit() -> None:
 
     team_id = schedule_summary["teams"]["home"]["team_id"]
     roster = _get(
-        f"/teams/{team_id}/roster",
+        f"/v1/teams/{team_id}/roster",
         {"rosterType": "active", "date": "2026-09-26"},
     )
     roster_rows = roster.get("roster") or []
