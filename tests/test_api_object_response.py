@@ -37,7 +37,9 @@ def _settings(tmp_path: Path) -> BaseballSettings:
     )
 
 
-def test_team_statistics_supports_verified_object_response(monkeypatch, tmp_path) -> None:
+def test_team_statistics_supports_verified_object_response(
+    monkeypatch, tmp_path
+) -> None:
     payload = {
         "errors": [],
         "response": {
