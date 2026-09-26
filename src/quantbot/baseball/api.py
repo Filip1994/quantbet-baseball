@@ -54,13 +54,16 @@ class BaseballAPIClient:
         digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
         return self.settings.cache_dir / f"{digest}.json"
 
-    def _read_cache(self, path: Path) -> list[dict[str, Any]] | None:
+    def _read_cache(
+        self,
+        path: Path,
+    ) -> list[dict[str, Any]] | dict[str, Any] | None:
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
             if float(payload["expires_at"]) <= time.time():
                 return None
             response = payload["response"]
-            if isinstance(response, list):
+            if isinstance(response, (list, dict)):
                 self.cache_hits += 1
                 return response
         except (
@@ -76,7 +79,7 @@ class BaseballAPIClient:
     def _write_cache(
         self,
         path: Path,
-        response: list[dict[str, Any]],
+        response: list[dict[str, Any]] | dict[str, Any],
         ttl_seconds: int,
     ) -> None:
         if ttl_seconds <= 0:
@@ -103,15 +106,15 @@ class BaseballAPIClient:
             if os.path.exists(temp_name):
                 os.unlink(temp_name)
 
-    def get_with_receipt(
+    def _get_response_with_receipt(
         self,
         endpoint: str,
         params: dict[str, Any] | None = None,
         *,
         ttl_seconds: int = 0,
         use_cache: bool = True,
-    ) -> tuple[list[dict[str, Any]], ArchiveReceipt | None]:
-        """Return API rows plus the durable archive receipt for a fresh request."""
+    ) -> tuple[list[dict[str, Any]] | dict[str, Any], ArchiveReceipt | None]:
+        """Return a list/object provider response plus a fresh archive receipt."""
 
         params = {
             key: value for key, value in (params or {}).items() if value is not None
@@ -187,12 +190,52 @@ class BaseballAPIClient:
         if errors:
             raise BaseballAPIError(f"API error for {endpoint}: {errors}")
         result = payload.get("response")
-        if not isinstance(result, list):
+        if not isinstance(result, (list, dict)):
             raise BaseballAPIError(f"Unexpected API response for {endpoint}")
 
         if use_cache:
             self._write_cache(cache_path, result, ttl_seconds)
         return result, receipt
+
+    def get_with_receipt(
+        self,
+        endpoint: str,
+        params: dict[str, Any] | None = None,
+        *,
+        ttl_seconds: int = 0,
+        use_cache: bool = True,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt | None]:
+        """Return a list-shaped provider response plus its archive receipt."""
+
+        response, receipt = self._get_response_with_receipt(
+            endpoint,
+            params,
+            ttl_seconds=ttl_seconds,
+            use_cache=use_cache,
+        )
+        if not isinstance(response, list):
+            raise BaseballAPIError(f"Expected list API response for {endpoint}")
+        return response, receipt
+
+    def get_object_with_receipt(
+        self,
+        endpoint: str,
+        params: dict[str, Any] | None = None,
+        *,
+        ttl_seconds: int = 0,
+        use_cache: bool = True,
+    ) -> tuple[dict[str, Any], ArchiveReceipt | None]:
+        """Return an object-shaped provider response plus its archive receipt."""
+
+        response, receipt = self._get_response_with_receipt(
+            endpoint,
+            params,
+            ttl_seconds=ttl_seconds,
+            use_cache=use_cache,
+        )
+        if not isinstance(response, dict):
+            raise BaseballAPIError(f"Expected object API response for {endpoint}")
+        return response, receipt
 
     def get(
         self,
@@ -271,17 +314,69 @@ class BaseballAPIClient:
             ttl_seconds=21_600,
         )
 
+    def standings_with_receipt(
+        self,
+        league_id: int,
+        season: int,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt]:
+        response, receipt = self.get_with_receipt(
+            "standings",
+            {"league": league_id, "season": season},
+            use_cache=False,
+        )
+        if receipt is None:
+            raise BaseballAPIError("Fresh standings response was not archived")
+        return response, receipt
+
     def team_statistics(
         self,
         team_id: int,
         league_id: int,
         season: int,
-    ) -> list[dict[str, Any]]:
-        return self.get(
+    ) -> dict[str, Any]:
+        response, _ = self.get_object_with_receipt(
             "teams/statistics",
             {"team": team_id, "league": league_id, "season": season},
             ttl_seconds=86_400,
         )
+        return response
+
+    def team_statistics_with_receipt(
+        self,
+        team_id: int,
+        league_id: int,
+        season: int,
+    ) -> tuple[dict[str, Any], ArchiveReceipt]:
+        response, receipt = self.get_object_with_receipt(
+            "teams/statistics",
+            {"team": team_id, "league": league_id, "season": season},
+            use_cache=False,
+        )
+        if receipt is None:
+            raise BaseballAPIError("Fresh team statistics response was not archived")
+        return response, receipt
+
+    def bet_types_with_receipt(
+        self,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt]:
+        response, receipt = self.get_with_receipt(
+            "odds/bets",
+            use_cache=False,
+        )
+        if receipt is None:
+            raise BaseballAPIError("Fresh bet-type catalog was not archived")
+        return response, receipt
+
+    def bookmakers_with_receipt(
+        self,
+    ) -> tuple[list[dict[str, Any]], ArchiveReceipt]:
+        response, receipt = self.get_with_receipt(
+            "odds/bookmakers",
+            use_cache=False,
+        )
+        if receipt is None:
+            raise BaseballAPIError("Fresh bookmaker catalog was not archived")
+        return response, receipt
 
     def player_statistics(
         self,
