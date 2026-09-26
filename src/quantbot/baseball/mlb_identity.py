@@ -278,7 +278,10 @@ def _within_tolerance(
     if tolerance.total_seconds() < 0:
         raise EvidenceError("kickoff tolerance cannot be negative")
     fixture_pitch = _timestamp(fixture.kickoff_at, "fixture.kickoff_at")
-    return abs((game.first_pitch - fixture_pitch).total_seconds()) <= tolerance.total_seconds()
+    return (
+        abs((game.first_pitch - fixture_pitch).total_seconds())
+        <= tolerance.total_seconds()
+    )
 
 
 def propose_team_identity_mappings(
@@ -313,9 +316,9 @@ def propose_team_identity_mappings(
             "team identity bootstrap requires exactly one exact-name/time match"
         )
     game = candidates[0]
-    when = (verified_at or _timestamp(schedule_receipt.captured_at, "captured_at")).astimezone(
-        UTC
-    )
+    when = (
+        verified_at or _timestamp(schedule_receipt.captured_at, "captured_at")
+    ).astimezone(UTC)
 
     def build(
         api_team_id: int,
@@ -382,11 +385,15 @@ def link_fixture_to_mlb_game(
     if _normalized_name(home.api_sports_team_name) != _normalized_name(
         fixture.home_team_name
     ):
-        raise EvidenceError("home API-Sports team name disagrees with identity registry")
+        raise EvidenceError(
+            "home API-Sports team name disagrees with identity registry"
+        )
     if _normalized_name(away.api_sports_team_name) != _normalized_name(
         fixture.away_team_name
     ):
-        raise EvidenceError("away API-Sports team name disagrees with identity registry")
+        raise EvidenceError(
+            "away API-Sports team name disagrees with identity registry"
+        )
 
     candidates = [
         game
@@ -404,9 +411,9 @@ def link_fixture_to_mlb_game(
     game = candidates[0]
     api_pitch = _timestamp(fixture.kickoff_at, "fixture.kickoff_at")
     delta_seconds = int(abs((game.first_pitch - api_pitch).total_seconds()))
-    linked = (linked_at or _timestamp(schedule_receipt.captured_at, "captured_at")).astimezone(
-        UTC
-    )
+    linked = (
+        linked_at or _timestamp(schedule_receipt.captured_at, "captured_at")
+    ).astimezone(UTC)
     identity = {
         "mapping_version": registry.mapping_version,
         "api_sports_provider_game_id": fixture.provider_game_id,
