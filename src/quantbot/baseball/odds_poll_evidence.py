@@ -72,7 +72,9 @@ class OddsPollAttempt:
         for field in ("response_rows", "raw_market_rows", "canonical_rows"):
             _nonnegative(getattr(self, field), field)
         checksum = self.source_payload_checksum
-        if len(checksum) != 64 or any(ch not in "0123456789abcdefABCDEF" for ch in checksum):
+        if len(checksum) != 64 or any(
+            ch not in "0123456789abcdefABCDEF" for ch in checksum
+        ):
             raise EvidenceError("source_payload_checksum must be a SHA-256 hex digest")
 
     def to_dict(self) -> dict[str, Any]:
