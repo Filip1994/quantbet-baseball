@@ -1224,3 +1224,10 @@ PR #50 is merged as `843703c799afc05ee3dcccc68c081800bf4fca91` and introduces mi
 PR #51 adds field-level game-history integrity visibility so scores/hits/errors/innings/extra/raw-provenance can be accepted from durable health rather than DB helper services.
 
 A new ad-hoc Railway service `inspect-accepted-picks-v2` and a redeploy of `query-production-db` appeared independently around 14:41 UTC. They were audited read-only, are not part of final architecture, and are not being used further.
+
+
+## Game-history integrity health + MLB identity bootstrap staging — 2026-09-26
+
+PR #51 merged as `714138ec7fb82985626c5e9d17f1bc50924f3ba8` and both worker/dashboard are production SUCCESS. It exposes field-level integrity counts for the 2,433 API-Sports game-history snapshots through normal health telemetry. Live field-level counts await the next natural cron; no DB helper service will be used.
+
+PR #52 is under CI review only. The feature is OFF by default and adds a bounded official MLB schedule identity proof, durable versioned team mappings and API-Sports fixture -> MLB `gamePk` links. It does not activate official MLB enrichment. Production acceptance, if CI passes and the PR is deployed, must arm exactly one target-date bootstrap cycle and then turn the flag OFF again.
