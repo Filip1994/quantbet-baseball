@@ -53,6 +53,22 @@ Live audit facts:
 
 The presence of a market in /odds/bets is a catalog fact only. It does **not** prove that the market is available for a given game, league, or bookmaker.
 
+### Official MLB structured-source audit
+
+A separate bounded public/no-auth audit of the official MLB Stats API also passed on 2026-09-26.
+
+Verified live contracts:
+
+- `/api/v1/schedule?sportId=1&date=2026-09-26&hydrate=probablePitcher,team,venue` returned 13 MLB games with structured team, probable-pitcher and venue identity;
+- sampled game `822678` returned probable starter IDs/names for both clubs and venue ID/name;
+- `/api/v1.1/game/{gamePk}/feed/live` exposed `gameData.probablePitchers`, `gameData.players`, venue/location/time-zone/field metadata and boxscore team structures including `battingOrder`, `bullpen`, `pitchers` and `players`;
+- `/api/v1/teams/{teamId}/roster?rosterType=active&date=...` returned active-roster rows with person, position and status identity;
+- `/api/v1/transactions` returned dated transaction rows with person/team/type/description fields.
+
+Historical replay was also verified with `timecode` on a completed 2026-09-20 game. A requested snapshot roughly two hours before first pitch returned `Pre-Game` state, both probable pitchers and populated 9-player batting orders for both clubs.
+
+Critical point-in-time rule: the requested `timecode` is **not** the authoritative cutoff. In the bounded audit, requested `20260920_151000` returned `metaData.timeStamp=20260920_151258`. Historical ingestion must persist the response metadata timestamp and may use the snapshot only when that actual response timestamp is at or before the model prediction cutoff.
+
 # 3. API-Sports /games
 
 ## 3.1 Raw fields observed
@@ -423,7 +439,21 @@ Closing prices are never pregame model features for a decision made before they 
 
 # 10. MLB maximum research variable universe beyond current API fields
 
-The project should seek maximum useful pregame evidence, but external variables stay **EXTERNAL_PENDING** until their source, timestamp and replay contract are verified.
+The project should seek maximum useful pregame evidence. Official MLB source contracts for probable starters, roster/transactions, venue metadata and replayable pregame feed state are now **source-verified**, but their canonical variables remain **EXTERNAL_PENDING** until durable point-in-time ingestion and archive provenance are implemented.
+
+## 10.0 Official MLB source contract now verified
+
+| Evidence family | Verified source | Current registry status | Admission note |
+|---|---|---|---|
+| probable starter identity | MLB schedule hydrate + game feed | EXTERNAL_PENDING | source verified; persist probable/confirmed state and timestamp before model use |
+| batting order / lineup-capable state | MLB game feed boxscore | EXTERNAL_PENDING | historical pregame batting orders verified; expected vs confirmed state must remain separate |
+| active roster | MLB team roster | EXTERNAL_PENDING | source verified; roster date and capture timestamp required |
+| transactions | MLB transactions | EXTERNAL_PENDING | source verified; effective date and capture timestamp required |
+| venue identity/location/time zone/field metadata | MLB game feed | EXTERNAL_PENDING | candidate source for canonical venue registry; static fields should be cached/versioned |
+| historical pregame replay | MLB game feed `timecode` | EXTERNAL_PENDING | feasible, but actual `metaData.timeStamp` is the authoritative cutoff, not requested timecode |
+| MLB feed weather | MLB game feed | RAW_ONLY / OPTIONAL | sampled early-pregame payload was empty; do not depend on it or coerce absence to zero |
+
+No official MLB field becomes a model input merely because the endpoint is now verified. Durable raw archiving, canonicalization, null-reason semantics and chronological validation remain mandatory.
 
 ## 10.1 Starting pitcher
 
@@ -626,12 +656,21 @@ Provider request priority:
 
 One game odds response can contain many bookmakers and markets.
 
+Production burn findings on 2026-09-26:
+
+- broad collection now selects only games whose adaptive cadence is due;
+- successful provider odds responses are persisted as immutable `odds_poll_attempts`, including empty responses;
+- adaptive cadence uses the latest **successful poll attempt**, not only the latest parsed quote row;
+- a successful empty response is evidence that the provider was checked, but it is never fabricated into a quote;
+- provider/API errors do not create successful poll-attempt evidence.
+
 Therefore:
 
 - do not make separate API-Sports requests for Bet365 and 1xBet if one game odds request already returns both;
 - do not refresh a game just to rediscover static market/bookmaker catalogs;
 - do not query games far outside empirically useful odds coverage windows;
-- do not poll player props because they are not a product.
+- do not poll player props because they are not a product;
+- do not re-poll a game merely because the previous successful response contained zero market rows.
 
 # 13. Model compactness policy — remove meaningless/redundant variables
 
@@ -697,4 +736,6 @@ Moneyline and totals may share raw evidence but require separate calibrated prob
 - Player props: **OFF permanently**
 - Current production market: **full-game Moneyline**
 - Next market: **full-game Over/Under**
-- Collection activation remains gated by operational acceptance.
+- Scheduled collection: **ON** after operational acceptance.
+- Canary execution: **OFF** after successful acceptance.
+- Adaptive odds cadence: **ON**, with successful empty polls persisted so missing quotes do not force 15-minute rediscovery.
