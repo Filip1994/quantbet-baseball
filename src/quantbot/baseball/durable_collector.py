@@ -26,6 +26,8 @@ from .config import BaseballSettings
 from .db import database_url_from_env
 from .evidence import OddsObservation
 from .fixture_evidence import FixtureObservation, canonical_fixture_observation
+from .game_history_collection import collect_game_history
+from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
@@ -495,6 +497,37 @@ def collect_durable_once(
                     season=cycle_now.year,
                 )
 
+            game_history = {
+                "requests": 0,
+                "calls": 0,
+                "rows": 0,
+                "inserted": 0,
+                "errors": 0,
+            }
+            slow_requests_used = int(slow_provider["requests"])
+            history_request_cap = max(
+                0,
+                max_slow_provider_requests - slow_requests_used,
+            )
+            if (
+                execution_mode == "SCHEDULED"
+                and slow_provider_enabled
+                and client.remaining_budget > 0
+                and history_request_cap > 0
+            ):
+                history_repository = PostgreSQLGameHistoryRepository(connection)
+                game_history = collect_game_history(
+                    client,
+                    history_repository,
+                    now=cycle_now,
+                    max_requests=min(
+                        history_request_cap,
+                        client.remaining_budget,
+                    ),
+                    league_id=1,
+                    season=cycle_now.year,
+                )
+
             summary["slow_provider_enabled"] = int(slow_provider_enabled)
             summary["slow_provider_requests"] = int(slow_provider["requests"])
             summary["slow_standings_calls"] = int(slow_provider["standings_calls"])
@@ -512,7 +545,15 @@ def collect_durable_once(
             )
             summary["slow_catalog_calls"] = int(slow_provider["catalog_calls"])
             summary["slow_catalogs_inserted"] = int(slow_provider["catalogs_inserted"])
-            summary["errors"] = int(summary["errors"]) + int(slow_provider["errors"])
+            summary["game_history_requests"] = int(game_history["requests"])
+            summary["game_history_calls"] = int(game_history["calls"])
+            summary["game_history_rows"] = int(game_history["rows"])
+            summary["game_history_inserted"] = int(game_history["inserted"])
+            summary["errors"] = (
+                int(summary["errors"])
+                + int(slow_provider["errors"])
+                + int(game_history["errors"])
+            )
             summary["api_requests"] = client.request_count
             summary["api_remaining"] = client.remaining_budget
             summary["fixture_observations_inserted"] = (
