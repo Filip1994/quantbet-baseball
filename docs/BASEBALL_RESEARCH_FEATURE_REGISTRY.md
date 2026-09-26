@@ -3,7 +3,8 @@
 **Scope:** game-level Baseball research and paper moneyline picks only.  
 **Player props:** permanently excluded.  
 **Paper stake target:** 300 RSD per registered single.  
-**Operating rule:** retain complete raw provider payloads, but expose only point-in-time-safe fields to a model.
+**Operating rule:** retain complete raw provider payloads, but expose only point-in-time-safe fields to a model.  
+**Canonical live variable/market registry:** `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`.
 
 ## 1. Core rule
 
@@ -19,17 +20,18 @@ This avoids losing potentially useful information without introducing look-ahead
 
 ## 2. Current provider surface
 
-The repository already has API-Sports Baseball client methods for:
+Live production evidence now verifies these useful API-Sports Baseball surfaces:
 
-- games by date;
-- one game by ID;
-- games by league/season;
+- games/schedule/results;
 - standings;
 - team statistics;
-- player statistics;
-- pregame odds.
+- pregame odds;
+- odds bet-type catalog;
+- odds bookmaker catalog.
 
-The production collector currently calls only schedule/game and odds paths. Standings, team statistics, player statistics and additional game context are research inputs to be integrated after the live odds schema gate is repaired.
+The current repository still contains a legacy `players/statistics` client method, but it is **not an approved source**. A bounded live `/players` request on 2026-09-26 returned `endpoint does not exist`. Player-level API data therefore remains UNVERIFIED and must not be used until an exact live contract is proved.
+
+The exact observed field trees, market classifications, bookmaker policy and API-refresh policy live in `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`.
 
 ## 3. Feature families
 
@@ -111,9 +113,12 @@ No player betting markets are generated.
 
 ### 3.5 Market state
 
+Executable paper-pick bookmakers are **1xBet (provider id 1)** and **Bet365 (provider id 2)** only. Other provider books may be retained for consensus/intelligence but cannot become the registered entry quote.
+
 From immutable odds observations:
 
 - bookmaker;
+- playable/non-playable classification;
 - home/away prices;
 - de-vigged market probability;
 - opening/current/final verified quote;
@@ -223,7 +228,7 @@ No model may consume a source captured after `source_data_cutoff_at`.
 1. repair live full-game moneyline canonicalization using exact canary schema evidence;
 2. pass bounded canary;
 3. enable scheduled raw/canonical collection in `PAPER_MODE=true`;
-4. inventory live provider schemas for standings/team/player/game context;
+4. inventory live provider schemas for standings/team/game context and keep unverified player endpoints disabled;
 5. add canonical venue registry and roof state;
 6. integrate weather snapshots;
 7. build immutable feature snapshots;

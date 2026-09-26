@@ -60,7 +60,7 @@ def test_operational_canary_gate_and_performance_views() -> None:
             market_family="moneyline",
             line=None,
             selection="home",
-            bookmaker="book-a",
+            bookmaker="Bet365",
             decimal_odds=2.0,
             raw_price="2.0",
             observed_at=(started + timedelta(milliseconds=100)).isoformat(),

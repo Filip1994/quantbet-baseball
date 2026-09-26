@@ -39,7 +39,7 @@ class _RegistrationClient:
                 {
                     "bookmakers": [
                         {
-                            "name": "book-a",
+                            "name": "Bet365",
                             "bets": [
                                 {
                                     "name": "Moneyline",
@@ -82,7 +82,7 @@ def _observation(
         market_family="moneyline",
         line=None,
         selection=selection,
-        bookmaker="book-a",
+        bookmaker="Bet365",
         decimal_odds=odds,
         raw_price=str(odds),
         observed_at=observed_at,
@@ -144,7 +144,7 @@ def _register_pick(connection):
     preliminary = evaluate_preliminary_moneyline(
         repository,
         prediction,
-        bookmaker="book-a",
+        bookmaker="Bet365",
         evaluated_at=datetime(2026, 9, 20, 17, 1, tzinfo=UTC),
         policy=MoneylineDecisionPolicy(),
     )
