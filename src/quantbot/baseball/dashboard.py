@@ -198,7 +198,9 @@ class BaseballDashboardRepository:
             "gates": gate_map,
             "canary": dict(canary) if canary else None,
             "performance": dict(performance) if performance else {},
-            "money": dict(money) if money else {
+            "money": dict(money)
+            if money
+            else {
                 "settled_stake_minor": 0,
                 "realized_profit_minor": 0,
             },
@@ -464,7 +466,11 @@ class BaseballDashboard:
             ("CLV coverage", self._pct(p.get("clv_coverage")), ""),
             ("Positive CLV", self._pct(p.get("positive_clv_rate")), ""),
             ("Brier", self._dec(p.get("brier_score")), ""),
-            ("Log loss", self._dec(p.get("log_loss")), f"settled stake {settled_stake:.0f} RSD"),
+            (
+                "Log loss",
+                self._dec(p.get("log_loss")),
+                f"settled stake {settled_stake:.0f} RSD",
+            ),
         ]
         cards_html = "".join(
             f'<article class="kpi"><small>{escape(str(label))}</small><b>{escape(str(value))}</b><span>{escape(note)}</span></article>'
