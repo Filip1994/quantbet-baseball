@@ -164,6 +164,8 @@ def _register_pick(connection):
         policy=MoneylineDecisionPolicy(),
     )
     assert registered.pick is not None
+    assert registered.pick.paper_stake_minor == 30_000
+    assert registered.pick.currency == "RSD"
     return registered.pick
 
 
@@ -265,6 +267,12 @@ def test_registered_pick_settles_from_authoritative_result_with_clv() -> None:
         )
         assert after_dashboard["realized_profit_per_unit"] == pytest.approx(
             before_dashboard["realized_profit_per_unit"] + 1.0
+        )
+        assert after_dashboard["settled_stake_minor"] == (
+            before_dashboard["settled_stake_minor"] + 30_000
+        )
+        assert after_dashboard["realized_profit_minor"] == (
+            before_dashboard["realized_profit_minor"] + 30_000
         )
 
         after_health = PostgreSQLEvidenceRepository(connection).health_snapshot()
