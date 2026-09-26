@@ -21,6 +21,11 @@ on:
       - "src/quantbot/baseball/settlement_lifecycle.py"
       - "src/quantbot/baseball/settlement_repository.py"
       - "src/quantbot/baseball/postgres_repository.py"
+      - "src/quantbot/baseball/provider_data.py"
+      - "src/quantbot/baseball/provider_data_repository.py"
+      - "src/quantbot/baseball/slow_provider_collection.py"
+      - "src/quantbot/baseball/official_mlb.py"
+      - "src/quantbot/baseball/official_mlb_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
       - "migrations/**"
@@ -39,6 +44,12 @@ on:
       - "tests/test_settlement_lifecycle.py"
       - "tests/test_settlement_postgres_integration.py"
       - "tests/test_postgres_integration.py"
+      - "tests/test_provider_data.py"
+      - "tests/test_slow_provider_collection.py"
+      - "tests/test_api_object_response.py"
+      - "tests/test_provider_surface_audit.py"
+      - "tests/test_official_mlb.py"
+      - "tests/test_official_mlb_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
       - ".github/workflows/railway-runtime-smoke.yml"
@@ -62,6 +73,11 @@ on:
       - "src/quantbot/baseball/settlement_lifecycle.py"
       - "src/quantbot/baseball/settlement_repository.py"
       - "src/quantbot/baseball/postgres_repository.py"
+      - "src/quantbot/baseball/provider_data.py"
+      - "src/quantbot/baseball/provider_data_repository.py"
+      - "src/quantbot/baseball/slow_provider_collection.py"
+      - "src/quantbot/baseball/official_mlb.py"
+      - "src/quantbot/baseball/official_mlb_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
       - "migrations/**"
@@ -80,6 +96,12 @@ on:
       - "tests/test_settlement_lifecycle.py"
       - "tests/test_settlement_postgres_integration.py"
       - "tests/test_postgres_integration.py"
+      - "tests/test_provider_data.py"
+      - "tests/test_slow_provider_collection.py"
+      - "tests/test_api_object_response.py"
+      - "tests/test_provider_surface_audit.py"
+      - "tests/test_official_mlb.py"
+      - "tests/test_official_mlb_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
       - ".github/workflows/railway-runtime-smoke.yml"
@@ -132,6 +154,11 @@ jobs:
           src/quantbot/baseball/settlement_lifecycle.py
           src/quantbot/baseball/settlement_repository.py
           src/quantbot/baseball/postgres_repository.py
+          src/quantbot/baseball/provider_data.py
+          src/quantbot/baseball/provider_data_repository.py
+          src/quantbot/baseball/slow_provider_collection.py
+          src/quantbot/baseball/official_mlb.py
+          src/quantbot/baseball/official_mlb_repository.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
@@ -146,6 +173,12 @@ jobs:
           tests/test_settlement_lifecycle.py
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
+          tests/test_provider_data.py
+          tests/test_slow_provider_collection.py
+          tests/test_api_object_response.py
+          tests/test_provider_surface_audit.py
+          tests/test_official_mlb.py
+          tests/test_official_mlb_postgres_integration.py
           tests/test_raw_archive.py
           tests/test_runtime_foundation.py
       - name: Check focused lint
@@ -169,6 +202,11 @@ jobs:
           src/quantbot/baseball/settlement_lifecycle.py
           src/quantbot/baseball/settlement_repository.py
           src/quantbot/baseball/postgres_repository.py
+          src/quantbot/baseball/provider_data.py
+          src/quantbot/baseball/provider_data_repository.py
+          src/quantbot/baseball/slow_provider_collection.py
+          src/quantbot/baseball/official_mlb.py
+          src/quantbot/baseball/official_mlb_repository.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
@@ -183,6 +221,12 @@ jobs:
           tests/test_settlement_lifecycle.py
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
+          tests/test_provider_data.py
+          tests/test_slow_provider_collection.py
+          tests/test_api_object_response.py
+          tests/test_provider_surface_audit.py
+          tests/test_official_mlb.py
+          tests/test_official_mlb_postgres_integration.py
           tests/test_raw_archive.py
           tests/test_runtime_foundation.py
       - name: Run focused tests
