@@ -158,7 +158,9 @@ def test_official_mlb_historical_timecode_replay_audit() -> None:
     game = games[0]
     game_pk = int(game["gamePk"])
     game_date = datetime.fromisoformat(str(game["gameDate"]).replace("Z", "+00:00"))
-    requested_at = (game_date.astimezone(UTC) - timedelta(hours=2)).replace(microsecond=0)
+    requested_at = (game_date.astimezone(UTC) - timedelta(hours=2)).replace(
+        microsecond=0
+    )
     timecode = requested_at.strftime("%Y%m%d_%H%M%S")
 
     feed = _get(
