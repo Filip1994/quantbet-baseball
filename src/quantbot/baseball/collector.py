@@ -13,11 +13,12 @@ PLAYABLE_BOOKMAKER_TOKENS = (
     "bet365",
     "1xbet",
 )
-TARGET_MARKET_TOKENS = (
-    "moneyline",
-    "home/away",
-    "total",
-    "over/under",
+TARGET_MARKET_NAMES = frozenset(
+    {
+        "home/away",
+        "moneyline",
+        "over/under",
+    }
 )
 
 
@@ -118,18 +119,16 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
     market_names: set[str] = set()
     for record in records:
         bookmaker_name = record["name"]
-        keep_bookmaker = any(
+        _is_playable_book = any(
             token in _norm(bookmaker_name) for token in PLAYABLE_BOOKMAKER_TOKENS
         )
         markets: list[dict[str, Any]] = []
         for market in record["markets"]:
             market_name = market["name"]
             market_names.add(market_name)
-            if keep_bookmaker or any(
-                token in _norm(market_name) for token in TARGET_MARKET_TOKENS
-            ):
+            if _norm(market_name) in TARGET_MARKET_NAMES:
                 markets.append(market)
-        if keep_bookmaker or markets:
+        if markets:
             bookmakers.append({"name": bookmaker_name, "markets": markets})
     return {
         "bookmakers": bookmakers,
