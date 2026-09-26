@@ -246,6 +246,14 @@ class PostgreSQLOperationalAcceptanceRepository:
                 (cycle[1], cycle[2]),
             )
             odds_archive = bool(cursor.fetchone()[0])
+            cursor.execute(
+                "SELECT COUNT(*) FROM odds_observations "
+                "WHERE inserted_at BETWEEN %s AND %s "
+                "AND lower(replace(bookmaker, ' ', '')) IN ('bet365', '1xbet') "
+                "AND source_payload_ref LIKE 's3://%%'",
+                (cycle[1], cycle[2]),
+            )
+            playable_observations = int(cursor.fetchone()[0])
 
         fixture_writes = int(cycle[3])
         odds_writes = int(cycle[4])
@@ -253,9 +261,11 @@ class PostgreSQLOperationalAcceptanceRepository:
             "execution_mode": str(cycle[0]),
             "fixture_observations_inserted": fixture_writes,
             "observations_inserted": odds_writes,
+            "playable_observations_inserted": playable_observations,
             "errors": int(cycle[5]),
             "archive_verified": fixture_archive and odds_archive,
             "db_write_verified": fixture_writes > 0 and odds_writes > 0,
+            "playable_bookmaker_verified": playable_observations > 0,
         }
 
     def performance_snapshot(self) -> dict[str, Any]:

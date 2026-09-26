@@ -101,6 +101,8 @@ def test_operational_canary_gate_and_performance_views() -> None:
         assert verified["execution_mode"] == "CANARY"
         assert verified["archive_verified"] is True
         assert verified["db_write_verified"] is True
+        assert verified["playable_bookmaker_verified"] is True
+        assert verified["playable_observations_inserted"] >= 1
 
         canary = build_canary_fact(
             cycle_id=cycle.cycle_id,
