@@ -2121,3 +2121,30 @@ Safety action taken before accepting that behavior:
 PR #49 `Deduplicate slow team-statistics polling` now preserves every standings snapshot but derives the team-stat request queue from stable first-seen unique team IDs. A regression test models duplicate stage/group standing rows and proves a four-request cycle performs one standings request plus three different team-statistics requests.
 
 The bounded production acceptance will be re-run only after PR #49 passes both CI workflows and is deployed.
+
+
+## 2026-09-26 legacy Railway helper-service dependency audit
+
+A read-only audit was completed before considering deletion of the older query/audit helper services.
+
+Services inspected:
+
+- `query-production-db`;
+- `quantbet-postgres-audit`;
+- `db-audit-sync`;
+- `postgres-audit-runner`;
+- `inspect-picks-query`;
+- `api-sports-baseball-query-oneshot`.
+
+Findings:
+
+- all six latest deployments use Railway's `ghcr.io/railwayapp/function-bun:1.4.0` image;
+- none exposes a public domain in the returned Railway configuration;
+- none has an attached volume;
+- no service source repository/build configuration was returned for them;
+- database helpers expose only DB connection variables plus Railway-generated metadata;
+- the API-Sports one-shot exposes only the API-Sports base URL/key plus Railway-generated metadata;
+- repository search found no code/document reference to any of the six service names;
+- current worker/dashboard service configs do not depend on those service names.
+
+This is strong evidence that they are ad-hoc operational helpers rather than final architecture. They were deliberately **not deleted** in this audit. Durable health/dashboard telemetry is being added first so production observability no longer needs them, after which destructive cleanup can be handled as a separate bounded infrastructure change.
