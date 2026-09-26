@@ -193,23 +193,67 @@ class PostgreSQLMLBIdentityRepository:
         target = date.fromisoformat(date_iso)
         if observed_by.tzinfo is None or observed_by.utcoffset() is None:
             raise ValueError("observed_by must be timezone-aware")
-        # MLB games assigned to one North-American schedule date can cross UTC
-        # midnight. 06:00Z -> 06:00Z captures that slate without pulling the
-        # prior US evening into the same identity proof.
+
+        # API-Sports collection fetches UTC calendar dates independently. One
+        # North-American MLB slate spans 06:00Z -> 06:00Z, so identity needs a
+        # coherent pair of provider date snapshots. Use only the newest group
+        # for which both dates were durably archived. This prevents a fixture
+        # removed from a later provider schedule from surviving forever merely
+        # because an older fixture observation still exists.
+        first_query_date = target
+        second_query_date = target + timedelta(days=1)
+        observed_cutoff = observed_by.astimezone(UTC)
+        group_query = """
+            SELECT snapshot_group_id
+            FROM api_sports_game_schedule_snapshots
+            WHERE query_date IN (%s, %s)
+              AND observed_at <= %s
+            GROUP BY snapshot_group_id
+            HAVING COUNT(DISTINCT query_date) = 2
+            ORDER BY MAX(observed_at) DESC, snapshot_group_id DESC
+            LIMIT 1
+        """
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                group_query,
+                (first_query_date, second_query_date, observed_cutoff),
+            )
+            group_row = cursor.fetchone()
+        if group_row is None:
+            return ()
+
+        snapshot_group_id = group_row[0]
         start = datetime.combine(target, time(6), tzinfo=UTC)
         end = datetime.combine(target + timedelta(days=1), time(6), tzinfo=UTC)
         query = """
-            SELECT DISTINCT ON (provider_game_id)
-                canonical_record
-            FROM fixture_observations
-            WHERE lower(league) = 'mlb'
-              AND kickoff_at >= %s
-              AND kickoff_at < %s
-              AND observed_at <= %s
-            ORDER BY provider_game_id, observed_at DESC, fixture_observation_id DESC
+            SELECT DISTINCT ON (fo.provider_game_id)
+                fo.canonical_record
+            FROM api_sports_game_schedule_snapshots AS snapshot
+            CROSS JOIN LATERAL unnest(snapshot.provider_game_ids) AS member(provider_game_id)
+            JOIN fixture_observations AS fo
+              ON fo.provider_game_id = member.provider_game_id
+             AND fo.source_payload_ref = snapshot.source_payload_ref
+             AND fo.source_payload_checksum = snapshot.source_payload_checksum
+            WHERE snapshot.snapshot_group_id = %s
+              AND snapshot.query_date IN (%s, %s)
+              AND lower(fo.league) = 'mlb'
+              AND fo.kickoff_at >= %s
+              AND fo.kickoff_at < %s
+              AND fo.observed_at <= %s
+            ORDER BY fo.provider_game_id, fo.observed_at DESC, fo.fixture_observation_id DESC
         """
         with self._connection.cursor() as cursor:
-            cursor.execute(query, (start, end, observed_by.astimezone(UTC)))
+            cursor.execute(
+                query,
+                (
+                    snapshot_group_id,
+                    first_query_date,
+                    second_query_date,
+                    start,
+                    end,
+                    observed_cutoff,
+                ),
+            )
             rows = cursor.fetchall()
         fixtures: list[FixtureObservation] = []
         for row in rows:
