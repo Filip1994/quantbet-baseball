@@ -161,6 +161,7 @@ jobs:
           src/quantbot/baseball/official_mlb_repository.py
           src/quantbot/baseball/mlb_identity.py
           src/quantbot/baseball/mlb_identity_repository.py
+          src/quantbot/baseball/mlb_identity_bootstrap.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
@@ -183,6 +184,7 @@ jobs:
           tests/test_official_mlb_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_postgres_integration.py
+          tests/test_mlb_identity_bootstrap.py
           tests/test_raw_archive.py
           tests/test_runtime_foundation.py
       - name: Check focused lint
@@ -213,6 +215,7 @@ jobs:
           src/quantbot/baseball/official_mlb_repository.py
           src/quantbot/baseball/mlb_identity.py
           src/quantbot/baseball/mlb_identity_repository.py
+          src/quantbot/baseball/mlb_identity_bootstrap.py
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
@@ -235,6 +238,7 @@ jobs:
           tests/test_official_mlb_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_postgres_integration.py
+          tests/test_mlb_identity_bootstrap.py
           tests/test_raw_archive.py
           tests/test_runtime_foundation.py
       - name: Run focused tests
@@ -257,3 +261,4 @@ jobs:
           tests/test_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_postgres_integration.py
+          tests/test_mlb_identity_bootstrap.py
