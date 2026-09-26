@@ -1655,3 +1655,25 @@ A second natural cron run returned `ALREADY_DONE` with `provider_requests=0`, co
 Audit control variables were then cleared without a deploy. Collection and canary remain disabled and paper mode remains true.
 
 Interpretation: `/games` is a schedule/status/result spine across leagues. Rich MLB research inputs must come from additional verified endpoints and external structured sources; this result says nothing about the richness of `teams/statistics`, `players/statistics`, `standings`, `odds`, or other provider surfaces.
+
+
+## 78. Live provider surface audit and bookmaker/market policy evidence — 2026-09-26
+
+Bounded live audit `provider-surface-live-20260926-1` completed on deployment `e3f3dd80-f314-407b-be9a-298c39a22a53` using 9 provider requests against a hard cap of 12. Scheduled collection and canary remained disabled and paper mode remained true.
+
+Verified live findings:
+
+- MLB `standings`: one response group containing 60 team rows;
+- NPB `standings`: one response group containing 12 team rows;
+- standings row evidence includes team/league/country identity, position, games played, wins/losses with percentages, points/runs for and against, group and stage;
+- `odds/bets`: 83 market definitions; first canonical entry was id 1 `Home/Away`;
+- `odds/bookmakers`: 30 bookmaker definitions; live sample confirmed bookmaker id 1 `1xbet`;
+- `/players?search=ohtani` returned provider error `This endpoint do not exist.`; this path is not to be retried without new documentation/live evidence;
+- `teams/statistics` rejects the old `id+season` parameter shape and explicitly requires `league` and `team`;
+- `team+league+season` reached a provider response, but that endpoint returns an object while the generic API client currently expects a list. The raw response was archived before the client rejected the response shape.
+
+User execution policy is now explicit: **only Bet365 and 1xBet are playable**. Other bookmaker observations may remain market-intelligence evidence but may never be substituted as the executable paper-pick entry/closing bookmaker. Player-prop markets remain excluded from the product.
+
+API-burn decision: do not re-fetch the already archived `teams/statistics`, `odds/bets` or `odds/bookmakers` payloads merely to inspect their schema. PR #25 introduced a zero-provider-request S3 archive inventory for that purpose and merged as `a74bca8687c6c3346a7872be0c60f9e4b811fb00`.
+
+At the first natural cron after that deployment, the worker exited before inventory execution because cleanup had set `BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON` to an empty string and the worker parsed it with `int("")`. No provider request was made by that failed runtime. Production variables were immediately restored to a safe state with the provider-surface audit ID empty, season `2026`, collection false, canary false and paper mode true. A code hardening patch is being carried in the provider-variable-policy branch so empty optional audit variables cannot crash the worker again.
