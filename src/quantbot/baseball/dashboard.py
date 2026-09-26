@@ -490,7 +490,7 @@ class BaseballDashboard:
         pnl = "—" if profit is None else f"{profit * PAPER_STAKE_RSD:+.0f} RSD"
         clv = self._pct(row.get("clv_probability_delta"))
         bookmaker = str(row.get("bookmaker") or "—")
-        book_class = "bet365" if "365" in bookmaker.casefold() else "1xbet"
+        book_class = "bet365" if "365" in bookmaker.casefold() else "one-x"
         return f"""<tr>
 <td><b>{escape(str(away))} @ {escape(str(home))}</b><small>{escape(str(row.get("league") or "—"))}</small></td>
 <td>{escape(str(row.get("selection") or "—").upper())}</td>
@@ -709,7 +709,7 @@ main{min-width:0;padding:25px 30px 18px;max-width:1680px;width:100%;margin:auto}
 .canary-row{display:grid;grid-template-columns:repeat(5,1fr);padding:14px}.canary-row>div{padding:8px;border-right:1px solid #26343b}.muted{color:var(--muted);font-size:10px;padding:0 14px 12px}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{background:linear-gradient(145deg,#172329,#111a1f);border:1px solid var(--line);border-radius:12px;padding:15px}.kpi small{color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:.08em}.kpi b{display:block;font-size:22px;margin:7px 0 2px;color:var(--cream)}.kpi span{font-size:9px;color:#718287}
 .table-panel{margin-top:11px}.table-wrap{overflow:auto;max-height:64vh}table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}th,td{padding:10px 12px;border-bottom:1px solid #243239;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#172329;color:#839397;text-transform:uppercase;font-size:9px;letter-spacing:.07em;z-index:2}tbody tr:hover{background:#1b292f}td small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.empty{text-align:center;padding:45px!important;color:var(--muted)}
-.book{display:inline-flex;padding:5px 8px;border-radius:6px;font-weight:900}.book.bet365{background:#176847;color:#f5e36f}.book.1xbet{background:#183952;color:#8fc8f3}.pill,.result{display:inline-flex;padding:4px 7px;border-radius:999px;border:1px solid #3b4a50;font-size:9px;font-weight:850}.result.win{color:var(--green);border-color:#38674a}.result.loss{color:var(--red);border-color:#6c3b3e}.result.push{color:var(--blue)}.result.pending{color:var(--amber)}
+.book{display:inline-flex;padding:5px 8px;border-radius:6px;font-weight:900}.book.bet365{background:#176847;color:#f5e36f}.book.one-x{background:#183952;color:#8fc8f3}.pill,.result{display:inline-flex;padding:4px 7px;border-radius:999px;border:1px solid #3b4a50;font-size:9px;font-weight:850}.result.win{color:var(--green);border-color:#38674a}.result.loss{color:var(--red);border-color:#6c3b3e}.result.push{color:var(--blue)}.result.pending{color:var(--amber)}
 .research-note{margin-top:11px;border:1px solid #36454b;border-radius:12px;padding:15px;background:linear-gradient(100deg,#172329,#131c20)}.research-note>b{color:var(--cream)}.research-note p{color:#9aabad;max-width:1000px;line-height:1.55}.research-note div{display:flex;align-items:center;gap:9px}.research-note span{font-size:8px;letter-spacing:.12em;color:var(--green)}.research-note strong{font-size:11px}
 footer{display:flex;justify-content:space-between;gap:20px;color:#65777b;font-size:10px;margin-top:13px;padding:8px 2px}
 @media(max-width:1150px){.status-strip{grid-template-columns:repeat(3,1fr)}.health-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
