@@ -1,3 +1,5 @@
+import pytest
+
 from quantbot.baseball.decision_lifecycle import (
     build_model_prediction,
     build_moneyline_pair_evaluations,
@@ -6,7 +8,7 @@ from quantbot.baseball.decision_lifecycle import (
     requested_verification,
     select_best_candidate,
 )
-from quantbot.baseball.evidence import OddsObservation
+from quantbot.baseball.evidence import EvidenceError, OddsObservation
 
 
 def _observation(
@@ -200,3 +202,121 @@ def test_ready_final_quote_can_register_immutable_paper_pick() -> None:
     assert pick.entry_odds == 2.00
     assert pick.paper_mode is True
     assert pick.state == "REGISTERED"
+
+
+
+def test_non_playable_bookmaker_is_never_selected_as_candidate() -> None:
+    home = _observation(
+        observation_id="00000000-0000-0000-0000-000000000101",
+        selection="home",
+        odds=2.30,
+        observed_at="2026-09-20T17:00:00+00:00",
+        bookmaker="Pinnacle",
+    )
+    away = _observation(
+        observation_id="00000000-0000-0000-0000-000000000102",
+        selection="away",
+        odds=1.65,
+        observed_at="2026-09-20T17:00:00+00:00",
+        bookmaker="Pinnacle",
+    )
+
+    evaluations = build_moneyline_pair_evaluations(
+        _prediction(),
+        home,
+        away,
+        stage="PRELIMINARY",
+        evaluated_at="2026-09-20T17:01:00+00:00",
+        min_edge=0.0,
+        min_expected_value=-1.0,
+        max_uncertainty=0.05,
+        max_quote_age_seconds=300,
+    )
+
+    assert any(item.outcome == "CANDIDATE" for item in evaluations)
+    assert select_best_candidate(evaluations) is None
+
+
+def test_registered_pick_rejects_non_playable_bookmaker() -> None:
+    prediction = _prediction()
+    preliminary_home = _observation(
+        observation_id="00000000-0000-0000-0000-000000000111",
+        selection="home",
+        odds=2.20,
+        observed_at="2026-09-20T17:00:00+00:00",
+        bookmaker="WilliamHill",
+    )
+    preliminary_away = _observation(
+        observation_id="00000000-0000-0000-0000-000000000112",
+        selection="away",
+        odds=1.70,
+        observed_at="2026-09-20T17:00:00+00:00",
+        bookmaker="WilliamHill",
+    )
+    preliminary = next(
+        item
+        for item in build_moneyline_pair_evaluations(
+            prediction,
+            preliminary_home,
+            preliminary_away,
+            stage="PRELIMINARY",
+            evaluated_at="2026-09-20T17:01:00+00:00",
+            min_edge=0.0,
+            min_expected_value=-1.0,
+            max_uncertainty=0.05,
+            max_quote_age_seconds=300,
+        )
+        if item.selection == "home"
+    )
+    request = requested_verification(
+        preliminary,
+        requested_at="2026-09-20T17:01:30+00:00",
+    )
+    final_home = _observation(
+        observation_id="00000000-0000-0000-0000-000000000113",
+        selection="home",
+        odds=2.15,
+        observed_at="2026-09-20T17:02:00+00:00",
+        bookmaker="WilliamHill",
+    )
+    final_away = _observation(
+        observation_id="00000000-0000-0000-0000-000000000114",
+        selection="away",
+        odds=1.72,
+        observed_at="2026-09-20T17:02:00+00:00",
+        bookmaker="WilliamHill",
+    )
+    final = next(
+        item
+        for item in build_moneyline_pair_evaluations(
+            prediction,
+            final_home,
+            final_away,
+            stage="FINAL",
+            evaluated_at="2026-09-20T17:02:10+00:00",
+            min_edge=0.0,
+            min_expected_value=-1.0,
+            max_uncertainty=0.05,
+            max_quote_age_seconds=120,
+        )
+        if item.selection == "home"
+    )
+    ready = ready_verification(
+        request,
+        home=final_home,
+        away=final_away,
+        final_evaluation=final,
+        decided_at="2026-09-20T17:02:11+00:00",
+    )
+
+    with pytest.raises(
+        EvidenceError,
+        match="registered pick bookmaker must be Bet365 or 1xBet",
+    ):
+        build_registered_pick(
+            verification=ready,
+            final_evaluation=final,
+            prediction=prediction,
+            entry_observation=final_home,
+            registered_at="2026-09-20T17:02:12+00:00",
+        )
