@@ -151,7 +151,7 @@ def collect_slow_provider_data(
             summary["standings_rows"] = len(records)
             summary["standings_inserted"] = repository.append_standings(records)
             if records:
-                team_ids = tuple(record.team_id for record in records)
+                team_ids = tuple(dict.fromkeys(record.team_id for record in records))
         except BaseballAPIBudgetExceeded:
             pass
         except (BaseballAPIError, ValueError):
