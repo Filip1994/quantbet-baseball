@@ -111,7 +111,10 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
     assert result["fixture_observations"] == 2
     assert result["fixture_observations_inserted"] == 2
     assert result["pregame_games"] == 1
+    assert result["due_events"] == 1
+    assert result["not_due_events"] == 0
     assert result["games_selected"] == 1
+    assert result["due_events_unselected"] == 0
     assert result["odds_calls"] == 1
     assert result["canonical_rows"] == 2
     assert result["observations_inserted"] == 2
@@ -121,6 +124,35 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
     assert {record.home_team_id for record in repository.fixtures} == {101, 303}
     assert "schema_market_names_json" not in result
     assert "schema_candidate_values_json" not in result
+
+
+class RecentlyObservedRepository(FakeRepository):
+    def latest_observation_times(self):
+        return {"10": datetime(2030, 9, 18, 16, 50, tzinfo=UTC)}
+
+
+def test_skips_pregame_game_when_adaptive_scheduler_says_not_due() -> None:
+    now = datetime(2030, 9, 18, 17, 0, tzinfo=UTC)
+    client = FakeClient()
+    repository = RecentlyObservedRepository()
+
+    result = collect_with_dependencies(
+        client,
+        repository,
+        now=now,
+        max_odds_requests=10,
+        clock=lambda: now,
+    )
+
+    assert result["pregame_games"] == 1
+    assert result["due_events"] == 0
+    assert result["not_due_events"] == 1
+    assert result["games_selected"] == 0
+    assert result["due_events_unselected"] == 0
+    assert result["odds_calls"] == 0
+    assert result["canonical_rows"] == 0
+    assert result["observations_inserted"] == 0
+    assert client.request_count == 2
 
 
 def test_canary_schema_probe_reports_market_names_without_prices() -> None:
