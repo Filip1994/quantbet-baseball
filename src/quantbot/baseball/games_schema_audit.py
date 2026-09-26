@@ -94,9 +94,7 @@ def summarize_games(rows: list[dict[str, Any]]) -> dict[str, Any]:
             for name, count in sorted(league_counts.items())
         ],
         "mlb_sample": mlb,
-        "non_mlb_samples": [
-            samples[name] | {"league": name} for name in non_mlb_names
-        ],
+        "non_mlb_samples": [samples[name] | {"league": name} for name in non_mlb_names],
         "mlb_present": mlb is not None,
         "non_mlb_league_count": len([name for name in samples if name != "MLB"]),
     }
