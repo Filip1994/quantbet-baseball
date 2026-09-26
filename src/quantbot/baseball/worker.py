@@ -161,6 +161,14 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "BASEBALL_MLB_IDENTITY_MAPPING_VERSION",
         "mlb-2026-v1",
     ).strip()
+    mlb_mapping_completion_diagnostic_id = os.getenv(
+        "BASEBALL_MLB_MAPPING_COMPLETION_DIAGNOSTIC_ID",
+        "",
+    ).strip()
+    mlb_mapping_completion_diagnostic_date = os.getenv(
+        "BASEBALL_MLB_MAPPING_COMPLETION_DATE",
+        started_at.date().isoformat(),
+    ).strip()
 
     result: dict[str, object] = {
         "status": "ready",
@@ -171,6 +179,9 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "provider_surface_audit_armed": bool(provider_surface_audit_id),
         "raw_provider_inventory_armed": bool(raw_provider_inventory_id),
         "mlb_identity_diagnostic_armed": bool(mlb_identity_diagnostic_id),
+        "mlb_mapping_completion_diagnostic_armed": bool(
+            mlb_mapping_completion_diagnostic_id
+        ),
     }
 
     # Fail closed if both paths are armed. A canary must never coexist with
@@ -274,6 +285,30 @@ def run_once(root: Path | None = None) -> dict[str, object]:
             )
         diagnostic["diagnostic_id"] = mlb_identity_diagnostic_id
         result["mlb_identity_diagnostic"] = diagnostic
+
+    if mlb_mapping_completion_diagnostic_id:
+        database_url = os.getenv("DATABASE_URL", "").strip()
+        if not database_url:
+            mapping_diagnostic: dict[str, object] = {
+                "status": "BLOCKED",
+                "provider_calls": 0,
+                "archive_reads": 0,
+                "reason_codes": ["DATABASE_URL_MISSING"],
+            }
+        else:
+            from .mlb_identity_mapping_diagnostic import (
+                run_mlb_mapping_completion_diagnostic,
+            )
+
+            mapping_diagnostic = run_mlb_mapping_completion_diagnostic(
+                database_url,
+                date_iso=mlb_mapping_completion_diagnostic_date,
+                mapping_version=mlb_identity_mapping_version,
+                observed_by=datetime.now(UTC),
+                root=project_root,
+            )
+        mapping_diagnostic["diagnostic_id"] = mlb_mapping_completion_diagnostic_id
+        result["mlb_mapping_completion_diagnostic"] = mapping_diagnostic
 
     health = _record_runtime(
         result,
