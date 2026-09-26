@@ -81,11 +81,24 @@ def test_official_mlb_structured_source_audit() -> None:
     game_data = feed.get("gameData") or {}
     live_data = feed.get("liveData") or {}
     boxscore = live_data.get("boxscore") or {}
+    venue = game_data.get("venue") or {}
     feed_summary = {
         "top_level_keys": sorted(feed),
         "game_data_keys": sorted(game_data),
         "live_data_keys": sorted(live_data),
-        "venue_keys": sorted(game_data.get("venue") or {}),
+        "datetime_keys": sorted(game_data.get("datetime") or {}),
+        "team_side_keys": {
+            side: sorted((game_data.get("teams") or {}).get(side) or {})
+            for side in ("away", "home")
+        },
+        "probable_pitcher_keys": {
+            side: sorted((game_data.get("probablePitchers") or {}).get(side) or {})
+            for side in ("away", "home")
+        },
+        "venue_keys": sorted(venue),
+        "venue_field_info_keys": sorted(venue.get("fieldInfo") or {}),
+        "venue_location_keys": sorted(venue.get("location") or {}),
+        "venue_time_zone_keys": sorted(venue.get("timeZone") or {}),
         "weather_keys": sorted(game_data.get("weather") or {}),
         "boxscore_keys": sorted(boxscore),
         "boxscore_team_keys": {
@@ -187,7 +200,10 @@ def test_official_mlb_historical_timecode_replay_audit() -> None:
         "requested_timecode": timecode,
         "metadata_timestamp": (feed.get("metaData") or {}).get("timeStamp"),
         "status": game_data.get("status") or {},
-        "probable_pitcher_sides": sorted(game_data.get("probablePitchers") or {}),
+        "datetime": game_data.get("datetime") or {},
+        "teams": game_data.get("teams") or {},
+        "probable_pitchers": game_data.get("probablePitchers") or {},
+        "venue": game_data.get("venue") or {},
         "boxscore": side_summary,
         "plays_count": len((live_data.get("plays") or {}).get("allPlays") or []),
     }
