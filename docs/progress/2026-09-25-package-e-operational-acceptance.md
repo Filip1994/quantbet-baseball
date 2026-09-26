@@ -589,3 +589,645 @@ Expected next live assessment remains:
 - collection OFF.
 
 This remains an expectation until the scheduled worker log confirms it.
+
+
+## Post-budget-fix scheduled execution acceptance — 2026-09-25
+
+The outstanding Package E production expectation has now been verified from a **real natural Railway cron execution**, without changing cron, service behavior, collection state, or canary state.
+
+### Deployment state
+
+Current Baseball production deployment:
+
+- `1466ff80-d238-4f38-9822-c4098fafc9da`;
+- source commit: `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- final status: **SUCCESS**.
+
+This docs-only deployment superseded the earlier budget-variable redeployment while preserving the corrected production variable state. The service remains scheduled at:
+
+- `*/15 * * * *`.
+
+Railway service config still has no watch patterns configured. No further attempt was made to modify them.
+
+### First natural cron proving the corrected budget
+
+First observed scheduled worker execution after the budget correction:
+
+- start: `2026-09-25T16:15:46.860128915Z`;
+- structured runtime/gate record: `2026-09-25T16:15:48.524278955Z`;
+- assessment ID: `93f7b3b6-c297-52ed-8ddb-ba31c5688bd1`.
+
+Exact activation-gate budget projection:
+
+```text
+daily_request_budget=7500
+cycle_request_cap=75
+cycles_per_day=96
+worst_case_daily_requests=7200
+request_headroom=300
+daily_reserve_required=250
+```
+
+Exact relevant checks:
+
+```text
+api_key_configured=false
+canary_passed=false
+collection_enabled=false
+migrations_current=true
+paper_mode=true
+raw_archive_configured=true
+runtime_fresh=true
+```
+
+Result:
+
+```text
+target=CANARY
+reason_codes=[API_KEY_MISSING]
+verdict=BLOCKED
+mode=storage-ready
+```
+
+This proves the production budget drift is fully resolved:
+
+- `API_BUDGET_UNSAFE` no longer appears;
+- the 7,500 daily ceiling is being interpreted correctly;
+- the collector remains capped at 75 fresh attempts per cycle;
+- worst-case daily usage remains 7,200;
+- theoretical headroom remains 300, above the required 250 reserve.
+
+### Repeated-run confirmation
+
+A later natural run at `2026-09-25T21:15:17.162099029Z` produced the same gate state with assessment:
+
+- `870a6ef0-fcbf-5a06-a5dc-cc760a8c8a74`;
+- only blocker: `API_KEY_MISSING`;
+- verdict: `BLOCKED`;
+- `collection_enabled=false`.
+
+### Package E acceptance boundary
+
+Package E operational acceptance has reached the credential boundary.
+
+No code defect, migration defect, budget defect, runtime freshness defect, archive configuration defect, or paper-mode defect is blocking the CANARY target.
+
+The remaining blocker is exactly:
+
+- missing Railway variable `API_BASEBALL_KEY`.
+
+Until that credential exists:
+
+- do not enable `BASEBALL_ENABLE_CANARY`;
+- do not enable `BASEBALL_ENABLE_COLLECTION`;
+- do not fabricate provider evidence;
+- keep production in `PAPER_MODE=true`.
+
+
+## Handoff revalidation — 2026-09-26
+
+A fresh read-only production check reconfirmed the Package E acceptance boundary.
+
+Current production deployment:
+
+- `1466ff80-d238-4f38-9822-c4098fafc9da`;
+- status: **SUCCESS**;
+- source commit: `cc31a5dc0cfa525d4bccac7b90ea247cb94d1ae6`;
+- cron: `*/15 * * * *`.
+
+Current service config still contains no watch-pattern restriction, and the production
+variable-name inventory still does not contain `API_BASEBALL_KEY`.
+
+Latest completed natural cron inspected:
+
+- gate timestamp: `2026-09-25T22:00:51.824842688Z`;
+- assessment ID: `f940b8d9-0240-5269-b0be-5ebf532de2e7`;
+- `daily_request_budget=7500`;
+- `cycle_request_cap=75`;
+- `worst_case_daily_requests=7200`;
+- `request_headroom=300`;
+- `reason_codes=[API_KEY_MISSING]`;
+- `collection_enabled=false`;
+- `paper_mode=true`;
+- verdict: **`BLOCKED`**.
+
+This independently reconfirms that the budget blocker is resolved and the remaining
+production blocker is solely the absent provider credential.
+
+No canary, collection activation, watch-pattern mutation, cron mutation, redeploy, or PR merge was performed.
+
+
+## Provider-key handoff check — 2026-09-26
+
+The operator reported adding `API_BASEBALL_KEY`.
+
+Immediate production verification found:
+
+- new deployment `59cccc85-cc41-45aa-8b46-9760c3945cd6` entered `BUILDING`;
+- guarded service/environment are correct;
+- the Railway variable inventory exposed to `quantbet-baseball` still does not list `API_BASEBALL_KEY`.
+
+Safety response:
+
+- no canary arming;
+- no collection activation;
+- no cron/config mutation;
+- wait for the deployment/variable state to become independently observable, then require the CANARY activation gate to become ready before any bounded provider request is allowed.
+
+
+## Provider URL restoration after credential misplacement — 2026-09-26
+
+A credential-entry mistake was identified: the provider key had been placed in `API_BASEBALL_BASE_URL`.
+
+The canonical URL was independently verified from `config.py` and `.env.example`:
+
+- `https://v1.baseball.api-sports.io`.
+
+Production repair:
+
+- restored `API_BASEBALL_BASE_URL` to the canonical URL;
+- skipped redeploy for this repair;
+- left collection and canary disabled;
+- no credential was fabricated or copied.
+
+Remaining blocker: create `API_BASEBALL_KEY` on the guarded Baseball production service using the real provider secret.
+
+
+## Provider credential visibility confirmed — 2026-09-26
+
+Railway now exposes `API_BASEBALL_KEY` to the guarded Baseball production service. A new deployment, `667487c1-6b31-4624-ae36-a655147b6f08`, was created by the credential change and was initially `WAITING`.
+
+No canary or scheduled collection activation was performed. The next acceptance requirement is a natural storage-ready gate proving CANARY readiness with the key configured.
+
+
+## Credential deployment success; natural CANARY gate pending — 2026-09-26
+
+The credential-triggered deployment `667487c1-6b31-4624-ae36-a655147b6f08` completed with **SUCCESS**. No migration was newly applied during pre-deploy.
+
+The API key is now visible to the correct Baseball service, but deployment startup is not being treated as a readiness substitute. No canary or scheduled collection was enabled. The next accepted proof is the first natural `*/15` storage-ready worker execution on this deployment.
+
+A one-time follow-up verification is scheduled for the next cron window; it must only proceed toward bounded canary execution if the natural CANARY activation gate is ready and a safe existing one-shot execution path is available.
+
+
+## Natural CANARY gate READY and next execution design — 2026-09-26
+
+Natural cron executions on deployment `667487c1-6b31-4624-ae36-a655147b6f08` now prove the CANARY gate is `READY` with no blocker codes. The live budget projection remains 7500 daily / 75 per scheduled cycle / 7200 worst-case / 300 headroom, and production remains `PAPER_MODE=true`, `BASEBALL_ENABLE_COLLECTION=false`.
+
+The chosen safe execution mechanism is a DB-idempotent one-shot path inside the existing worker: an explicit canary flag may trigger one bounded canary only when the CANARY gate is READY; once a recent PASSED canary exists, later cron invocations must skip re-execution even if the flag remains armed. No cron rewrite, start-command rewrite, temporary service, or collection enablement is required.
+
+
+## One-shot canary implementation and arming — 2026-09-26
+
+PR #14 introduced the safe one-shot execution mechanism required to run the existing bounded canary without temporary cron/start-command/service hacks. CI passed and the PR was squash-merged to main as `dd423761e9146c1ea674a483ae8b12c3fe84fc50`. Deployment `26d1fbdd-7389-4ad4-b9b4-691aefcb2fcb` reached SUCCESS.
+
+The guarded Baseball service was then armed with explicit caps: 8 total provider attempts, 2 odds requests, 1 monitoring refresh, and 1 settlement refresh. `BASEBALL_ENABLE_COLLECTION=false` and `PAPER_MODE=true` were explicitly reasserted. Railway created redeployment `b7c0a7ea-5a76-464e-8efe-81187b3a3634`.
+
+Acceptance remains pending the natural cron evidence. PASS is not assumed in advance.
+
+
+## First bounded provider canary result — FAILED safely — 2026-09-26
+
+Natural cron executed the one-shot canary at `2026-09-25T23:16:05.657939242Z`.
+
+Observed evidence:
+
+- `status=FAILED`;
+- 4 provider requests, bounded below the cap of 8;
+- 66 games/fixtures seen and 66 fixture observations persisted;
+- 2 odds calls returned 1387 raw market rows;
+- 0 canonical odds observations were produced or inserted;
+- no provider/collector errors;
+- archive/db verification therefore remained false;
+- failure reasons: `POSTGRES_WRITES_NOT_VERIFIED`, `RAW_ARCHIVE_NOT_VERIFIED`.
+
+Interpretation: provider connectivity and fixture persistence are proven. Live odds payload mapping is not. Collection remains disabled and no activation claim is made. Next action is to diagnose the real provider odds shape against the canonical mapper, repair with regression fixtures/tests, deploy, and rerun one bounded canary.
+
+
+## Failed canary disarmed and live odds mapper repair opened — 2026-09-26
+
+The failed canary was immediately disarmed to avoid re-running provider requests every 15 minutes. Deployment `2c42711f-e4b2-4410-a05f-407cdb767113` succeeded with canary and scheduled collection disabled and paper mode retained.
+
+PR #15 repairs the observed live-moneyline mapping boundary by admitting API-Sports `Home/Away` as a full-game two-way moneyline alias, removes legacy player-prop target tokens from compact game-line processing, and adds bounded live market-name diagnostics. Full raw payload archiving remains unchanged.
+
+
+## First live canary result: safe failure in canonical odds ingestion — 2026-09-26
+
+The first natural bounded canary executed at `2026-09-25T23:16:05.657939242Z` and failed closed. It used 4/8 allowed provider attempts with 0 API errors, inserted 66 fixture observations, made 2 odds calls and observed 1387 compact market value rows, but produced 0 canonical odds rows and 0 PostgreSQL odds observations. Canary id: `e52931fc-e7ab-56cc-be44-9f175c20f1e8`; collection cycle: `dbddfcb8-6a6f-412b-b46a-017b986286f3`.
+
+Reason codes were `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`. This localizes the acceptance failure to odds canonicalization rather than provider connectivity or fixture storage.
+
+The canary flag was immediately disarmed after the failed run, with collection kept false and paper mode true. Deployment `2c42711f-e4b2-4410-a05f-407cdb767113` now represents that safe state.
+
+
+## Canary-only odds schema probe merged — 2026-09-26
+
+PR #16 added a diagnostic-only extension to the bounded canary path. It exposes distinct provider market names and selection labels while excluding odds values and credentials. CI initially caught formatting drift; no merge occurred until it was fixed. Final Baseball tests and Railway runtime smoke both passed. The PR was squash-merged as `e0f2926287c4dd269a499249f3645f684e2d048a`.
+
+This change does not widen the full-game moneyline parser. A second bounded canary is required to obtain exact live provider naming before the parser is changed.
+
+
+## Canary schema probe re-armed — 2026-09-26
+
+The canary-only schema probe is now on main as `e0f2926287c4dd269a499249f3645f684e2d048a`; deployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` is SUCCESS. One bounded diagnostic canary was re-armed with the existing 8/2/1/1 caps while collection remains false and paper mode remains true. No parser widening is authorized until the natural canary returns the exact live market/selection schema.
+
+
+## Second bounded schema-diagnostic canary — 2026-09-26
+
+Schema-probe commit `e0f2926287c4dd269a499249f3645f684e2d048a` deployed successfully. The diagnostic canary was re-armed with caps 8/2/1/1 while `BASEBALL_ENABLE_COLLECTION=false` and `PAPER_MODE=true`. Redeployment `d60fd5df-7b4d-495d-8255-aa2eb19edee7` reached SUCCESS. Acceptance remains pending the next natural cron; no market-name hypothesis is treated as proven before that evidence is emitted.
+
+
+## Second bounded canary diagnostic result — 2026-09-26
+
+The schema-probe canary ran naturally at `2026-09-25T23:46:33.726660077Z` (canary `e7e10245-4941-55c1-8cdd-f7b662047dca`, cycle `eaf76e67-fea3-42e3-90ee-b40f8dddb488`). It used 4/8 provider requests with zero API errors, inserted 66 fixture observations, but the two selected odds calls produced 0 compact market rows and therefore 0 canonical/PostgreSQL odds observations. Both schema-name diagnostic fields were empty.
+
+No parser widening is justified by this run. Canary was disarmed again and collection remains disabled. The next probe will distinguish an empty odds response from an unrecognized response shape and may inspect up to four games under the same 8-request ceiling.
+
+
+## Moneyline canonicalization root cause and fix — 2026-09-26
+
+Live-history payloads in the repository proved that API-Sports Baseball market id `1` is `Home/Away` with exactly `Home` and `Away`, while market id `14` `Match Winner` is three-way (`Home/Draw/Away`). The prior canonicalizer omitted the first market and could incorrectly drop `Draw` from the second.
+
+PR #22 fixed both behaviors and passed Baseball tests plus Railway runtime smoke before merging to main as `a4d20a9d624342a286603fe46bd2a4cf3dff3640`.
+
+No collection activation occurred. Next requirement: deploy this commit and run one bounded canary with <=8 total provider attempts and <=4 broad odds calls.
+
+
+## Third bounded canary after Home/Away fix — 2026-09-26
+
+Deployment `b57c3196-98f1-48ef-9c63-65666ed9c264` successfully ran main commit `a4d20a9d624342a286603fe46bd2a4cf3dff3640`. The next natural cron executed bounded canary `6f337f6f-d35a-595d-9874-f5d909a5dca0` (cycle `88839d4c-7b40-4fe6-b3e4-c4d132339c19`). It used 6/8 provider requests and selected 4 games for odds, but all four odds responses were empty: 0 payload rows, 0 bookmaker records, 0 raw market rows, 0 canonical rows, 0 PostgreSQL odds observations, and 0 API errors.
+
+This canary therefore failed with `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`. It did not invalidate the Home/Away parser fix because no market payload reached the parser. Canary was disarmed again, collection remains disabled, and paper mode remains true.
+
+
+## Live one-request /games schema audit completed — 2026-09-26
+
+The guarded Baseball service completed audit `games-schema-live-20260926-1` using exactly one provider request to `/games?date=2026-09-26`. It returned 35 games: MLB 16, NPB 5, Asian Games 4, CPBL 3, KBO 3, Elitserien 2, Bundesliga 1, Division 1 1. MLB and sampled non-MLB rows exposed the same schedule/status schema and no injuries, pitchers, lineups, players, venue/stadium, roof, umpire, or weather fields. Raw payload archival succeeded. A later cron returned `ALREADY_DONE` with zero requests, proving one-shot idempotence. Audit flags were cleared; collection and canary remain off; paper mode remains on.
+
+
+## Live provider surface audit and zero-request archive follow-up — 2026-09-26
+
+Audit `provider-surface-live-20260926-1` consumed 9/12 bounded API requests and verified MLB/NPB standings, 83 provider bet definitions, 30 bookmaker definitions, the absence of the attempted `/players` search endpoint, and the object-response behavior of `teams/statistics` using `team+league+season`. Raw successful responses were durably archived.
+
+The follow-up policy is to inspect already archived `teams/statistics`, bet-catalog and bookmaker-catalog payloads through S3 with zero additional provider requests. PR #25 merged this archive-only inventory path as `a74bca8687c6c3346a7872be0c60f9e4b811fb00`.
+
+The first post-deploy cron did not reach the inventory because an empty optional `BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON` variable caused `int("")` to fail during worker startup. This failure made zero provider requests. The variable was restored to `2026` while keeping the corresponding audit ID empty, collection/canary disabled and paper mode true. A parser hardening fix is in progress.
+
+Execution boundary: Bet365 and 1xBet only. All other books are intelligence-only; player props remain outside product scope.
+
+
+## Provider inventory and playable-book enforcement — 2026-09-26
+
+The zero-provider-request S3 inventory recovered the archived MLB/NPB team-statistics object schemas and catalog data without new API-Sports calls. Provider bookmaker ids are now evidence-backed: 1xBet id 1 and Bet365 id 2. PR #28 then enforced those two as the only executable/paper-pick bookmakers while preserving other books for intelligence-only evidence. Player props and inning variants were removed from compact game-level processing but remain present in immutable raw payloads.
+
+PR #28 passed Baseball tests plus Railway runtime smoke and merged as `7669e99d6ce6f5e815c604b22c9bcf91f84e0738`. The canonical registry is `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`. Collection and canary remain disabled; paper mode remains enabled.
+
+
+## Production dashboard full-readiness acceptance — 2026-09-26
+
+The dedicated `quantbet-baseball-dashboard` service is production-online at `https://quantbet-baseball-dashboard-production.up.railway.app`. It is DB-read-only, has no API-Sports credential, performs no provider calls and is isolated from the cron worker.
+
+PRs #29–#32 established the dashboard and hardened readiness. The key acceptance gate is now strong: `/readyz` executes the complete production dashboard snapshot. This intentionally exposed and then eliminated a psycopg `dict_row` mismatch with the existing tuple-based evidence repository. Final dashboard deployment `a5aed490-7fba-4057-8ea1-22b2394f0e94` reached SUCCESS and Railway reported `Healthcheck succeeded` on the full snapshot path.
+
+Worker deployment `af32f80a-3c57-4985-ba09-925bb1c0eeb7` also reached SUCCESS. Worker cron/start semantics are unchanged; collection and canary remain off and paper mode remains on. No provider requests were introduced by dashboard activity.
+
+
+## Market acceptance canary PASSED — 2026-09-26
+
+Canary `5dbf934c-c5c6-565f-8425-f49b79964286` passed on natural cron with 6/8 total provider requests, 4 odds calls, 522 raw market rows, 42 canonical moneyline rows and 42 PostgreSQL inserts. Archive verification and DB-write verification were both true, with zero collection errors and no canary reason codes.
+
+The post-canary `SCHEDULED_COLLECTION` gate returned **READY** with canary_passed=true, PAPER_MODE=true, collection_enabled=false, migrations_current=true, raw_archive_configured=true and runtime_fresh=true. The next cron returned `ALREADY_PASSED` rather than re-running provider ingestion. Canary was explicitly disarmed afterward; scheduled collection remains disabled pending fixed 300 RSD paper-stake deployment and final downstream checks.
+
+
+## Fixed 300 RSD paper stake deployed — 2026-09-26
+
+PR #35 merged as `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`. Worker predeploy applied `008_paper_stake_rsd.sql` and deployment `7ea4ea81-e3d6-4425-9ec9-c47ccb7b37d4` reached SUCCESS. The fixed 300 RSD stake is now enforced in both domain and PostgreSQL evidence, with DB-backed settled stake and realized paper P/L projections.
+
+The first dashboard deployment correctly failed before migration 008 existed. After the worker migration, dashboard redeploy `4ba844a2-0eec-461b-a210-086b8c544efe` reached SUCCESS on full-snapshot readiness. Collection remained disabled during the schema transition.
+
+
+## 2026-09-26 post-activation live read-back and API-burn diagnosis
+
+This entry records a fresh read-only production verification after scheduled collection activation.
+
+Authoritative live evidence:
+
+- GitHub default branch remains `main` at `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`;
+- PR #34 is merged as `35f76de13ee42e4d93df4a8334e4bb1faba92b0d`;
+- PR #35 is merged as `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`;
+- PR #13 remains open and intentionally unmerged;
+- guarded Railway target is still project `believable-contentment`, production environment `32ceeb6e-a8a8-4f98-b757-58d63417e496`;
+- worker `quantbet-baseball` latest deployment `cce8c01e-013e-4f53-87fe-5c2414b1f36a` is SUCCESS on main `8eb5dc6`;
+- dashboard latest deployment `4ba844a2-0eec-461b-a210-086b8c544efe` is SUCCESS on the same main commit;
+- dashboard Railway healthcheck step completed successfully with configured path `/readyz`; public root requests observed by Railway returned HTTP 200;
+- migration 008 is proven applied by pre-deploy output `('008_paper_stake_rsd.sql',)`; the subsequent redeploy reports no pending migrations;
+- immediately pre-activation activation-gate evidence reported `paper_mode=true`, `canary_passed=true`, `migrations_current=true`, raw archive configured, and no blocker codes;
+- current worker runtime evidence reports `collection_enabled=true` and `canary_enabled=false`.
+
+First observed scheduled collection cycle after activation:
+
+- cycle `ecd78577-abb1-4d08-b740-24bcb33411d0`;
+- execution mode `SCHEDULED`;
+- 56 / 75 API requests used;
+- 54 broad odds calls;
+- 65 games seen, 54 pregame games, 54 games selected;
+- 2,757 compact raw market rows;
+- 190 canonical moneyline rows inserted;
+- zero collector/provider errors;
+- durable health after the cycle: 96 distinct fixtures, 390 fixture observations, 232 odds observations, 15 distinct quote games, 7 bookmakers, and zero model predictions/value evaluations/registered picks/settled picks.
+
+### API-burn root cause found
+
+Code review of `src/quantbot/baseball/durable_collector.py` found a deterministic scheduler bypass. The collector correctly builds a `due` list using `is_observation_due(...)`, but selection then iterates over `(due, learning)`. The `learning` list contains every eligible pregame game inside 36 hours, so unused request capacity is filled with games that are explicitly not due. With 54 eligible games and a broad-odds cap above that count, all 54 games are polled on every 15-minute cron regardless of the intended 120/60/30/15-minute adaptive cadence.
+
+This explains the observed 54 odds calls in one cycle and is a real API-efficiency defect, not a tuning preference.
+
+Immediate engineering action: preserve collection activation, fix scheduled selection so non-due games cannot consume broad discovery capacity, add regression coverage and explicit efficiency telemetry, and validate the change before production merge. Do not lower the global budget/cap as a substitute for correcting scheduling semantics.
+
+
+## 2026-09-26 adaptive odds cadence repair merged and deployed
+
+Additional production evidence made the API-burn defect measurable before the repair deployed.
+
+Old-code scheduled cycle at `2026-09-26T07:31:42Z`:
+
+- cycle: `00305c67-5422-4206-9e21-484a0a4078d1`;
+- provider requests: 57 / 75;
+- games seen: 65;
+- pregame games: 55;
+- scheduler due events: **45**;
+- games selected for odds: **55**;
+- odds calls: **55**;
+- raw compact market rows: 2,757;
+- canonical rows / observations inserted: 190 / 190;
+- errors: 0.
+
+Therefore at least **10 broad odds requests in that single cycle were explicitly non-due** according to the project's own adaptive cadence. This directly confirms the due+learning fallback was consuming quota outside scheduler intent.
+
+Repair PR #38, `Honor adaptive cadence for scheduled odds polling`, changed broad selection to consume only `due` games. It also adds `not_due_events` and `due_events_unselected` telemetry and a regression test proving a recently observed game is not queried before its interval expires.
+
+Validation:
+
+- Baseball tests: PASS;
+- Railway runtime smoke: PASS;
+- PR #38 squash-merged to main as `a6dd7624040249b233453272f25029ef92446815`;
+- worker deployment `885575ba-0750-4b61-87fb-08cf5a096a57`: SUCCESS;
+- dashboard deployment `12008f77-e4ec-46ac-a05a-eaff68faab83`: SUCCESS;
+- collection was not disabled;
+- cron, request budget, bookmaker policy, paper mode and Football resources were not changed.
+
+Acceptance of the burn repair still requires a natural scheduled production cycle on `a6dd762...` proving `games_selected <= due_events` and exposing the new telemetry. No API-saving claim beyond the demonstrated old-code waste is considered complete until that live post-deploy evidence exists.
+
+
+## 2026-09-26 post-repair production cycle and second API-burn defect
+
+The first natural scheduled collection observed after the adaptive due-only repair ran on main `7af3f59c318a9724c60a5af0b9d3a0b02ca26675` through worker deployment `b045c5e1-e0cb-4a7a-b1bc-f3d4edc708cf` (SUCCESS).
+
+Cycle `ee7e84d4-92d6-4017-b75d-e62035626444` at ~07:46 UTC:
+
+- execution mode: SCHEDULED;
+- API requests: 42 / 75;
+- games seen: 65;
+- pregame games: 55;
+- due events: 40;
+- not-due events: 15;
+- games selected: 40;
+- due events unselected: 0;
+- odds calls: 40;
+- raw market rows: 0;
+- canonical rows: 0;
+- observations inserted: 0;
+- errors: 0.
+
+This is production proof that PR #38 repaired the first scheduler bypass: `games_selected == due_events`, and 15 explicitly non-due games did not consume broad odds calls. Compared with the pre-fix cycle where 45 due became 55 selected, broad selection now honors the scheduler.
+
+However, the same cycle exposed a second burn defect: all 40 successful odds calls returned empty provider responses. The scheduler's prior timestamp is currently derived only from `odds_observations`. An empty but successful archived odds response creates no canonical quote row, therefore no latest observation timestamp. Such games can remain due on every 15-minute cron even though they were just checked.
+
+Required repair: persist a durable per-game odds poll-attempt fact for every successful provider odds response, including empty responses and the raw archive receipt/checksum. Adaptive scheduling must use the latest successful poll attempt, not only the latest parsed quote observation. Provider errors must remain distinguishable from successful empty responses.
+
+### Dashboard API-efficiency telemetry
+
+PR #40, `Show scheduled collection efficiency on dashboard`, passed Baseball tests and was squash-merged as `7af3f59c318a9724c60a5af0b9d3a0b02ca26675`.
+
+Dashboard deployment `8e2dc6bc-3c54-4efb-b786-3e4446a2184e` is SUCCESS. The System view now exposes persisted latest-cycle requests/cap, due games, selected games, not-due games, odds calls and canonical observations per provider request. The dashboard remains read-only and makes no provider calls.
+
+### Official MLB structured-source live audit
+
+Draft PR #39 is audit-only and must not be merged. Its bounded public no-auth MLB Stats API audit passed on commit `f9ab46d3d674001db7a32072a2b5151e3716a146`: 135 tests passed, 6 skipped.
+
+Verified live on 2026-09-26:
+
+- `/api/v1/schedule?sportId=1&date=2026-09-26&hydrate=probablePitcher,team,venue` returned 13 MLB games and structured probable-pitcher/team/venue data;
+- first sampled game `gamePk=822678` exposed Mets probable starter Jonah Tong (MLB id 804636), Nationals probable starter Connelly Early (MLB id 813349), and Nationals Park (venue id 3309);
+- `/api/v1.1/game/822678/feed/live` exposed `gameData.probablePitchers`, `gameData.players`, venue/location/time-zone/field metadata, and boxscore team structures including battingOrder, bullpen, pitchers and players;
+- the sampled early-pregame feed had an empty `gameData.weather` object, which is treated as absent evidence, never as zero values;
+- active roster query returned 28 rows with person/position/status identity fields;
+- transactions query for 2026-09-24 through 2026-09-26 returned 67 rows with date/effectiveDate/person/team/type/description fields.
+
+Lineup-capable schema is verified, but confirmed-lineup availability is not yet proven for an actual populated pregame snapshot. Expected and confirmed lineup states remain separate by contract. Historical `timecode` replay is the next bounded audit before point-in-time ingestion is approved.
+
+
+## 2026-09-26 successful-empty-poll cadence evidence and MLB replay verification
+
+### API-burn repair #2
+
+PR #41, `Persist successful empty odds polls for cadence`, passed both Baseball tests and Railway runtime smoke and was squash-merged as `527790c13a76811c7c63300b5504dcf0f7a495e4`.
+
+Migration `009_odds_poll_attempts.sql` adds immutable evidence for every successful API-Sports game-odds response, including empty responses. Each record preserves game/provider identity, actual capture time, kickoff, response/raw/canonical row counts and the raw archive ref/checksum. Scheduler cadence now keys off latest successful odds poll attempt rather than only parsed quote observations. A provider error does not create successful poll evidence.
+
+Worker deployment `008ce875-1c54-47aa-98aa-77eab7bf5bfc` is SUCCESS. Predeploy evidence at 07:55:45 UTC confirms:
+
+`{'migrations_applied': ('009_odds_poll_attempts.sql',)}`
+
+This fixes the second burn defect discovered by cycle `ee7e84d4-92d6-4017-b75d-e62035626444`, where 40/40 due odds requests were successful but returned zero market rows; before migration 009 such empty calls had no durable last-check timestamp and could become due again every cron.
+
+A natural post-migration cycle is still required to prove the new empty-response throttle in production across consecutive cron runs.
+
+### Dashboard deployment race observed and resolved
+
+The first dashboard deploy of `527790c...` failed readiness because it started before worker predeploy had created `odds_poll_attempts`; readiness correctly failed with PostgreSQL `UndefinedTable` rather than reporting a false green state. After migration 009 applied, dashboard-only redeploy `3ebfcb50-5594-4f6b-99b9-aeec2a9635d1` succeeded without code/schema changes. This was a deployment-order race, not a dashboard query defect.
+
+### Official MLB historical replay verified
+
+Audit-only PR #39 was never merged and has now been closed after evidence was harvested into canonical docs.
+
+Bounded official MLB Stats API audit passed with 136 tests / 6 skipped. Historical `timecode` replay on completed game `823570` requested `20260920_151000` for a game scheduled at `2026-09-20T17:10:00Z` and returned:
+
+- `Pre-Game` status;
+- probable pitchers for both sides;
+- populated 9-player batting orders for both teams;
+- 28 player records per team in the sampled boxscore state;
+- bullpen/pitcher identity arrays;
+- response `metaData.timeStamp=20260920_151258`.
+
+The 2m58s difference between requested timecode and response metadata timestamp is a critical anti-leakage finding. Historical feature ingestion must use the actual provider response metadata timestamp as source cutoff evidence. A requested timestamp alone is insufficient.
+
+PR #42, `Document verified official MLB source contracts`, passed tests and was squash-merged as `74eeb9cf3220225143c780425269860c2d711c31`. The canonical variable and research feature registries now record these source contracts, current scheduled-collection state and migration-009 empty-poll semantics.
+
+
+## 2026-09-26 source hierarchy lock and post-migration burn acceptance
+
+### Adaptive odds cadence production acceptance
+
+Migration 009 was validated across consecutive natural cron cycles.
+
+Seed cycle `9cdcda9b-e5e3-489a-92bf-eea9e307875c` at 08:01 UTC:
+
+- pregame games: 52;
+- due events: 52;
+- odds calls: 52;
+- successful immutable poll attempts inserted: 52;
+- canonical quote rows: 148;
+- errors: 0.
+
+Next cycle `316946c5-cb31-4afb-bef5-fffb07c49fc9` at 08:15 UTC:
+
+- pregame games: 51;
+- due events: 7;
+- not-due events: 44;
+- odds calls: 7;
+- poll attempts inserted: 7;
+- canonical rows: 28;
+- errors: 0.
+
+This closes the successful-empty-response burn defect. Games successfully checked in the prior cycle no longer become immediately due merely because no canonical quote row existed.
+
+### Canonical source hierarchy locked
+
+The governing source architecture is now:
+
+- API-Sports Baseball = primary provider;
+- official MLB Stats API = granular baseball enrichment only;
+- Open-Meteo = weather only;
+- QuantBet = local derivations and models.
+
+API-Sports remains canonical for games, schedule/history, results/status, standings, team statistics, odds, bookmaker/market intelligence and settlement evidence. MLB must not become a parallel source for those facts. MLB schedule access is permitted only as an identity bridge to obtain `gamePk` needed to fetch granular starter/lineup/roster/bullpen/venue enrichment.
+
+### Official MLB enrichment boundary merged
+
+PR #43 `Add official MLB point-in-time pregame evidence` was tightened to enrichment-only semantics, passed Baseball tests + Railway runtime smoke, and was squash-merged as `262b5d2e85909245ca221c192f691292d041da56`.
+
+The merged boundary stores no MLB team-strength/standings duplication. It preserves probable starters, batting-order presence, bullpen identity, venue/roof/location metadata, raw provenance and actual `metaData.timeStamp` cutoff semantics. Scheduled MLB enrichment polling is still OFF pending cross-provider identity mapping.
+
+Worker deployment `b64eb7f3-6fbd-45c2-84c2-ad2bfd6a7d24` and dashboard deployment `d854b489-a9ac-4ba8-8bba-8cd105271c84` are SUCCESS on this commit.
+
+### Phase 1 API-Sports primary-data work
+
+PR #44 `Canonicalize API-Sports primary team data` is in progress.
+
+Current implementation on the PR branch includes:
+
+- support for the live-verified object-shaped `teams/statistics` response;
+- immutable standings evidence;
+- immutable overall/home/away team-statistics evidence;
+- non-redundant compact team-strength feature view;
+- immutable bookmaker and bet-type reference catalog snapshots;
+- migration 011 + PostgreSQL repository;
+- low-frequency slow-source collector that can consume only leftover per-cycle request capacity after settlement, registered-pick monitoring, schedule discovery and adaptive odds;
+- daily standings/team-stat cadence;
+- weekly catalog cadence;
+- default-OFF production feature flag pending CI + bounded activation acceptance;
+- canonical `docs/DATA_SOURCE_ARCHITECTURE.md`.
+
+No player props, real-money path, MLB polling or bookmaker execution rules are changed by this Phase 1 work.
+
+
+## API-Sports Phase 1 catch-up and bounded slow-source acceptance — 2026-09-26
+
+The operational log was refreshed from live GitHub and Railway before any new provider action.
+
+Current main is `42a4ae569aeadc676114c6935b9c69722083cc4e` after PR #47. The relevant merged chain is:
+
+- PR #44 / migration 011: canonical API-Sports standings, team-statistics and reference-catalog evidence;
+- PR #45: nested standings-envelope parsing;
+- PR #46: stage/group/position-aware immutable standings identity;
+- PR #47 / migration 012: point-in-time API-Sports game-history evidence and local schedule/rest derivations.
+
+Live production before slow-source reactivation showed collection ON, canary OFF and slow-provider collection OFF. Natural cycle `99ba909b-f267-4c41-8917-9d03c745b7da` completed with 25 API requests, 23 due/selected odds games, 64 inserted odds observations and zero errors. Model/value/pick counts remain zero.
+
+The two accidentally-created temporary audit services are no longer present in Railway and no staged environment changes remain. Existing older helper services were left untouched pending dependency audit.
+
+For the post-fix acceptance, only the guarded Baseball worker was changed:
+
+```text
+BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION=true
+BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4
+PAPER_MODE=true
+```
+
+Railway variable deployment `55f45427-5c1e-4419-ae72-0ceade5025ac` reached SUCCESS with no pending migrations. No cron rewrite, helper service, Railway AI DB query, Football change, or extra API cap increase was used.
+
+Acceptance condition is unchanged: one natural cron must stay within four slow-source requests, persist standings/team-stat evidence, and report zero errors. Failure requires immediate slow-source shutdown and evidence inspection.
+
+Separate read-only observability work is in PR #48. It exposes durable count/freshness telemetry for the new provider tables through the existing repository health snapshot and dashboard; it introduces no provider request path or schema migration.
+
+
+## Slow-source acceptance pause for unique-team polling fix — 2026-09-26
+
+The first post-fix slow-source acceptance was intentionally stopped before a natural slow-enabled cron was accepted. Static inspection exposed that fresh standings records were copied directly into the team-statistics queue without unique-team deduplication. Because live MLB standings repeat teams across stage/group contexts, this could spend the three remaining requests in a four-request acceptance cycle on duplicate team IDs.
+
+Production was returned to slow-provider OFF with the four-request cap and paper mode retained. No cap was increased and no manual provider call was used.
+
+PR #49 fixes only the request queue: all standings contexts remain canonical evidence, while team-statistics requests are stable-deduplicated by team ID. A regression test covers multi-group duplicate standings. Acceptance will resume after green CI and deployment.
+
+
+## Legacy helper-service read-only dependency audit — 2026-09-26
+
+Six older Railway helper services were inspected without executing them or querying PostgreSQL through them. Each is a Railway function-bun deployment with no returned public domain, volume, source-repository dependency, or repository-name reference. DB helpers carry only DB credentials/metadata; the API-Sports one-shot carries only provider credentials/metadata.
+
+No worker/dashboard dependency on those names was found. The services therefore appear operationally ad-hoc, but no deletion was performed. Primary-data health telemetry will replace the remaining need for helper-style inspection before any later cleanup.
+
+
+## Bounded slow-provider production acceptance PASSED — 2026-09-26 14:15 UTC
+
+After PR #49 was deployed, the slow collector was re-enabled with the unchanged four-request cap. Natural cycle `184edb49-c692-4608-981a-098fbd245514` provided the production acceptance evidence:
+
+```text
+slow_provider_requests=4
+slow_standings_calls=1
+slow_standings_inserted=60
+slow_team_statistics_calls=3
+slow_team_statistics_inserted=3
+slow_team_statistics_due_uncollected=27
+slow_catalog_calls=0
+game_history_calls=0
+errors=0
+```
+
+The overall cycle used 26 API requests and retained 49 requests of the 75-request cycle budget. This proves the fixed path preserves all multi-group standings evidence while polling only unique team IDs for team statistics.
+
+Decision: acceptance PASSED. Keep slow-provider collection ON at cap=4 for bounded seeding; do not increase the cap. Next natural-cycle expectation is no standings refresh before the daily cadence, with team-stat coverage growing by unique team ID.
+
+
+## Team-stat rollout + game-history production seeding — 2026-09-26
+
+After bounded acceptance passed, the cap remained at four requests and natural cycles grew distinct MLB team-stat coverage exactly by unique team ID: 7 -> 11 -> 15 -> 19 -> 23 -> 27 -> **30**.
+
+Cycle `72ee8695-407c-41d9-befb-7b8028b77532` completed the final three team-stat teams and used the remaining request for one league-season `/games` history fetch. It archived and inserted **2,433** game-history snapshots with zero errors. The next cycle made zero game-history calls, proving the daily cadence prevents immediate re-poll.
+
+Durable health on the next cycle showed:
+
+```text
+distinct_standing_teams=30
+distinct_team_statistics_teams=30
+game_history_snapshots=2433
+distinct_game_history_games=2433
+official_mlb_pregame_snapshots=0
+model_predictions=0
+registered_picks=0
+errors=0
+```
+
+PR #48 is merged and production-live for provider-data health visibility.
+
+PR #50 is merged as `843703c799afc05ee3dcccc68c081800bf4fca91` and introduces migration 013 plus the fail-close official MLB identity boundary. It does not activate official MLB polling.
+
+PR #51 adds field-level game-history integrity visibility so scores/hits/errors/innings/extra/raw-provenance can be accepted from durable health rather than DB helper services.
+
+A new ad-hoc Railway service `inspect-accepted-picks-v2` and a redeploy of `query-production-db` appeared independently around 14:41 UTC. They were audited read-only, are not part of final architecture, and are not being used further.
+
+
+## Game-history integrity health + MLB identity bootstrap staging — 2026-09-26
+
+PR #51 merged as `714138ec7fb82985626c5e9d17f1bc50924f3ba8` and both worker/dashboard are production SUCCESS. It exposes field-level integrity counts for the 2,433 API-Sports game-history snapshots through normal health telemetry. Live field-level counts await the next natural cron; no DB helper service will be used.
+
+PR #52 is under CI review only. The feature is OFF by default and adds a bounded official MLB schedule identity proof, durable versioned team mappings and API-Sports fixture -> MLB `gamePk` links. It does not activate official MLB enrichment. Production acceptance, if CI passes and the PR is deployed, must arm exactly one target-date bootstrap cycle and then turn the flag OFF again.
