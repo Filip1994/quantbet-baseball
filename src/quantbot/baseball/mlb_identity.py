@@ -556,7 +556,6 @@ def diagnose_fixture_schedule_match(
     }
 
 
-
 def canonical_team_identity_json(record: MLBTeamIdentityMapping) -> str:
     return _canonical_json(record)
 
