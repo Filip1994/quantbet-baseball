@@ -112,13 +112,14 @@ def test_worker_can_run_identity_diagnostic_alongside_collection(
 
     captured = {}
 
-    def fake_diagnostic(database_url, *, date_iso, mapping_version, observed_by):
+    def fake_diagnostic(database_url, *, date_iso, mapping_version, observed_by, root):
         captured.update(
             {
                 "database_url": database_url,
                 "date_iso": date_iso,
                 "mapping_version": mapping_version,
                 "observed_by": observed_by,
+                "root": root,
             }
         )
         return {
@@ -147,3 +148,4 @@ def test_worker_can_run_identity_diagnostic_alongside_collection(
     assert captured["date_iso"] == "2026-09-26"
     assert captured["mapping_version"] == "mlb-2026-v1"
     assert captured["observed_by"].tzinfo is not None
+    assert captured["root"] == tmp_path

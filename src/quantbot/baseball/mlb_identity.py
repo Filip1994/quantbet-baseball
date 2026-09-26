@@ -448,6 +448,114 @@ def link_fixture_to_mlb_game(
     )
 
 
+def diagnose_fixture_schedule_match(
+    fixture: FixtureObservation,
+    schedule_payload: dict[str, Any],
+    *,
+    kickoff_tolerance: timedelta = timedelta(minutes=30),
+    candidate_limit: int = 5,
+) -> dict[str, Any]:
+    """Explain why one fixture does or does not satisfy identity match rules."""
+
+    _fixture_is_mlb(fixture)
+    if candidate_limit < 1:
+        raise ValueError("candidate_limit must be positive")
+    tolerance_seconds = int(kickoff_tolerance.total_seconds())
+    if tolerance_seconds < 0:
+        raise EvidenceError("kickoff tolerance cannot be negative")
+
+    fixture_pitch = _timestamp(fixture.kickoff_at, "fixture.kickoff_at")
+    rows: list[dict[str, Any]] = []
+    for game in _schedule_games(schedule_payload):
+        delta_seconds = int(abs((game.first_pitch - fixture_pitch).total_seconds()))
+        home_name_exact = _normalized_name(game.home_team_name) == _normalized_name(
+            fixture.home_team_name
+        )
+        away_name_exact = _normalized_name(game.away_team_name) == _normalized_name(
+            fixture.away_team_name
+        )
+        reverse_orientation = _normalized_name(game.home_team_name) == _normalized_name(
+            fixture.away_team_name
+        ) and _normalized_name(game.away_team_name) == _normalized_name(
+            fixture.home_team_name
+        )
+        rows.append(
+            {
+                "mlb_game_pk": game.game_pk,
+                "official_first_pitch": game.first_pitch.isoformat(),
+                "kickoff_delta_seconds": delta_seconds,
+                "within_tolerance": delta_seconds <= tolerance_seconds,
+                "official_home_team_id": game.home_team_id,
+                "official_home_team_name": game.home_team_name,
+                "official_away_team_id": game.away_team_id,
+                "official_away_team_name": game.away_team_name,
+                "home_name_exact": home_name_exact,
+                "away_name_exact": away_name_exact,
+                "exact_pair": home_name_exact and away_name_exact,
+                "reverse_orientation_exact": reverse_orientation,
+            }
+        )
+
+    eligible = [row for row in rows if row["exact_pair"] and row["within_tolerance"]]
+    exact_pair = [row for row in rows if row["exact_pair"]]
+    reverse_near = [
+        row
+        for row in rows
+        if row["reverse_orientation_exact"] and row["within_tolerance"]
+    ]
+    partial_near = [
+        row
+        for row in rows
+        if row["within_tolerance"]
+        and (row["home_name_exact"] or row["away_name_exact"])
+        and not row["exact_pair"]
+    ]
+
+    if len(eligible) == 1:
+        classification = "EXACT_MATCH_AVAILABLE"
+    elif len(eligible) > 1:
+        classification = "AMBIGUOUS_EXACT_MATCH"
+    elif exact_pair:
+        classification = (
+            "FIRST_PITCH_MISMATCH" if len(exact_pair) == 1 else "AMBIGUOUS_EXACT_PAIR"
+        )
+    elif reverse_near:
+        classification = (
+            "HOME_AWAY_ORIENTATION_MISMATCH"
+            if len(reverse_near) == 1
+            else "AMBIGUOUS_REVERSED_ORIENTATION"
+        )
+    elif partial_near:
+        classification = (
+            "TEAM_NAMING_MISMATCH"
+            if len(partial_near) == 1
+            else "AMBIGUOUS_PARTIAL_NAME_MATCH"
+        )
+    else:
+        classification = "NO_EXACT_NAME_PAIR"
+
+    ranked = sorted(
+        rows,
+        key=lambda row: (
+            0 if row["within_tolerance"] else 1,
+            -int(bool(row["home_name_exact"])),
+            -int(bool(row["away_name_exact"])),
+            -int(bool(row["reverse_orientation_exact"])),
+            int(row["kickoff_delta_seconds"]),
+            int(row["mlb_game_pk"]),
+        ),
+    )
+    return {
+        "classification": classification,
+        "kickoff_tolerance_seconds": tolerance_seconds,
+        "eligible_exact_matches": len(eligible),
+        "exact_pair_candidates": len(exact_pair),
+        "partial_name_matches_within_tolerance": len(partial_near),
+        "reverse_orientation_matches_within_tolerance": len(reverse_near),
+        "candidate_games": ranked[:candidate_limit],
+    }
+
+
 def canonical_team_identity_json(record: MLBTeamIdentityMapping) -> str:
     return _canonical_json(record)
 

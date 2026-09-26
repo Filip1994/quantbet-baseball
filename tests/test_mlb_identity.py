@@ -6,6 +6,7 @@ from quantbot.baseball.evidence import EvidenceError
 from quantbot.baseball.fixture_evidence import FixtureObservation
 from quantbot.baseball.mlb_identity import (
     MLBTeamIdentityRegistry,
+    diagnose_fixture_schedule_match,
     link_fixture_to_mlb_game,
     propose_team_identity_mappings,
 )
@@ -167,3 +168,35 @@ def test_identity_bridge_rejects_non_mlb_fixture() -> None:
             _receipt(),
             mapping_version="mlb-2026-v1",
         )
+
+
+def test_schedule_diagnostic_proves_team_naming_mismatch() -> None:
+    schedule = _schedule()
+    schedule["dates"][0]["games"][0]["teams"]["away"]["team"]["name"] = (
+        "Philadelphia Phils"
+    )
+
+    result = diagnose_fixture_schedule_match(_fixture(), schedule)
+
+    assert result["classification"] == "TEAM_NAMING_MISMATCH"
+    assert result["eligible_exact_matches"] == 0
+    assert result["partial_name_matches_within_tolerance"] == 1
+    candidate = result["candidate_games"][0]
+    assert candidate["home_name_exact"] is True
+    assert candidate["away_name_exact"] is False
+    assert candidate["within_tolerance"] is True
+
+
+def test_schedule_diagnostic_proves_first_pitch_mismatch() -> None:
+    result = diagnose_fixture_schedule_match(
+        _fixture(),
+        _schedule(first_pitch="2026-09-20T17:50:00Z"),
+        kickoff_tolerance=timedelta(minutes=30),
+    )
+
+    assert result["classification"] == "FIRST_PITCH_MISMATCH"
+    assert result["exact_pair_candidates"] == 1
+    candidate = result["candidate_games"][0]
+    assert candidate["exact_pair"] is True
+    assert candidate["within_tolerance"] is False
+    assert candidate["kickoff_delta_seconds"] == 2400

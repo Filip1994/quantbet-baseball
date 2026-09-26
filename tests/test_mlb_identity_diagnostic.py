@@ -1,8 +1,17 @@
+import hashlib
+import io
+import json
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
+import pytest
+
+from quantbot.baseball.evidence import EvidenceError
 from quantbot.baseball.fixture_evidence import FixtureObservation
-from quantbot.baseball.mlb_identity_diagnostic import diagnose_mlb_identity_coverage
+from quantbot.baseball.mlb_identity_diagnostic import (
+    _read_verified_schedule_payload,
+    diagnose_mlb_identity_coverage,
+)
 
 
 def _fixture(
@@ -68,7 +77,11 @@ class FakeRepository:
     def game_link_for_provider_game(self, *, mapping_version, provider_game_id):
         assert mapping_version == "mlb-2026-v1"
         if provider_game_id == 1001:
-            return SimpleNamespace(api_sports_provider_game_id=1001)
+            return SimpleNamespace(
+                api_sports_provider_game_id=1001,
+                mlb_schedule_source_payload_ref="s3://raw/schedule.json",
+                mlb_schedule_source_payload_checksum="b" * 64,
+            )
         return None
 
 
@@ -109,3 +122,53 @@ def test_identity_diagnostic_is_read_only_coverage_evidence() -> None:
             "reason_code": "MISSING_TEAM_MAPPING",
         }
     ]
+
+
+class _FakeS3Client:
+    def __init__(self, body: bytes) -> None:
+        self.body = body
+
+    def get_object(self, **kwargs):
+        assert kwargs == {"Bucket": "raw", "Key": "schedule.json"}
+        return {"Body": io.BytesIO(self.body)}
+
+
+def _schedule_archive_document() -> bytes:
+    document = {
+        "captured_at": "2026-09-26T17:31:15+00:00",
+        "endpoint": "official-mlb/v1/schedule",
+        "params": {
+            "sportId": "1",
+            "date": "2026-09-26",
+            "hydrate": "probablePitcher,team,venue",
+        },
+        "payload": {"dates": []},
+    }
+    return json.dumps(
+        document,
+        ensure_ascii=True,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def test_schedule_archive_read_requires_matching_checksum_and_provenance() -> None:
+    body = _schedule_archive_document()
+    archive = SimpleNamespace(bucket="raw", client=_FakeS3Client(body))
+
+    payload = _read_verified_schedule_payload(
+        archive,
+        source_payload_ref="s3://raw/schedule.json",
+        source_payload_checksum=hashlib.sha256(body).hexdigest(),
+        date_iso="2026-09-26",
+    )
+
+    assert payload == {"dates": []}
+
+    with pytest.raises(EvidenceError, match="checksum mismatch"):
+        _read_verified_schedule_payload(
+            archive,
+            source_payload_ref="s3://raw/schedule.json",
+            source_payload_checksum="0" * 64,
+            date_iso="2026-09-26",
+        )
