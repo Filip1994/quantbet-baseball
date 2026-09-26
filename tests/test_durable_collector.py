@@ -12,9 +12,13 @@ class FakeRepository:
     def __init__(self) -> None:
         self.records = []
         self.fixtures = []
+        self.poll_attempts = []
 
-    def latest_observation_times(self):
-        return {}
+    def latest_odds_poll_times(self):
+        return {
+            record.game_id: datetime.fromisoformat(record.attempted_at)
+            for record in self.poll_attempts
+        }
 
     def append_observations(self, records):
         self.records.extend(records)
@@ -23,6 +27,15 @@ class FakeRepository:
     def append_fixture_observations(self, records):
         self.fixtures.extend(records)
         return len(records)
+
+    def append_odds_poll_attempt(self, record):
+        if any(
+            existing.poll_attempt_id == record.poll_attempt_id
+            for existing in self.poll_attempts
+        ):
+            return False
+        self.poll_attempts.append(record)
+        return True
 
 
 class FakeClient:
@@ -118,6 +131,9 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
     assert result["odds_calls"] == 1
     assert result["canonical_rows"] == 2
     assert result["observations_inserted"] == 2
+    assert result["poll_attempts_inserted"] == 1
+    assert len(repository.poll_attempts) == 1
+    assert repository.poll_attempts[0].response_rows == 1
     assert {record.selection for record in repository.records} == {"home", "away"}
     assert all(record.game_id == "10" for record in repository.records)
     assert {record.game_id for record in repository.fixtures} == {"10", "11"}
@@ -127,7 +143,7 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
 
 
 class RecentlyObservedRepository(FakeRepository):
-    def latest_observation_times(self):
+    def latest_odds_poll_times(self):
         return {"10": datetime(2030, 9, 18, 16, 50, tzinfo=UTC)}
 
 
@@ -221,6 +237,25 @@ def test_canary_schema_probe_distinguishes_empty_odds_response() -> None:
     assert json.loads(result["schema_response_shapes_json"]) == []
     assert json.loads(result["schema_market_names_json"]) == []
     assert json.loads(result["schema_candidate_values_json"]) == {}
+    assert result["poll_attempts_inserted"] == 1
+    assert len(repository.poll_attempts) == 1
+    attempt = repository.poll_attempts[0]
+    assert attempt.response_rows == 0
+    assert attempt.raw_market_rows == 0
+    assert attempt.canonical_rows == 0
+    assert attempt.source_payload_ref == "s3://raw/game-10-empty.json"
+
+    follow_up = collect_with_dependencies(
+        EmptyOddsClient(),
+        repository,
+        now=datetime(2030, 9, 18, 17, 5, tzinfo=UTC),
+        max_odds_requests=10,
+        clock=lambda: datetime(2030, 9, 18, 17, 5, tzinfo=UTC),
+    )
+    assert follow_up["due_events"] == 0
+    assert follow_up["games_selected"] == 0
+    assert follow_up["odds_calls"] == 0
+    assert follow_up["poll_attempts_inserted"] == 0
 
 
 def test_shared_cycle_budget_reduces_broad_odds_capacity() -> None:
