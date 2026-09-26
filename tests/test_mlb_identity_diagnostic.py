@@ -90,10 +90,14 @@ def test_identity_diagnostic_is_read_only_coverage_evidence() -> None:
         {
             "provider_game_id": 1002,
             "kickoff_at": "2026-09-26T23:10:00+00:00",
+            "provider_status": "NS",
+            "observed_at": "2026-09-26T17:00:00+00:00",
             "home_team_id": 3,
             "home_team_name": "Mapped Team",
             "away_team_id": 4,
             "away_team_name": "Missing Team",
+            "source_payload_ref": "s3://raw/api-sports/games.json",
+            "source_payload_checksum": "a" * 64,
             "link_present": False,
             "missing_team_mappings": [
                 {
