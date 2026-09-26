@@ -13,15 +13,28 @@ PLAYABLE_BOOKMAKER_TOKENS = (
     "bet365",
     "1xbet",
 )
-TARGET_MARKET_TOKENS = (
-    "moneyline",
+TARGET_GAME_MARKETS = {
     "home/away",
-    "winner",
+    "moneyline",
+    "game winner",
+    "over/under",
+    "asian handicap",
     "run line",
     "spread",
-    "total",
-    "over/under",
-)
+    "total - home",
+    "total - away",
+    "total hits",
+    "home total hits",
+    "away total hits",
+    "total errors",
+    "total home runs",
+    "extra innings",
+    "team to score first",
+    "first team to score",
+    "last team to score",
+    "home winning margin",
+    "away winning margin",
+}
 
 
 def _text(value: Any) -> str:
@@ -121,19 +134,23 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
     market_names: set[str] = set()
     for record in records:
         bookmaker_name = record["name"]
-        keep_bookmaker = any(
-            token in _norm(bookmaker_name) for token in PLAYABLE_BOOKMAKER_TOKENS
+        playable = any(
+            token == _norm(bookmaker_name) for token in PLAYABLE_BOOKMAKER_TOKENS
         )
         markets: list[dict[str, Any]] = []
         for market in record["markets"]:
             market_name = market["name"]
             market_names.add(market_name)
-            if keep_bookmaker or any(
-                token in _norm(market_name) for token in TARGET_MARKET_TOKENS
-            ):
+            if _norm(market_name) in TARGET_GAME_MARKETS:
                 markets.append(market)
-        if keep_bookmaker or markets:
-            bookmakers.append({"name": bookmaker_name, "markets": markets})
+        if markets:
+            bookmakers.append(
+                {
+                    "name": bookmaker_name,
+                    "playable": playable,
+                    "markets": markets,
+                }
+            )
     return {
         "bookmakers": bookmakers,
         "bookmaker_names": sorted({r["name"] for r in records if r["name"]}),
