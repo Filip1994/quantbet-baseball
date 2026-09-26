@@ -157,7 +157,7 @@ def test_official_mlb_historical_timecode_replay_audit() -> None:
 
     game = games[0]
     game_pk = int(game["gamePk"])
-    game_date = datetime.fromisoformat(str(game["gameDate"]).replace("Z", "+00:00"))
+    game_date = datetime.fromisoformat(str(game["gameDate"]))
     requested_at = (game_date.astimezone(UTC) - timedelta(hours=2)).replace(
         microsecond=0
     )
@@ -187,7 +187,7 @@ def test_official_mlb_historical_timecode_replay_audit() -> None:
         "requested_timecode": timecode,
         "metadata_timestamp": (feed.get("metaData") or {}).get("timeStamp"),
         "status": game_data.get("status") or {},
-        "probable_pitcher_sides": sorted((game_data.get("probablePitchers") or {})),
+        "probable_pitcher_sides": sorted(game_data.get("probablePitchers") or {}),
         "boxscore": side_summary,
         "plays_count": len((live_data.get("plays") or {}).get("allPlays") or []),
     }
