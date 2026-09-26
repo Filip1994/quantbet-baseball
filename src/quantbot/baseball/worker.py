@@ -133,8 +133,7 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "",
     ).strip()
     provider_surface_audit_season = int(
-        os.getenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "2026").strip()
-        or "2026"
+        os.getenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "2026").strip() or "2026"
     )
     raw_provider_inventory_id = os.getenv(
         "BASEBALL_RAW_PROVIDER_INVENTORY_ID",
