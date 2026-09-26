@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, date, datetime, time, timedelta
 from typing import Any
 
+from .fixture_evidence import FixtureObservation
 from .mlb_identity import (
     MLBGameIdentityLink,
     MLBTeamIdentityMapping,
@@ -181,3 +183,67 @@ class PostgreSQLMLBIdentityRepository:
             if isinstance(value, dict):
                 result.append(MLBTeamIdentityMapping(**value))
         return tuple(result)
+
+
+    def latest_mlb_fixtures_around_date(
+        self,
+        *,
+        date_iso: str,
+        observed_by: datetime,
+        padding: timedelta,
+    ) -> tuple[FixtureObservation, ...]:
+        target = date.fromisoformat(date_iso)
+        if observed_by.tzinfo is None or observed_by.utcoffset() is None:
+            raise ValueError("observed_by must be timezone-aware")
+        if padding.total_seconds() < 0:
+            raise ValueError("padding cannot be negative")
+        start = datetime.combine(target, time.min, tzinfo=UTC) - padding
+        end = datetime.combine(target + timedelta(days=1), time.min, tzinfo=UTC) + padding
+        query = """
+            SELECT DISTINCT ON (provider_game_id)
+                canonical_record
+            FROM fixture_observations
+            WHERE lower(league) = 'mlb'
+              AND kickoff_at >= %s
+              AND kickoff_at < %s
+              AND observed_at <= %s
+            ORDER BY provider_game_id, observed_at DESC, fixture_observation_id DESC
+        """
+        with self._connection.cursor() as cursor:
+            cursor.execute(query, (start, end, observed_by.astimezone(UTC)))
+            rows = cursor.fetchall()
+        fixtures: list[FixtureObservation] = []
+        for row in rows:
+            value = row[0]
+            if isinstance(value, str):
+                value = json.loads(value)
+            if isinstance(value, dict):
+                fixtures.append(FixtureObservation(**value))
+        return tuple(
+            sorted(
+                fixtures,
+                key=lambda item: (item.kickoff_at, item.provider_game_id),
+            )
+        )
+
+    def game_link_for_provider_game(
+        self,
+        *,
+        mapping_version: str,
+        provider_game_id: int,
+    ) -> MLBGameIdentityLink | None:
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT canonical_record FROM official_mlb_game_identity_links "
+                "WHERE mapping_version = %s AND api_sports_provider_game_id = %s",
+                (mapping_version, provider_game_id),
+            )
+            row = cursor.fetchone()
+        if row is None:
+            return None
+        value = row[0]
+        if isinstance(value, str):
+            value = json.loads(value)
+        if not isinstance(value, dict):
+            return None
+        return MLBGameIdentityLink(**value)
