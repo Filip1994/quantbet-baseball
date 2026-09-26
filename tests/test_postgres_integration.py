@@ -11,12 +11,12 @@ from quantbot.baseball.decision_lifecycle import build_model_prediction
 from quantbot.baseball.decision_repository import PostgreSQLMoneylineDecisionRepository
 from quantbot.baseball.evidence import OddsObservation
 from quantbot.baseball.fixture_evidence import FixtureObservation
-from quantbot.baseball.odds_poll_evidence import OddsPollAttempt
 from quantbot.baseball.moneyline_registration import (
     MoneylineDecisionPolicy,
     evaluate_preliminary_moneyline,
     verify_and_register_moneyline,
 )
+from quantbot.baseball.odds_poll_evidence import OddsPollAttempt
 from quantbot.baseball.postgres_repository import PostgreSQLEvidenceRepository
 from quantbot.baseball.raw_archive import ArchiveReceipt
 from quantbot.baseball.runtime_evidence import CollectionCycle
