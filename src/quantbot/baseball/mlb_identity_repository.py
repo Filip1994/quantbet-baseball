@@ -43,6 +43,7 @@ class PostgreSQLMLBIdentityRepository:
         columns: tuple[str, ...],
         values: tuple[Any, ...],
         canonical: str,
+        commit: bool = True,
     ) -> bool:
         placeholders = ["%s"] * len(values)
         placeholders[-1] = "%s::jsonb"
@@ -53,7 +54,8 @@ class PostgreSQLMLBIdentityRepository:
         with self._connection.cursor() as cursor:
             cursor.execute(query, values)
             if cursor.rowcount == 1:
-                self._connection.commit()
+                if commit:
+                    self._connection.commit()
                 return True
             cursor.execute(
                 f"SELECT canonical_record FROM {table} WHERE {id_column} = %s",
@@ -65,10 +67,16 @@ class PostgreSQLMLBIdentityRepository:
             raise EvidenceConflictError(
                 f"conflicting immutable MLB identity: {record_id}"
             )
-        self._connection.commit()
+        if commit:
+            self._connection.commit()
         return False
 
-    def append_team_mapping(self, record: MLBTeamIdentityMapping) -> bool:
+    def _append_team_mapping(
+        self,
+        record: MLBTeamIdentityMapping,
+        *,
+        commit: bool,
+    ) -> bool:
         canonical = canonical_team_identity_json(record)
         columns = (
             "mapping_id",
@@ -109,7 +117,26 @@ class PostgreSQLMLBIdentityRepository:
             columns=columns,
             values=values,
             canonical=canonical,
+            commit=commit,
         )
+
+    def append_team_mapping(self, record: MLBTeamIdentityMapping) -> bool:
+        return self._append_team_mapping(record, commit=True)
+
+    def append_team_mappings_atomically(
+        self,
+        records: tuple[MLBTeamIdentityMapping, ...],
+    ) -> int:
+        inserted = 0
+        try:
+            for record in records:
+                if self._append_team_mapping(record, commit=False):
+                    inserted += 1
+        except Exception:
+            self._connection.rollback()
+            raise
+        self._connection.commit()
+        return inserted
 
     def append_game_link(self, record: MLBGameIdentityLink) -> bool:
         canonical = canonical_game_identity_json(record)
