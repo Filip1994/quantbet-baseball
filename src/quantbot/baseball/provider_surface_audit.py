@@ -97,14 +97,25 @@ def run_provider_surface_audit(
         name: str,
         endpoint: str,
         params: dict[str, Any] | None = None,
+        *,
+        object_response: bool = False,
     ) -> list[dict[str, Any]]:
         try:
-            rows, receipt = client.get_with_receipt(
-                endpoint,
-                params or {},
-                ttl_seconds=0,
-                use_cache=False,
-            )
+            if object_response:
+                row, receipt = client.get_object_with_receipt(
+                    endpoint,
+                    params or {},
+                    ttl_seconds=0,
+                    use_cache=False,
+                )
+                rows = [row]
+            else:
+                rows, receipt = client.get_with_receipt(
+                    endpoint,
+                    params or {},
+                    ttl_seconds=0,
+                    use_cache=False,
+                )
         except BaseballAPIError as exc:
             results[name] = {
                 "status": "ERROR",
@@ -146,6 +157,7 @@ def run_provider_surface_audit(
             "team_stats_mlb_team_contract",
             "teams/statistics",
             {"team": 22, "league": 1, "season": season},
+            object_response=True,
         )
 
     npb_team_rows = call(
@@ -158,6 +170,7 @@ def run_provider_surface_audit(
             "team_stats_npb_team_contract",
             "teams/statistics",
             {"team": 58, "league": 2, "season": season},
+            object_response=True,
         )
 
     player_rows = call(

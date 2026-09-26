@@ -33,10 +33,12 @@ from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
 from .odds_poll_evidence import OddsPollAttempt, build_odds_poll_attempt
 from .postgres_repository import PostgreSQLEvidenceRepository
+from .provider_data_repository import PostgreSQLProviderDataRepository
 from .raw_archive import archive_from_env
 from .runtime_evidence import CollectionCycle
 from .scheduler import build_scheduler_record, is_observation_due
 from .settlement_repository import PostgreSQLMoneylineSettlementRepository
+from .slow_provider_collection import collect_slow_provider_data
 
 _ADVISORY_LOCK_KEY = 726478920260918
 
@@ -450,6 +452,69 @@ def collect_durable_once(
                 max_odds_requests=remaining_odds_requests,
                 schema_probe=execution_mode == "CANARY",
             )
+
+            slow_provider_enabled = os.getenv(
+                "BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            max_slow_provider_requests = int(
+                os.getenv("BASEBALL_MAX_SLOW_PROVIDER_REQUESTS", "8")
+            )
+            if max_slow_provider_requests < 0:
+                raise ValueError(
+                    "BASEBALL_MAX_SLOW_PROVIDER_REQUESTS cannot be negative"
+                )
+
+            slow_provider = {
+                "requests": 0,
+                "standings_calls": 0,
+                "standings_rows": 0,
+                "standings_inserted": 0,
+                "team_statistics_calls": 0,
+                "team_statistics_inserted": 0,
+                "team_statistics_due_uncollected": 0,
+                "catalog_calls": 0,
+                "catalogs_inserted": 0,
+                "errors": 0,
+            }
+            if (
+                execution_mode == "SCHEDULED"
+                and slow_provider_enabled
+                and client.remaining_budget > 0
+                and max_slow_provider_requests > 0
+            ):
+                slow_repository = PostgreSQLProviderDataRepository(connection)
+                slow_provider = collect_slow_provider_data(
+                    client,
+                    slow_repository,
+                    now=cycle_now,
+                    max_requests=min(
+                        max_slow_provider_requests,
+                        client.remaining_budget,
+                    ),
+                    league_id=1,
+                    season=cycle_now.year,
+                )
+
+            summary["slow_provider_enabled"] = int(slow_provider_enabled)
+            summary["slow_provider_requests"] = int(slow_provider["requests"])
+            summary["slow_standings_calls"] = int(slow_provider["standings_calls"])
+            summary["slow_standings_inserted"] = int(
+                slow_provider["standings_inserted"]
+            )
+            summary["slow_team_statistics_calls"] = int(
+                slow_provider["team_statistics_calls"]
+            )
+            summary["slow_team_statistics_inserted"] = int(
+                slow_provider["team_statistics_inserted"]
+            )
+            summary["slow_team_statistics_due_uncollected"] = int(
+                slow_provider["team_statistics_due_uncollected"]
+            )
+            summary["slow_catalog_calls"] = int(slow_provider["catalog_calls"])
+            summary["slow_catalogs_inserted"] = int(slow_provider["catalogs_inserted"])
+            summary["errors"] = int(summary["errors"]) + int(slow_provider["errors"])
+            summary["api_requests"] = client.request_count
+            summary["api_remaining"] = client.remaining_budget
             summary["fixture_observations_inserted"] = (
                 int(summary["fixture_observations_inserted"])
                 + int(settlement["fixture_observations_inserted"])

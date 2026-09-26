@@ -8,6 +8,8 @@
 
 This document defines which provider/external variables are retained, which are eligible for modeling, which betting markets are allowed, and how often each source may be refreshed.
 
+Canonical source hierarchy is defined in `docs/DATA_SOURCE_ARCHITECTURE.md`: API-Sports is the primary provider, MLB Stats API is granular baseball enrichment only, Open-Meteo is weather only, and QuantBet derives locally wherever possible.
+
 The governing rule is:
 
 > Capture broad evidence, model only useful point-in-time-safe variables, and never spend API requests on data that can be cached, derived, or replayed from the raw archive.

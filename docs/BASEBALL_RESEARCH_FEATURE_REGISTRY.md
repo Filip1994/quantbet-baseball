@@ -4,7 +4,8 @@
 **Player props:** permanently excluded.  
 **Paper stake target:** 300 RSD per registered single.  
 **Operating rule:** retain complete raw provider payloads, but expose only point-in-time-safe fields to a model.  
-**Canonical live variable/market registry:** `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`.
+**Canonical live variable/market registry:** `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`.  
+**Canonical source hierarchy:** `docs/DATA_SOURCE_ARCHITECTURE.md`.
 
 ## 1. Core rule
 
