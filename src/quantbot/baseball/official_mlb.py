@@ -72,20 +72,6 @@ def _optional_positive_int(value: Any, field: str) -> int | None:
     return _positive_int(value, field)
 
 
-def _optional_nonnegative_int(value: Any, field: str) -> int | None:
-    if value in (None, ""):
-        return None
-    if isinstance(value, bool):
-        raise EvidenceError(f"{field} must be a non-negative integer")
-    try:
-        number = int(value)
-    except (TypeError, ValueError) as exc:
-        raise EvidenceError(f"{field} must be a non-negative integer") from exc
-    if number < 0:
-        raise EvidenceError(f"{field} must be a non-negative integer")
-    return number
-
-
 def _optional_float(value: Any, field: str) -> float | None:
     if value in (None, ""):
         return None
@@ -145,19 +131,10 @@ class OfficialMLBPregameSnapshot:
     requested_timecode: str | None
     status_abstract: str
     status_detailed: str
-    day_night: str
     away_team_id: int
     away_team_name: str
     home_team_id: int
     home_team_name: str
-    away_record_wins: int | None
-    away_record_losses: int | None
-    away_record_games_played: int | None
-    away_record_win_pct: float | None
-    home_record_wins: int | None
-    home_record_losses: int | None
-    home_record_games_played: int | None
-    home_record_win_pct: float | None
     away_probable_pitcher_id: int | None
     away_probable_pitcher_name: str | None
     home_probable_pitcher_id: int | None
@@ -290,9 +267,6 @@ def canonical_pregame_snapshot(
     coordinates = location.get("defaultCoordinates") or {}
     timezone = venue.get("timeZone") or {}
 
-    away_record = away_team.get("record") or {}
-    home_record = home_team.get("record") or {}
-
     identity = {
         "game_pk": game_pk,
         "source_observed_at": observed.isoformat(),
@@ -317,35 +291,10 @@ def canonical_pregame_snapshot(
         or "UNKNOWN",
         status_detailed=_string(_nested(game_data, "status", "detailedState"))
         or "UNKNOWN",
-        day_night=_string(_nested(game_data, "datetime", "dayNight")) or "UNKNOWN",
         away_team_id=_positive_int(away_team.get("id"), "away_team.id"),
         away_team_name=_string(away_team.get("name")),
         home_team_id=_positive_int(home_team.get("id"), "home_team.id"),
         home_team_name=_string(home_team.get("name")),
-        away_record_wins=_optional_nonnegative_int(
-            away_record.get("wins"), "away_record.wins"
-        ),
-        away_record_losses=_optional_nonnegative_int(
-            away_record.get("losses"), "away_record.losses"
-        ),
-        away_record_games_played=_optional_nonnegative_int(
-            away_record.get("gamesPlayed"), "away_record.gamesPlayed"
-        ),
-        away_record_win_pct=_optional_float(
-            away_record.get("winningPercentage"), "away_record.winningPercentage"
-        ),
-        home_record_wins=_optional_nonnegative_int(
-            home_record.get("wins"), "home_record.wins"
-        ),
-        home_record_losses=_optional_nonnegative_int(
-            home_record.get("losses"), "home_record.losses"
-        ),
-        home_record_games_played=_optional_nonnegative_int(
-            home_record.get("gamesPlayed"), "home_record.gamesPlayed"
-        ),
-        home_record_win_pct=_optional_float(
-            home_record.get("winningPercentage"), "home_record.winningPercentage"
-        ),
         away_probable_pitcher_id=_optional_positive_int(
             away_probable.get("id"), "away_probable.id"
         ),
@@ -431,12 +380,18 @@ class OfficialMLBStatsClient:
         self.transport = transport or _http_transport
         self.base_url = base_url.rstrip("/")
 
-    def schedule_with_receipt(
+    def schedule_identity_map_with_receipt(
         self,
         date_iso: str,
         *,
         captured_at: datetime | None = None,
     ) -> tuple[dict[str, Any], ArchiveReceipt]:
+        """Fetch MLB schedule only to discover gamePk for enrichment linking.
+
+        API-Sports remains canonical for schedule/game status. This response is
+        archived but must not become a parallel canonical schedule source.
+        """
+
         params = {
             "sportId": "1",
             "date": date_iso,
