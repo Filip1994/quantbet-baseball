@@ -873,3 +873,10 @@ The follow-up policy is to inspect already archived `teams/statistics`, bet-cata
 The first post-deploy cron did not reach the inventory because an empty optional `BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON` variable caused `int("")` to fail during worker startup. This failure made zero provider requests. The variable was restored to `2026` while keeping the corresponding audit ID empty, collection/canary disabled and paper mode true. A parser hardening fix is in progress.
 
 Execution boundary: Bet365 and 1xBet only. All other books are intelligence-only; player props remain outside product scope.
+
+
+## Provider inventory and playable-book enforcement — 2026-09-26
+
+The zero-provider-request S3 inventory recovered the archived MLB/NPB team-statistics object schemas and catalog data without new API-Sports calls. Provider bookmaker ids are now evidence-backed: 1xBet id 1 and Bet365 id 2. PR #28 then enforced those two as the only executable/paper-pick bookmakers while preserving other books for intelligence-only evidence. Player props and inning variants were removed from compact game-level processing but remain present in immutable raw payloads.
+
+PR #28 passed Baseball tests plus Railway runtime smoke and merged as `7669e99d6ce6f5e815c604b22c9bcf91f84e0738`. The canonical registry is `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`. Collection and canary remain disabled; paper mode remains enabled.
