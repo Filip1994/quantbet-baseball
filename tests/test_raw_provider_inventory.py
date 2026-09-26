@@ -37,9 +37,7 @@ class FakeS3Client:
         prefix = kwargs["Prefix"]
         return {
             "Contents": [
-                {"Key": key}
-                for key in sorted(self.objects)
-                if key.startswith(prefix)
+                {"Key": key} for key in sorted(self.objects) if key.startswith(prefix)
             ]
         }
 
@@ -67,17 +65,13 @@ def test_raw_provider_inventory_uses_archive_only(monkeypatch) -> None:
     assert result["relevant_objects"] == 2
 
     team = next(
-        item for item in result["summaries"]
-        if item["endpoint"] == "teams/statistics"
+        item for item in result["summaries"] if item["endpoint"] == "teams/statistics"
     )
     assert team["response_type"] == "dict"
     assert "games.played" in team["leaf_paths"]
     assert "runs.for" in team["leaf_paths"]
 
-    bets = next(
-        item for item in result["summaries"]
-        if item["endpoint"] == "odds/bets"
-    )
+    bets = next(item for item in result["summaries"] if item["endpoint"] == "odds/bets")
     assert bets["markets"] == [
         {"id": 1, "name": "Home/Away"},
         {"id": 2, "name": "Over/Under"},
