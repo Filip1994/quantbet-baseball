@@ -40,8 +40,9 @@ class MLBIdentityBootstrapRepository(Protocol):
         observed_by: datetime,
     ) -> tuple[FixtureObservation, ...]: ...
 
-    def team_mappings(self, mapping_version: str) -> tuple[MLBTeamIdentityMapping, ...]:
-        ...
+    def team_mappings(
+        self, mapping_version: str
+    ) -> tuple[MLBTeamIdentityMapping, ...]: ...
 
     def append_team_mapping(self, record: MLBTeamIdentityMapping) -> bool: ...
 
@@ -75,7 +76,8 @@ def _same_team_mapping(
     return (
         left.api_sports_team_id == right.api_sports_team_id
         and left.official_mlb_team_id == right.official_mlb_team_id
-        and left.api_sports_team_name.casefold() == right.api_sports_team_name.casefold()
+        and left.api_sports_team_name.casefold()
+        == right.api_sports_team_name.casefold()
         and left.official_mlb_team_name.casefold()
         == right.official_mlb_team_name.casefold()
     )
@@ -222,11 +224,7 @@ def collect_mlb_identity_bootstrap(
     summary["game_links_total_for_target"] = linked_total
     failures = int(summary["mapping_failures"]) + int(summary["link_failures"])
     complete_target = linked_total == len(fixtures)
-    ready = (
-        failures == 0
-        and complete_target
-        and len(mappings) >= expected_team_count
-    )
+    ready = failures == 0 and complete_target and len(mappings) >= expected_team_count
     summary["ready_for_enrichment"] = int(ready)
     summary["status"] = "COMPLETE" if complete_target and failures == 0 else "PARTIAL"
     return summary
