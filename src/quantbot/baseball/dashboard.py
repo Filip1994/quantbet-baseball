@@ -557,13 +557,21 @@ class BaseballDashboardHTTPService:
                     service._text(self, 200, "ok\n", "text/plain; charset=utf-8")
                     return
                 if parsed.path == "/readyz":
-                    ready = dashboard.repository.check_database()
-                    service._text(
-                        self,
-                        200 if ready else 503,
-                        "ready\n" if ready else "database_unavailable\n",
-                        "text/plain; charset=utf-8",
-                    )
+                    try:
+                        dashboard.snapshot()
+                        service._text(
+                            self,
+                            200,
+                            "ready\n",
+                            "text/plain; charset=utf-8",
+                        )
+                    except Exception as exc:  # noqa: BLE001
+                        service._text(
+                            self,
+                            503,
+                            f"snapshot_unavailable:{type(exc).__name__}\n",
+                            "text/plain; charset=utf-8",
+                        )
                     return
                 if parsed.path == "/api/status":
                     if not service._authorize(self):
