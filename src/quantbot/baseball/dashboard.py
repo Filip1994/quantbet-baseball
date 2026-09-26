@@ -202,9 +202,7 @@ class BaseballDashboard:
         now = data["generated_at"]
         health = data["health"]
         runtime = data["runtime"]
-        gate = data["gates"].get("CANARY") or data["gates"].get(
-            "SCHEDULED_COLLECTION"
-        )
+        gate = data["gates"].get("CANARY") or data["gates"].get("SCHEDULED_COLLECTION")
 
         runtime_age = _age(now, None if runtime is None else runtime["finished_at"])
         fixture_age = _age(now, health.get("latest_fixture_observed_at"))
@@ -214,7 +212,9 @@ class BaseballDashboard:
             StatusItem("Dashboard", "good", "ONLINE", "read-only service"),
             StatusItem(
                 "Worker",
-                "good" if runtime_age is not None and runtime_age <= WORKER_FRESHNESS else "bad",
+                "good"
+                if runtime_age is not None and runtime_age <= WORKER_FRESHNESS
+                else "bad",
                 "RUNNING"
                 if runtime_age is not None and runtime_age <= WORKER_FRESHNESS
                 else "STALE",
@@ -273,8 +273,12 @@ class BaseballDashboard:
             ),
             StatusItem(
                 "Odds evidence",
-                "good" if odds_age is not None and odds_age <= ODDS_FRESHNESS else "bad",
-                "FRESH" if odds_age is not None and odds_age <= ODDS_FRESHNESS else "NO FRESH ODDS",
+                "good"
+                if odds_age is not None and odds_age <= ODDS_FRESHNESS
+                else "bad",
+                "FRESH"
+                if odds_age is not None and odds_age <= ODDS_FRESHNESS
+                else "NO FRESH ODDS",
                 _fmt_age(odds_age),
             ),
         ]
@@ -312,7 +316,9 @@ class BaseballDashboard:
             )
         )
         status_strip = "".join(self._status_chip(item) for item in statuses[:6])
-        generated = data["generated_at"].astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+        generated = (
+            data["generated_at"].astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+        )
         return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
@@ -389,7 +395,7 @@ class BaseballDashboard:
             "Reserve": gate.get("daily_reserve_required", "—"),
         }
         budget_html = "".join(
-            f'<div><small>{escape(k)}</small><b>{escape(str(v))}</b></div>'
+            f"<div><small>{escape(k)}</small><b>{escape(str(v))}</b></div>"
             for k, v in budget.items()
         )
         canary_reasons = canary.get("reason_codes") or []
@@ -431,7 +437,11 @@ class BaseballDashboard:
         paper_profit = profit_units * PAPER_STAKE_RSD
         cards = [
             ("Settled", settled, ""),
-            ("W / L / P", f"{p.get('wins', 0)} / {p.get('losses', 0)} / {p.get('pushes', 0)}", ""),
+            (
+                "W / L / P",
+                f"{p.get('wins', 0)} / {p.get('losses', 0)} / {p.get('pushes', 0)}",
+                "",
+            ),
             ("ROI", self._pct(p.get("roi_per_unit_staked")), ""),
             ("Paper P/L", f"{paper_profit:+.0f} RSD", "derived @ 300 RSD target"),
             ("CLV coverage", self._pct(p.get("clv_coverage")), ""),
@@ -444,16 +454,19 @@ class BaseballDashboard:
             for label, value, note in cards
         )
         rows = data.get("breakdown") or []
-        row_html = "".join(
-            f"""<tr><td>{escape(str(r.get("dimension")))}</td>
+        row_html = (
+            "".join(
+                f"""<tr><td>{escape(str(r.get("dimension")))}</td>
             <td><b>{escape(str(r.get("dimension_value")))}</b></td>
             <td>{r.get("settled_picks", 0)}</td>
             <td>{self._pct(r.get("roi_per_unit_staked"))}</td>
             <td>{self._dec(r.get("brier_score"))}</td>
             <td>{self._dec(r.get("log_loss"))}</td>
             <td>{self._pct(r.get("average_clv_probability_delta"))}</td></tr>"""
-            for r in rows
-        ) or '<tr><td class="empty" colspan="7">No settled research picks yet.</td></tr>'
+                for r in rows
+            )
+            or '<tr><td class="empty" colspan="7">No settled research picks yet.</td></tr>'
+        )
         return f"""
 <section class="section-title"><div><small>RESEARCH</small><h2>Paper performance</h2></div>
 <span>Moneyline closed loop · full-game totals next</span></section>
@@ -508,7 +521,7 @@ class BaseballDashboard:
     def _status_chip(item: StatusItem) -> str:
         return (
             f'<div class="status {item.state}"><span></span><div><small>'
-            f'{escape(item.label)}</small><b>{escape(item.value)}</b></div></div>'
+            f"{escape(item.label)}</small><b>{escape(item.value)}</b></div></div>"
         )
 
     @staticmethod
@@ -573,9 +586,7 @@ class BaseballDashboardHTTPService:
                         )
                     return
                 if parsed.path not in {"/", "/dashboard"}:
-                    service._text(
-                        self, 404, "not_found\n", "text/plain; charset=utf-8"
-                    )
+                    service._text(self, 404, "not_found\n", "text/plain; charset=utf-8")
                     return
                 if not service._authorize(self):
                     return
@@ -595,9 +606,7 @@ class BaseballDashboardHTTPService:
                     )
 
             def do_POST(self) -> None:
-                service._text(
-                    self, 405, "read_only\n", "text/plain; charset=utf-8"
-                )
+                service._text(self, 405, "read_only\n", "text/plain; charset=utf-8")
 
             def log_message(self, _format: str, *_args: object) -> None:
                 return
