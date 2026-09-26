@@ -1175,3 +1175,24 @@ PR #49 fixes only the request queue: all standings contexts remain canonical evi
 Six older Railway helper services were inspected without executing them or querying PostgreSQL through them. Each is a Railway function-bun deployment with no returned public domain, volume, source-repository dependency, or repository-name reference. DB helpers carry only DB credentials/metadata; the API-Sports one-shot carries only provider credentials/metadata.
 
 No worker/dashboard dependency on those names was found. The services therefore appear operationally ad-hoc, but no deletion was performed. Primary-data health telemetry will replace the remaining need for helper-style inspection before any later cleanup.
+
+
+## Bounded slow-provider production acceptance PASSED — 2026-09-26 14:15 UTC
+
+After PR #49 was deployed, the slow collector was re-enabled with the unchanged four-request cap. Natural cycle `184edb49-c692-4608-981a-098fbd245514` provided the production acceptance evidence:
+
+```text
+slow_provider_requests=4
+slow_standings_calls=1
+slow_standings_inserted=60
+slow_team_statistics_calls=3
+slow_team_statistics_inserted=3
+slow_team_statistics_due_uncollected=27
+slow_catalog_calls=0
+game_history_calls=0
+errors=0
+```
+
+The overall cycle used 26 API requests and retained 49 requests of the 75-request cycle budget. This proves the fixed path preserves all multi-group standings evidence while polling only unique team IDs for team statistics.
+
+Decision: acceptance PASSED. Keep slow-provider collection ON at cap=4 for bounded seeding; do not increase the cap. Next natural-cycle expectation is no standings refresh before the daily cadence, with team-stat coverage growing by unique team ID.
