@@ -75,16 +75,14 @@ class FakeRepository:
         self.mappings = {}
         self.links = {}
 
-    def latest_mlb_fixtures_around_date(
+    def latest_mlb_fixtures_for_schedule_date(
         self,
         *,
         date_iso,
         observed_by,
-        padding,
     ):
         assert date_iso == "2026-09-26"
         assert observed_by.tzinfo is not None
-        assert padding.total_seconds() > 0
         return self.fixtures
 
     def team_mappings(self, mapping_version):
