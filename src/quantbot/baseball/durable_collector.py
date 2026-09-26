@@ -591,12 +591,8 @@ def collect_durable_once(
 
             summary["mlb_identity_enabled"] = int(mlb_identity_enabled)
             summary["mlb_identity_status"] = str(mlb_identity["status"])
-            summary["mlb_identity_schedule_calls"] = int(
-                mlb_identity["schedule_calls"]
-            )
-            summary["mlb_identity_fixtures_seen"] = int(
-                mlb_identity["fixtures_seen"]
-            )
+            summary["mlb_identity_schedule_calls"] = int(mlb_identity["schedule_calls"])
+            summary["mlb_identity_fixtures_seen"] = int(mlb_identity["fixtures_seen"])
             summary["mlb_identity_fixtures_already_linked"] = int(
                 mlb_identity["fixtures_already_linked"]
             )
@@ -615,9 +611,7 @@ def collect_durable_once(
             summary["mlb_identity_mapping_failures"] = int(
                 mlb_identity["mapping_failures"]
             )
-            summary["mlb_identity_link_failures"] = int(
-                mlb_identity["link_failures"]
-            )
+            summary["mlb_identity_link_failures"] = int(mlb_identity["link_failures"])
             summary["mlb_identity_ready_for_enrichment"] = int(
                 mlb_identity["ready_for_enrichment"]
             )
