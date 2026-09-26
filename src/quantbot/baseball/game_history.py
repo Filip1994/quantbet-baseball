@@ -181,9 +181,7 @@ class GameHistorySnapshot:
             return None
         home_extra = self.home_innings.get("extra")
         away_extra = self.away_innings.get("extra")
-        if home_extra is None and away_extra is None:
-            return False
-        return True
+        return not (home_extra is None and away_extra is None)
 
     @property
     def total_runs(self) -> int | None:
@@ -305,9 +303,12 @@ def canonical_game_history(
         except EvidenceError:
             continue
 
-        def optional_score(*path: str) -> int | None:
+        def optional_score(
+            *path: str,
+            source_row: dict[str, Any] = row,
+        ) -> int | None:
             return _int(
-                _nested(row, *path),
+                _nested(source_row, *path),
                 ".".join(path),
                 minimum=0,
                 required=False,
