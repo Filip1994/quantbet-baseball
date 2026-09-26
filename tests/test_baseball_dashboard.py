@@ -58,6 +58,15 @@ class FakeRepository:
                 ).isoformat(),
                 "official_mlb_pregame_snapshots": 0,
                 "latest_official_mlb_observed_at": None,
+                "mlb_identity_team_mappings": 30,
+                "mlb_identity_mapping_versions": 1,
+                "latest_mlb_identity_mapping_at": (
+                    now - timedelta(hours=1)
+                ).isoformat(),
+                "mlb_identity_game_links": 15,
+                "latest_mlb_identity_link_at": (
+                    now - timedelta(hours=1)
+                ).isoformat(),
                 "latest_fixture_observed_at": (now - timedelta(hours=1)).isoformat(),
                 "latest_odds_observed_at": None,
                 "latest_collection_finished_at": None,
@@ -173,6 +182,7 @@ def test_system_page_renders_operational_evidence() -> None:
     assert "Standings" in html
     assert "Team stats" in html
     assert "Game history" in html
+    assert "MLB identity" in html
 
 
 def test_research_and_history_render_empty_states_without_fabrication() -> None:
@@ -185,6 +195,7 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     assert "Primary evidence coverage" in research
     assert "Standings 30 teams" in research
     assert "team stats 18 teams" in research
+    assert "MLB identity 30 team maps / 15 game links" in research
     assert (
         "history 480 games (470 final-score, 468 inning-detail, 21 extra-inning)"
         in research
