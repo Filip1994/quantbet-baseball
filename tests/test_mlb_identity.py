@@ -1,3 +1,4 @@
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -157,6 +158,42 @@ def test_bootstrap_requires_exact_team_names_not_fuzzy_aliases() -> None:
             schedule,
             _receipt(),
             mapping_version="mlb-2026-v1",
+        )
+
+
+def test_bootstrap_accepts_only_versioned_cardinals_alias() -> None:
+    fixture = replace(
+        _fixture(),
+        home_team_id=20,
+        home_team_name="Milwaukee Brewers",
+        away_team_id=33,
+        away_team_name="St.Louis Cardinals",
+        kickoff_at="2026-09-26T23:10:00+00:00",
+    )
+    schedule = _schedule(
+        game_pk=823733,
+        first_pitch="2026-09-26T23:10:00Z",
+    )
+    game = schedule["dates"][0]["games"][0]
+    game["teams"]["home"]["team"] = {"id": 158, "name": "Milwaukee Brewers"}
+    game["teams"]["away"]["team"] = {"id": 138, "name": "St. Louis Cardinals"}
+
+    mappings = propose_team_identity_mappings(
+        fixture,
+        schedule,
+        _receipt(),
+        mapping_version="mlb-2026-v1",
+    )
+    assert [row.official_mlb_team_id for row in mappings] == [158, 138]
+    assert mappings[1].api_sports_team_name == "St.Louis Cardinals"
+    assert mappings[1].official_mlb_team_name == "St. Louis Cardinals"
+
+    with pytest.raises(EvidenceError, match="exactly one exact-name/time match"):
+        propose_team_identity_mappings(
+            fixture,
+            schedule,
+            _receipt(),
+            mapping_version="mlb-2027-v1",
         )
 
 
