@@ -191,12 +191,19 @@ class FixtureScheduleSnapshot:
         if self.response_rows < 0:
             raise EvidenceError("response_rows cannot be negative")
         normalized_ids = tuple(
-            sorted({_positive_int(value, "provider_game_id") for value in self.provider_game_ids})
+            sorted(
+                {
+                    _positive_int(value, "provider_game_id")
+                    for value in self.provider_game_ids
+                }
+            )
         )
         if normalized_ids != self.provider_game_ids:
             raise EvidenceError("provider_game_ids must be unique and sorted")
         if self.response_rows < len(self.provider_game_ids):
-            raise EvidenceError("response_rows cannot be smaller than canonical game IDs")
+            raise EvidenceError(
+                "response_rows cannot be smaller than canonical game IDs"
+            )
         checksum = self.source_payload_checksum
         if len(checksum) != 64 or any(
             char not in "0123456789abcdefABCDEF" for char in checksum
@@ -238,7 +245,9 @@ def build_fixture_schedule_snapshot(
         if record.source_payload_ref != receipt.ref:
             raise EvidenceError("fixture source ref disagrees with schedule receipt")
         if record.source_payload_checksum.lower() != receipt.checksum.lower():
-            raise EvidenceError("fixture source checksum disagrees with schedule receipt")
+            raise EvidenceError(
+                "fixture source checksum disagrees with schedule receipt"
+            )
 
     provider_game_ids = tuple(sorted({record.provider_game_id for record in records}))
     identity = {
