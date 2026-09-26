@@ -347,18 +347,18 @@ def canonical_game_history(
                 away_hits=optional_score("scores", "away", "hits"),
                 home_errors=optional_score("scores", "home", "errors"),
                 away_errors=optional_score("scores", "away", "errors"),
-                home_innings=_innings(
-                    _nested(row, "scores", "home", "innings")
-                ),
-                away_innings=_innings(
-                    _nested(row, "scores", "away", "innings")
-                ),
+                home_innings=_innings(_nested(row, "scores", "home", "innings")),
+                away_innings=_innings(_nested(row, "scores", "away", "innings")),
                 source_payload_ref=receipt.ref,
                 source_payload_checksum=_checksum(receipt.checksum),
             )
         )
 
-    return tuple(sorted(result, key=lambda item: (item.scheduled_first_pitch, item.provider_game_id)))
+    return tuple(
+        sorted(
+            result, key=lambda item: (item.scheduled_first_pitch, item.provider_game_id)
+        )
+    )
 
 
 def _team_site(game: GameHistorySnapshot, team_id: int) -> str | None:
@@ -387,7 +387,9 @@ def derive_team_schedule_features(
     """Derive schedule context only from snapshots known by the decision cutoff."""
 
     cutoff = _timestamp(cutoff_at, "cutoff_at")
-    target_start = _timestamp(target.scheduled_first_pitch, "target.scheduled_first_pitch")
+    target_start = _timestamp(
+        target.scheduled_first_pitch, "target.scheduled_first_pitch"
+    )
     target_observed = _timestamp(target.observed_at, "target.observed_at")
     if target_observed > cutoff:
         raise EvidenceError("target schedule snapshot exceeds decision cutoff")
