@@ -210,3 +210,53 @@ def test_catalogs_use_weekly_cadence_after_team_data_priority() -> None:
     assert result["catalog_calls"] == 2
     assert result["catalogs_inserted"] == 2
     assert client.calls == [("bets",), ("books",)]
+
+
+class DuplicateStandingClient(FakeClient):
+    def standings_with_receipt(self, league_id, season):
+        self.request_count += 1
+        self.remaining_budget -= 1
+        self.calls.append(("standings", league_id, season))
+        rows = []
+        for group_name in ("League", "Division"):
+            for position, team_id in enumerate((10, 20, 30), start=1):
+                rows.append(
+                    {
+                        "position": position,
+                        "stage": "Regular Season",
+                        "group": {"name": group_name},
+                        "games": {
+                            "played": 10,
+                            "win": {"total": 6, "percentage": ".600"},
+                            "lose": {"total": 4, "percentage": ".400"},
+                        },
+                        "points": {"for": 50, "against": 40},
+                        "team": {"id": team_id, "name": f"Team {team_id}"},
+                    }
+                )
+        return rows, _receipt("standings-duplicate-contexts")
+
+
+def test_fresh_multigroup_standings_poll_each_team_statistics_once() -> None:
+    client = DuplicateStandingClient()
+    repository = FakeRepository()
+
+    result = collect_slow_provider_data(
+        client,
+        repository,
+        now=datetime(2026, 9, 26, 8, 0, tzinfo=UTC),
+        max_requests=4,
+    )
+
+    assert result["requests"] == 4
+    assert result["standings_calls"] == 1
+    assert result["standings_rows"] == 6
+    assert result["team_statistics_calls"] == 3
+    assert result["team_statistics_inserted"] == 3
+    assert result["team_statistics_due_uncollected"] == 0
+    assert client.calls == [
+        ("standings", 1, 2026),
+        ("team_stats", 10, 1, 2026),
+        ("team_stats", 20, 1, 2026),
+        ("team_stats", 30, 1, 2026),
+    ]
