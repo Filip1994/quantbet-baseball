@@ -28,7 +28,7 @@ def _observation() -> OddsObservation:
         market_family="moneyline",
         line=None,
         selection="home",
-        bookmaker="book-a",
+        bookmaker="Bet365",
         decimal_odds=2.1,
         raw_price="2.1",
         observed_at="2026-09-20T17:00:00+00:00",
@@ -140,7 +140,7 @@ class _FreshQuoteClient:
                 {
                     "bookmakers": [
                         {
-                            "name": "book-a",
+                            "name": "Bet365",
                             "bets": [
                                 {
                                     "name": "Moneyline",
@@ -183,7 +183,7 @@ def _moneyline_observation(
         market_family="moneyline",
         line=None,
         selection=selection,
-        bookmaker="book-a",
+        bookmaker="Bet365",
         decimal_odds=odds,
         raw_price=str(odds),
         observed_at="2026-09-20T17:00:00+00:00",
@@ -251,7 +251,7 @@ def test_moneyline_candidate_requires_fresh_quote_before_registration() -> None:
         preliminary = evaluate_preliminary_moneyline(
             repository,
             prediction,
-            bookmaker="book-a",
+            bookmaker="Bet365",
             evaluated_at=datetime(2026, 9, 20, 17, 1, tzinfo=UTC),
             policy=policy,
         )
@@ -304,7 +304,7 @@ class _DeterioratedFreshQuoteClient:
                 {
                     "bookmakers": [
                         {
-                            "name": "book-a",
+                            "name": "Bet365",
                             "bets": [
                                 {
                                     "name": "Moneyline",
@@ -382,7 +382,7 @@ def test_final_price_deterioration_rejects_registration() -> None:
         preliminary = evaluate_preliminary_moneyline(
             repository,
             prediction,
-            bookmaker="book-a",
+            bookmaker="Bet365",
             evaluated_at=datetime(2026, 9, 20, 17, 1, tzinfo=UTC),
             policy=policy,
         )
