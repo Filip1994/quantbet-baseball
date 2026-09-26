@@ -47,7 +47,15 @@ class FakeRepository:
                 "collection_enabled": False,
                 "mode": "storage-ready",
                 "status": "ready",
-                "stats": {},
+                "stats": {
+                    "api_requests": 12,
+                    "cycle_request_cap": 75,
+                    "due_events": 8,
+                    "not_due_events": 6,
+                    "games_selected": 8,
+                    "odds_calls": 8,
+                    "observations_inserted": 24,
+                },
             },
             "gates": {
                 "CANARY": {
@@ -134,6 +142,10 @@ def test_system_page_renders_operational_evidence() -> None:
     assert "Bet365 · 1xBet" in html
     assert "LOCKED" in html
     assert "NO FRESH ODDS" in html
+    assert "Latest collection efficiency" in html
+    assert "12 / 75" in html
+    assert "Obs / request" in html
+    assert "2.00" in html
 
 
 def test_research_and_history_render_empty_states_without_fabrication() -> None:
