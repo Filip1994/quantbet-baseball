@@ -2220,3 +2220,34 @@ Unexpected Railway drift was also observed around 14:41 UTC:
 - `query-production-db` was redeployed.
 
 Read-only audit shows these are Railway function-bun DB query helpers with no cron/domain/volume dependency. Their output confirmed accepted picks = 0. They are not used by the desired architecture and will not be used for further DB inspection. No blind deletion was performed.
+
+
+## 2026-09-26 game-history integrity health live; bounded MLB identity bootstrap under review
+
+PR #51 `Expose game-history evidence integrity health` passed both CI workflows and merged as `714138ec7fb82985626c5e9d17f1bc50924f3ba8`.
+
+Production deployments on that commit reached SUCCESS:
+
+- worker: `ca7f220d-4b3a-417d-b823-a73c2bf98370`;
+- dashboard: `21dc11fa-f260-43ce-a853-25ecc15a5fec`.
+
+The new health read model can report durable game-history evidence integrity for final scores, hits, errors, inning detail, explicit `innings.extra`, and archived raw provenance. A natural cron after this deployment is still required before recording the live field-level counts; no helper DB service will be created for that read-back.
+
+PR #52 `Add bounded official MLB identity bootstrap` is now open and remains **inactive in production** while CI runs.
+
+Its safety contract is:
+
+- `BASEBALL_ENABLE_MLB_IDENTITY_BOOTSTRAP=false` by default;
+- official MLB schedule is used only as an identity bridge;
+- one archived schedule request maximum for an armed target date;
+- point-in-time API-Sports fixtures remain canonical;
+- exact home/away identity plus first-pitch tolerance;
+- versioned team mapping + immutable `gamePk` links;
+- ambiguous/missing identity fails closed;
+- a fully linked target date performs zero repeat schedule requests;
+- enrichment readiness requires zero mapping/link failures and at least 30 mapped MLB teams;
+- no official MLB game-feed, starter, lineup, bullpen, roster, transaction or venue enrichment polling is enabled by this PR.
+
+The fixture query for identity bootstrap was tightened before acceptance to an MLB schedule-day window of 06:00 UTC through 06:00 UTC the following day, avoiding accidental inclusion of the previous North-American evening slate.
+
+PR #13 remains open and unmerged.
