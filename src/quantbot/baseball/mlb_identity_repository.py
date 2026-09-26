@@ -184,6 +184,78 @@ class PostgreSQLMLBIdentityRepository:
                 result.append(MLBTeamIdentityMapping(**value))
         return tuple(result)
 
+    def latest_mlb_fixtures_for_provider_query_date(
+        self,
+        *,
+        date_iso: str,
+        observed_by: datetime,
+    ) -> tuple[FixtureObservation, ...]:
+        target = date.fromisoformat(date_iso)
+        if observed_by.tzinfo is None or observed_by.utcoffset() is None:
+            raise ValueError("observed_by must be timezone-aware")
+        observed_cutoff = observed_by.astimezone(UTC)
+        snapshot_query = """
+            SELECT
+                snapshot_group_id,
+                source_payload_ref,
+                source_payload_checksum
+            FROM api_sports_game_schedule_snapshots
+            WHERE query_date = %s
+              AND observed_at <= %s
+            ORDER BY observed_at DESC, snapshot_id DESC
+            LIMIT 1
+        """
+        with self._connection.cursor() as cursor:
+            cursor.execute(snapshot_query, (target, observed_cutoff))
+            snapshot = cursor.fetchone()
+        if snapshot is None:
+            return ()
+
+        snapshot_group_id, source_payload_ref, source_payload_checksum = snapshot
+        query = """
+            SELECT DISTINCT ON (fo.provider_game_id)
+                fo.canonical_record
+            FROM api_sports_game_schedule_snapshots AS schedule
+            CROSS JOIN LATERAL unnest(schedule.provider_game_ids) AS member(provider_game_id)
+            JOIN fixture_observations AS fo
+              ON fo.provider_game_id = member.provider_game_id
+             AND fo.source_payload_ref = schedule.source_payload_ref
+             AND fo.source_payload_checksum = schedule.source_payload_checksum
+            WHERE schedule.snapshot_group_id = %s
+              AND schedule.query_date = %s
+              AND schedule.source_payload_ref = %s
+              AND schedule.source_payload_checksum = %s
+              AND lower(fo.league) = 'mlb'
+              AND fo.observed_at <= %s
+            ORDER BY fo.provider_game_id, fo.observed_at DESC, fo.fixture_observation_id DESC
+        """
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                query,
+                (
+                    snapshot_group_id,
+                    target,
+                    source_payload_ref,
+                    source_payload_checksum,
+                    observed_cutoff,
+                ),
+            )
+            rows = cursor.fetchall()
+
+        fixtures: list[FixtureObservation] = []
+        for row in rows:
+            value = row[0]
+            if isinstance(value, str):
+                value = json.loads(value)
+            if isinstance(value, dict):
+                fixtures.append(FixtureObservation(**value))
+        return tuple(
+            sorted(
+                fixtures,
+                key=lambda item: (item.kickoff_at, item.provider_game_id),
+            )
+        )
+
     def latest_mlb_fixtures_for_schedule_date(
         self,
         *,
