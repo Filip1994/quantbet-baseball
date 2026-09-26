@@ -104,7 +104,11 @@ def _record_runtime(
             collection_enabled=collection_enabled,
             mode=str(result["mode"]),
             status=str(result["status"]),
-            stats=dict(result.get("collection") or {}),
+            stats=dict(
+                result.get("collection")
+                or result.get("games_schema_audit")
+                or {}
+            ),
         )
         return repository.health_snapshot()
 
@@ -117,12 +121,18 @@ def run_once(root: Path | None = None) -> dict[str, object]:
     applied = apply_migrations(project_root)
     collection_enabled = _enabled("BASEBALL_ENABLE_COLLECTION")
     canary_enabled = _enabled("BASEBALL_ENABLE_CANARY")
+    games_schema_audit_id = os.getenv("BASEBALL_GAMES_SCHEMA_AUDIT_ID", "").strip()
+    games_schema_audit_date = os.getenv(
+        "BASEBALL_GAMES_SCHEMA_AUDIT_DATE",
+        started_at.date().isoformat(),
+    ).strip()
 
     result: dict[str, object] = {
         "status": "ready",
         "migrations_applied": list(applied),
         "collection_enabled": collection_enabled,
         "canary_enabled": canary_enabled,
+        "games_schema_audit_armed": bool(games_schema_audit_id),
     }
 
     # Fail closed if both paths are armed. A canary must never coexist with
@@ -136,6 +146,18 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         }
     elif not collection_enabled:
         result["mode"] = "storage-ready"
+        if games_schema_audit_id and not canary_enabled:
+            from .games_schema_audit import run_games_schema_audit
+
+            audit = run_games_schema_audit(
+                project_root,
+                audit_id=games_schema_audit_id,
+                date_iso=games_schema_audit_date,
+            )
+            result["games_schema_audit"] = audit
+            if audit.get("status") not in {"COMPLETE", "ALREADY_DONE"}:
+                result["status"] = "audit-failed"
+
         activation_gate = _record_activation_gate(
             project_root,
             assessed_at=started_at,
