@@ -106,6 +106,7 @@ def _record_runtime(
             status=str(result["status"]),
             stats=dict(
                 result.get("collection")
+                or result.get("raw_provider_inventory")
                 or result.get("provider_surface_audit")
                 or result.get("games_schema_audit")
                 or {}
@@ -134,6 +135,14 @@ def run_once(root: Path | None = None) -> dict[str, object]:
     provider_surface_audit_season = int(
         os.getenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "2026")
     )
+    raw_provider_inventory_id = os.getenv(
+        "BASEBALL_RAW_PROVIDER_INVENTORY_ID",
+        "",
+    ).strip()
+    raw_provider_inventory_day = os.getenv(
+        "BASEBALL_RAW_PROVIDER_INVENTORY_DAY",
+        started_at.date().isoformat(),
+    ).strip()
 
     result: dict[str, object] = {
         "status": "ready",
@@ -142,6 +151,7 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "canary_enabled": canary_enabled,
         "games_schema_audit_armed": bool(games_schema_audit_id),
         "provider_surface_audit_armed": bool(provider_surface_audit_id),
+        "raw_provider_inventory_armed": bool(raw_provider_inventory_id),
     }
 
     # Fail closed if both paths are armed. A canary must never coexist with
@@ -177,6 +187,18 @@ def run_once(root: Path | None = None) -> dict[str, object]:
             )
             result["provider_surface_audit"] = audit
             if audit.get("status") not in {"COMPLETE", "ALREADY_DONE"}:
+                result["status"] = "audit-failed"
+
+        if raw_provider_inventory_id and not canary_enabled:
+            from .raw_provider_inventory import run_raw_provider_inventory
+
+            inventory = run_raw_provider_inventory(
+                project_root,
+                day=raw_provider_inventory_day,
+            )
+            inventory["raw_provider_inventory_id"] = raw_provider_inventory_id
+            result["raw_provider_inventory"] = inventory
+            if inventory.get("status") != "COMPLETE":
                 result["status"] = "audit-failed"
 
         activation_gate = _record_activation_gate(
