@@ -1159,3 +1159,12 @@ Railway variable deployment `55f45427-5c1e-4419-ae72-0ceade5025ac` reached SUCCE
 Acceptance condition is unchanged: one natural cron must stay within four slow-source requests, persist standings/team-stat evidence, and report zero errors. Failure requires immediate slow-source shutdown and evidence inspection.
 
 Separate read-only observability work is in PR #48. It exposes durable count/freshness telemetry for the new provider tables through the existing repository health snapshot and dashboard; it introduces no provider request path or schema migration.
+
+
+## Slow-source acceptance pause for unique-team polling fix — 2026-09-26
+
+The first post-fix slow-source acceptance was intentionally stopped before a natural slow-enabled cron was accepted. Static inspection exposed that fresh standings records were copied directly into the team-statistics queue without unique-team deduplication. Because live MLB standings repeat teams across stage/group contexts, this could spend the three remaining requests in a four-request acceptance cycle on duplicate team IDs.
+
+Production was returned to slow-provider OFF with the four-request cap and paper mode retained. No cap was increased and no manual provider call was used.
+
+PR #49 fixes only the request queue: all standings contexts remain canonical evidence, while team-statistics requests are stable-deduplicated by team ID. A regression test covers multi-group duplicate standings. Acceptance will resume after green CI and deployment.
