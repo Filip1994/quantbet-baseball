@@ -13,7 +13,7 @@ def observation(odds=2.1, observation_id="o-1"):
         market_family="moneyline",
         line=None,
         selection="home",
-        bookmaker="book-a",
+        bookmaker="Bet365",
         decimal_odds=odds,
         raw_price=str(odds),
         observed_at="2026-09-20T17:00:00+00:00",
