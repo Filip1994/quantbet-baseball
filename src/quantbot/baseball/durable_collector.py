@@ -29,14 +29,14 @@ from .fixture_evidence import FixtureObservation, canonical_fixture_observation
 from .game_history_collection import collect_game_history
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
+from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
+from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
-from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
-from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
-from .official_mlb import OfficialMLBStatsClient
 from .odds_poll_evidence import OddsPollAttempt, build_odds_poll_attempt
+from .official_mlb import OfficialMLBStatsClient
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .provider_data_repository import PostgreSQLProviderDataRepository
 from .raw_archive import archive_from_env
