@@ -9,31 +9,15 @@ from .api import BaseballAPIBudgetExceeded, BaseballAPIClient, BaseballAPIError
 from .lifecycle import flatten_market_observations
 from .scheduler import build_scheduler_record, is_observation_due
 
-LOCAL_BOOKMAKER_TOKENS = (
+PLAYABLE_BOOKMAKER_TOKENS = (
     "bet365",
     "1xbet",
-    "superbet",
-    "mozzart",
-    "maxbet",
-    "soccerbet",
-    "meridian",
-    "admiralbet",
-    "balkanbet",
 )
 TARGET_MARKET_TOKENS = (
     "moneyline",
     "home/away",
-    "winner",
-    "run line",
-    "spread",
     "total",
     "over/under",
-    "strikeout",
-    "hits",
-    "total bases",
-    "runs",
-    "rbi",
-    "home run",
 )
 
 
@@ -135,7 +119,7 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
     for record in records:
         bookmaker_name = record["name"]
         keep_bookmaker = any(
-            token in _norm(bookmaker_name) for token in LOCAL_BOOKMAKER_TOKENS
+            token in _norm(bookmaker_name) for token in PLAYABLE_BOOKMAKER_TOKENS
         )
         markets: list[dict[str, Any]] = []
         for market in record["markets"]:
