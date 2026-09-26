@@ -144,7 +144,9 @@ def _read_verified_schedule_payload(
     if parsed.scheme != "s3" or not parsed.netloc or not parsed.path:
         raise EvidenceError("MLB schedule archive reference must be an s3 URI")
     if parsed.netloc != archive.bucket:
-        raise EvidenceError("MLB schedule archive bucket disagrees with configured bucket")
+        raise EvidenceError(
+            "MLB schedule archive bucket disagrees with configured bucket"
+        )
 
     key = parsed.path.lstrip("/")
     result = archive.client.get_object(Bucket=archive.bucket, Key=key)
@@ -167,7 +169,9 @@ def _read_verified_schedule_payload(
     if str(params.get("sportId") or "") != "1":
         raise EvidenceError("MLB schedule archive sportId is unexpected")
     if str(params.get("date") or "") != date_iso:
-        raise EvidenceError("MLB schedule archive date disagrees with diagnostic target")
+        raise EvidenceError(
+            "MLB schedule archive date disagrees with diagnostic target"
+        )
 
     payload = document.get("payload")
     if not isinstance(payload, dict):
@@ -226,9 +230,7 @@ def run_mlb_identity_diagnostic(
         payload = _read_verified_schedule_payload(
             archive,
             source_payload_ref=str(evidence.get("source_payload_ref") or ""),
-            source_payload_checksum=str(
-                evidence.get("source_payload_checksum") or ""
-            ),
+            source_payload_checksum=str(evidence.get("source_payload_checksum") or ""),
             date_iso=date_iso,
         )
     except Exception as exc:  # noqa: BLE001 - diagnostic must fail closed
@@ -249,9 +251,7 @@ def run_mlb_identity_diagnostic(
             continue
         fixture = fixture_by_game.get(int(row["provider_game_id"]))
         if fixture is None:
-            row["schedule_match_diagnostic"] = {
-                "classification": "FIXTURE_NOT_FOUND"
-            }
+            row["schedule_match_diagnostic"] = {"classification": "FIXTURE_NOT_FOUND"}
             continue
         row["schedule_match_diagnostic"] = diagnose_fixture_schedule_match(
             fixture,
