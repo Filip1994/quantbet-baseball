@@ -397,6 +397,38 @@ class BaseballDashboard:
             f'<div class="metric"><small>{escape(k)}</small><b>{v}</b></div>'
             for k, v in lifecycle
         )
+        provider_evidence = [
+            (
+                "Standings",
+                health.get("standing_snapshots", 0),
+                health.get("latest_standings_observed_at"),
+            ),
+            (
+                "Team stats",
+                health.get("team_statistics_snapshots", 0),
+                health.get("latest_team_statistics_observed_at"),
+            ),
+            (
+                "Catalogs",
+                health.get("reference_catalog_snapshots", 0),
+                health.get("latest_catalog_observed_at"),
+            ),
+            (
+                "Game history",
+                health.get("game_history_snapshots", 0),
+                health.get("latest_game_history_observed_at"),
+            ),
+            (
+                "MLB enrich",
+                health.get("official_mlb_pregame_snapshots", 0),
+                health.get("latest_official_mlb_observed_at"),
+            ),
+        ]
+        provider_html = "".join(
+            f'<div class="metric"><small>{escape(label)}</small><b>{count}</b>'
+            f'<span>{escape(_fmt_age(_age(data["generated_at"], stamp)))}</span></div>'
+            for label, count, stamp in provider_evidence
+        )
         reasons = gate.get("reason_codes") or []
         reason_html = (
             "".join(f"<span>{escape(str(x))}</span>" for x in reasons)
@@ -457,6 +489,10 @@ class BaseballDashboard:
     </div>
   </article>
 </section>
+<section class="panel table-panel">
+  <div class="panel-title"><b>Primary provider evidence</b><span>durable counts · freshness</span></div>
+  <div class="metric-grid">{provider_html}</div>
+</section>
 <section class="panel">
   <div class="panel-title"><b>Latest collection efficiency</b><span>scheduler-aware request use</span></div>
   <div class="budget-grid cycle-grid">{cycle_html}</div>
@@ -482,6 +518,13 @@ class BaseballDashboard:
         settled_stake_minor = int(money.get("settled_stake_minor") or 0)
         paper_profit = realized_minor / 100
         settled_stake = settled_stake_minor / 100
+        health = data.get("health") or {}
+        provider_summary = (
+            f"Standings {health.get('distinct_standing_teams', 0)} teams · "
+            f"team stats {health.get('distinct_team_statistics_teams', 0)} teams · "
+            f"history {health.get('distinct_game_history_games', 0)} games · "
+            f"MLB enrichment {health.get('official_mlb_pregame_snapshots', 0)} snapshots"
+        )
         cards = [
             ("Settled", settled, ""),
             (
@@ -527,6 +570,8 @@ class BaseballDashboard:
 <div class="table-wrap"><table><thead><tr><th>Dimension</th><th>Value</th><th>N</th><th>ROI</th><th>Brier</th><th>Log loss</th><th>Avg CLV Δ</th></tr></thead>
 <tbody>{row_html}</tbody></table></div></section>
 <section class="research-note">
+<b>Primary evidence coverage</b>
+<p>{escape(provider_summary)}</p>
 <b>Feature universe</b>
 <p>MLB target includes starting pitcher, bullpen, injuries/roster, confirmed lineup, Statcast, park/roof, weather, rest/travel/time-of-day and market evidence — admitted only after point-in-time validation. Other leagues use only verified available fields.</p>
 <div><span>PLAYABLE</span><strong>Bet365 · 1xBet</strong></div>
@@ -777,7 +822,7 @@ main{min-width:0;padding:25px 30px 18px;max-width:1680px;width:100%;margin:auto}
 .status-strip{display:grid;grid-template-columns:repeat(6,minmax(125px,1fr));gap:7px;margin-bottom:23px}.status{display:flex;align-items:center;gap:9px;padding:9px 11px;border:1px solid var(--line);background:#121c21;border-radius:9px}.status div{color:var(--text)}
 .section-title{display:flex;align-items:end;justify-content:space-between;margin:22px 0 11px}.section-title small{font-size:9px;letter-spacing:.15em;color:var(--seam);font-weight:900}.section-title h2{margin:2px 0 0;font-size:18px}.section-title>span{font-size:11px;color:var(--muted)}
 .health-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.health-card{padding:14px;background:linear-gradient(145deg,#172329,#121c21);border:1px solid var(--line);border-radius:12px;min-height:105px}.health-card.good{border-color:#2b5740}.health-card.warn{border-color:#604f2d}.health-card.bad{border-color:#63363a}.health-card.locked{border-color:#345364}.health-head{display:flex;align-items:center;gap:8px;color:var(--text)}.health-head b{font-size:11px}.health-card>strong{display:block;font-size:17px;margin:14px 0 4px;color:currentColor}.health-card>small{color:#7e8e92}
-.split{display:grid;grid-template-columns:1.4fr 1fr;gap:11px;margin-top:11px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}.panel-title{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);background:#172329}.panel-title b{font-size:12px}.panel-title span{font-size:10px;color:var(--muted)}.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);padding:11px}.metric{padding:11px;border-right:1px solid #243239;border-bottom:1px solid #243239}.metric small,.budget-grid small,.canary-row small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.06em}.metric b{display:block;font-size:20px;margin-top:5px}.budget-grid{display:grid;grid-template-columns:repeat(5,1fr);padding:13px}.budget-grid div{padding:8px}.budget-grid b,.canary-row b{display:block;margin-top:5px}.reason-box{margin:0 13px 13px;padding:11px;border:1px solid #34434a;border-radius:9px;background:#121c21}.reason-box>small{color:var(--muted)}.reason-box>b{float:right}.reason-box div{clear:both;padding-top:9px;display:flex;gap:5px;flex-wrap:wrap}.reason-box span{font-size:9px;background:#2a2420;color:var(--amber);padding:4px 6px;border-radius:5px}.reason-box span.ok{background:#183126;color:var(--green)}
+.split{display:grid;grid-template-columns:1.4fr 1fr;gap:11px;margin-top:11px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}.panel-title{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);background:#172329}.panel-title b{font-size:12px}.panel-title span{font-size:10px;color:var(--muted)}.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);padding:11px}.metric{padding:11px;border-right:1px solid #243239;border-bottom:1px solid #243239}.metric small,.budget-grid small,.canary-row small{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.06em}.metric b{display:block;font-size:20px;margin-top:5px}.metric span{display:block;color:var(--muted);font-size:9px;margin-top:4px}.budget-grid{display:grid;grid-template-columns:repeat(5,1fr);padding:13px}.budget-grid div{padding:8px}.budget-grid b,.canary-row b{display:block;margin-top:5px}.reason-box{margin:0 13px 13px;padding:11px;border:1px solid #34434a;border-radius:9px;background:#121c21}.reason-box>small{color:var(--muted)}.reason-box>b{float:right}.reason-box div{clear:both;padding-top:9px;display:flex;gap:5px;flex-wrap:wrap}.reason-box span{font-size:9px;background:#2a2420;color:var(--amber);padding:4px 6px;border-radius:5px}.reason-box span.ok{background:#183126;color:var(--green)}
 .canary-row{display:grid;grid-template-columns:repeat(5,1fr);padding:14px}.canary-row>div{padding:8px;border-right:1px solid #26343b}.cycle-grid{grid-template-columns:repeat(6,1fr)}.cycle-grid b{font-size:17px}.muted{color:var(--muted);font-size:10px;padding:0 14px 12px}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{background:linear-gradient(145deg,#172329,#111a1f);border:1px solid var(--line);border-radius:12px;padding:15px}.kpi small{color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:.08em}.kpi b{display:block;font-size:22px;margin:7px 0 2px;color:var(--cream)}.kpi span{font-size:9px;color:#718287}
 .table-panel{margin-top:11px}.table-wrap{overflow:auto;max-height:64vh}table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}th,td{padding:10px 12px;border-bottom:1px solid #243239;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#172329;color:#839397;text-transform:uppercase;font-size:9px;letter-spacing:.07em;z-index:2}tbody tr:hover{background:#1b292f}td small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.empty{text-align:center;padding:45px!important;color:var(--muted)}
