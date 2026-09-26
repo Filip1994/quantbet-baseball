@@ -8,6 +8,6 @@ def normalize_bookmaker(value: object) -> str:
     return " ".join(str(value or "").strip().casefold().split())
 
 
-def is_playable_bookmaker(value: Any) -> bool:
+def is_playable_bookmaker(value: object) -> bool:
     """Return whether the bookmaker is permitted for paper execution."""
     return normalize_bookmaker(value) in PLAYABLE_BOOKMAKERS
