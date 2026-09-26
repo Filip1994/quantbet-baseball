@@ -1196,3 +1196,31 @@ errors=0
 The overall cycle used 26 API requests and retained 49 requests of the 75-request cycle budget. This proves the fixed path preserves all multi-group standings evidence while polling only unique team IDs for team statistics.
 
 Decision: acceptance PASSED. Keep slow-provider collection ON at cap=4 for bounded seeding; do not increase the cap. Next natural-cycle expectation is no standings refresh before the daily cadence, with team-stat coverage growing by unique team ID.
+
+
+## Team-stat rollout + game-history production seeding — 2026-09-26
+
+After bounded acceptance passed, the cap remained at four requests and natural cycles grew distinct MLB team-stat coverage exactly by unique team ID: 7 -> 11 -> 15 -> 19 -> 23 -> 27 -> **30**.
+
+Cycle `72ee8695-407c-41d9-befb-7b8028b77532` completed the final three team-stat teams and used the remaining request for one league-season `/games` history fetch. It archived and inserted **2,433** game-history snapshots with zero errors. The next cycle made zero game-history calls, proving the daily cadence prevents immediate re-poll.
+
+Durable health on the next cycle showed:
+
+```text
+distinct_standing_teams=30
+distinct_team_statistics_teams=30
+game_history_snapshots=2433
+distinct_game_history_games=2433
+official_mlb_pregame_snapshots=0
+model_predictions=0
+registered_picks=0
+errors=0
+```
+
+PR #48 is merged and production-live for provider-data health visibility.
+
+PR #50 is merged as `843703c799afc05ee3dcccc68c081800bf4fca91` and introduces migration 013 plus the fail-close official MLB identity boundary. It does not activate official MLB polling.
+
+PR #51 adds field-level game-history integrity visibility so scores/hits/errors/innings/extra/raw-provenance can be accepted from durable health rather than DB helper services.
+
+A new ad-hoc Railway service `inspect-accepted-picks-v2` and a redeploy of `query-production-db` appeared independently around 14:41 UTC. They were audited read-only, are not part of final architecture, and are not being used further.
