@@ -1587,3 +1587,26 @@ In this endpoint response there were no fields for:
 No MLB-only top-level fields were found, and no non-MLB-only top-level fields were found in this single response.
 
 Interpretation: the generic `/games` endpoint is schedule/result metadata and does not by itself provide the rich pregame context required by the research model. MLB enrichment must therefore come from additional verified provider endpoints and/or external structured sources. Historical raw evidence should be preferred over spending new provider requests when the question can already be answered from archived payloads.
+
+
+## 76. One-shot live games API audit deployed — 2026-09-26
+
+A direct live API-Sports request could not be issued through the Railway agent because Railway intentionally hides secret variable values from the agent. To execute the user's requested live provider check without exposing the API key, PR #23 added an idempotent one-shot diagnostic to the existing Baseball worker.
+
+Safety properties:
+
+- endpoint: `/games?date=2026-09-26`;
+- provider budget hard-capped to exactly 1 request;
+- retry attempts hard-capped to 1;
+- raw response archived through the existing remote archive;
+- audit ID: `games-schema-live-20260926-1`;
+- repeat cron executions query `runtime_cycles` and return `ALREADY_DONE` after the first completed audit instead of calling the provider again;
+- `BASEBALL_ENABLE_COLLECTION=false`;
+- `BASEBALL_ENABLE_CANARY=false`;
+- `PAPER_MODE=true`;
+- cron and start command unchanged;
+- Football untouched.
+
+PR #23 passed Baseball tests and Railway runtime smoke, then was squash-merged to main as `1dca14ebb89292a21a9af359e4d78bed6ceb1408`.
+
+Railway deployment `3f21aaa4-2574-408e-b5d3-b5f8c1cb9fdd` reached SUCCESS at approximately `2026-09-26T00:45:41Z`. Because deployment completion occurred after the 00:45 UTC cron boundary, the live provider request is pending the next natural `*/15` execution. No provider request is claimed yet.
