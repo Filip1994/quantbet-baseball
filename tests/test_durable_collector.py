@@ -12,6 +12,7 @@ class FakeRepository:
     def __init__(self) -> None:
         self.records = []
         self.fixtures = []
+        self.schedule_snapshots = []
         self.poll_attempts = []
 
     def latest_odds_poll_times(self):
@@ -27,6 +28,10 @@ class FakeRepository:
     def append_fixture_observations(self, records):
         self.fixtures.extend(records)
         return len(records)
+
+    def append_fixture_schedule_snapshot(self, record):
+        self.schedule_snapshots.append(record)
+        return True
 
     def append_odds_poll_attempt(self, record):
         if any(
@@ -138,6 +143,16 @@ def test_collects_only_strict_pregame_games_into_repository() -> None:
     assert all(record.game_id == "10" for record in repository.records)
     assert {record.game_id for record in repository.fixtures} == {"10", "11"}
     assert {record.home_team_id for record in repository.fixtures} == {101, 303}
+    assert result["schedule_snapshots_inserted"] == 2
+    assert len(repository.schedule_snapshots) == 2
+    first, second = repository.schedule_snapshots
+    assert first.query_date == "2030-09-18"
+    assert first.provider_game_ids == (10, 11)
+    assert first.response_rows == 2
+    assert second.query_date == "2030-09-19"
+    assert second.provider_game_ids == ()
+    assert second.response_rows == 0
+    assert first.snapshot_group_id == second.snapshot_group_id
     assert "schema_market_names_json" not in result
     assert "schema_candidate_values_json" not in result
 
