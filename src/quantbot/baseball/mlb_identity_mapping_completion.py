@@ -178,10 +178,14 @@ def complete_mlb_team_mappings(
 
             pending_api = proposed_by_api.get(candidate.api_sports_team_id)
             pending_mlb = proposed_by_mlb.get(candidate.official_mlb_team_id)
-            if pending_api is not None and not _same_team_mapping(pending_api, candidate):
+            if pending_api is not None and not _same_team_mapping(
+                pending_api, candidate
+            ):
                 fixture_failed = True
                 break
-            if pending_mlb is not None and not _same_team_mapping(pending_mlb, candidate):
+            if pending_mlb is not None and not _same_team_mapping(
+                pending_mlb, candidate
+            ):
                 fixture_failed = True
                 break
 
@@ -205,10 +209,7 @@ def complete_mlb_team_mappings(
         summary["status"] = "FAILED"
         return summary
 
-    records = tuple(
-        proposed_by_api[team_id]
-        for team_id in sorted(unmapped_ids)
-    )
+    records = tuple(proposed_by_api[team_id] for team_id in sorted(unmapped_ids))
     summary["team_mappings_inserted"] = repository.append_team_mappings_atomically(
         records
     )
