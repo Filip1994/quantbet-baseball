@@ -162,18 +162,21 @@ def collect_with_dependencies(
     due.sort(key=lambda item: (item[0], item[2]["event_id"]))
     learning.sort(key=lambda item: (item[0], item[2]["event_id"]))
 
+    # Scheduled broad odds polling must honor the adaptive scheduler.  The
+    # previous due+learning fallback refilled spare capacity with explicitly
+    # non-due games, effectively polling every eligible pregame game on every
+    # 15-minute cron while the event count remained below the request cap.
     selected: list[dict[str, Any]] = []
     selected_ids: set[int] = set()
-    for source in (due, learning):
-        for _, game, _ in source:
-            game_id = _game_id(game)
-            if (
-                game_id is not None
-                and game_id not in selected_ids
-                and len(selected) < max_odds_requests
-            ):
-                selected.append(game)
-                selected_ids.add(game_id)
+    for _, game, _ in due:
+        game_id = _game_id(game)
+        if (
+            game_id is not None
+            and game_id not in selected_ids
+            and len(selected) < max_odds_requests
+        ):
+            selected.append(game)
+            selected_ids.add(game_id)
 
     odds_calls = 0
     raw_market_rows = 0
@@ -278,7 +281,9 @@ def collect_with_dependencies(
         "fixture_observations_inserted": fixtures_inserted,
         "pregame_games": len(learning),
         "due_events": len(due),
+        "not_due_events": max(0, len(learning) - len(due)),
         "games_selected": len(selected),
+        "due_events_unselected": max(0, len(due) - len(selected)),
         "odds_calls": odds_calls,
         "raw_market_rows": raw_market_rows,
         "canonical_rows": canonical_rows,
