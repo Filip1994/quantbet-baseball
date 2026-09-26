@@ -148,7 +148,12 @@ class StandingSnapshot:
     def __post_init__(self) -> None:
         if self.provider != _PROVIDER:
             raise EvidenceError("standing provider is unsupported")
-        for field in ("snapshot_id", "team_name", "source_payload_ref", "schema_version"):
+        for field in (
+            "snapshot_id",
+            "team_name",
+            "source_payload_ref",
+            "schema_version",
+        ):
             _text(getattr(self, field), field)
         _integer(self.league_id, "league_id", minimum=1)
         _integer(self.season, "season", minimum=1900)
@@ -445,7 +450,9 @@ def canonical_team_statistics(
     _timestamp(observed_at, "receipt.captured_at")
     team_id = _integer(_nested(payload, "team", "id"), "team.id", minimum=1)
     league_id = _integer(_nested(payload, "league", "id"), "league.id", minimum=1)
-    season = _integer(_nested(payload, "league", "season"), "league.season", minimum=1900)
+    season = _integer(
+        _nested(payload, "league", "season"), "league.season", minimum=1900
+    )
     team_name = _text(_nested(payload, "team", "name"), "team.name")
     assert team_id is not None and league_id is not None and season is not None
     assert team_name is not None
@@ -540,7 +547,9 @@ def canonical_reference_catalog(
     )
 
 
-def canonical_json(record: StandingSnapshot | TeamStatisticsSnapshot | ReferenceCatalogSnapshot) -> str:
+def canonical_json(
+    record: StandingSnapshot | TeamStatisticsSnapshot | ReferenceCatalogSnapshot,
+) -> str:
     return json.dumps(
         record.to_dict(),
         ensure_ascii=True,
