@@ -347,16 +347,24 @@ class ReferenceCatalogSnapshot:
 
 
 def canonical_standings(
-    rows: list[dict[str, Any]],
+    rows: list[Any],
     receipt: ArchiveReceipt,
     *,
     league_id: int,
     season: int,
 ) -> tuple[StandingSnapshot, ...]:
+    """Canonicalize API-Sports standings, including its nested group envelope."""
+
     observed_at = receipt.captured_at
     _timestamp(observed_at, "receipt.captured_at")
+    provider_rows: list[Any] = rows
+    if len(rows) == 1 and isinstance(rows[0], list):
+        provider_rows = rows[0]
+
     result: list[StandingSnapshot] = []
-    for row in rows:
+    for row in provider_rows:
+        if not isinstance(row, dict):
+            continue
         try:
             team_id = _integer(_nested(row, "team", "id"), "team.id", minimum=1)
             assert team_id is not None
