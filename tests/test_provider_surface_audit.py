@@ -179,3 +179,21 @@ def test_worker_runs_surface_audit_only_when_storage_ready(
     assert result["provider_surface_audit"]["provider_requests"] == 8
     assert result["collection_enabled"] is False
     assert result["canary_enabled"] is False
+
+
+def test_worker_uses_default_surface_audit_season_when_env_blank(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BASEBALL_ENABLE_COLLECTION", "false")
+    monkeypatch.setenv("BASEBALL_ENABLE_CANARY", "false")
+    monkeypatch.setenv("BASEBALL_PROVIDER_SURFACE_AUDIT_ID", "")
+    monkeypatch.setenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "")
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    monkeypatch.setattr(worker, "apply_migrations", lambda _root: ())
+    monkeypatch.setattr(worker, "_record_runtime", lambda *_a, **_k: None)
+    monkeypatch.setattr(worker, "_record_activation_gate", lambda *_a, **_k: None)
+
+    result = worker.run_once(Path("."))
+
+    assert result["status"] == "ready"
+    assert result["provider_surface_audit_armed"] is False

@@ -15,6 +15,11 @@ def _enabled(name: str) -> bool:
     return os.getenv(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _integer_env(name: str, default: int) -> int:
+    raw = os.getenv(name, "").strip()
+    return default if not raw else int(raw)
+
+
 def _record_activation_gate(
     root: Path,
     *,
@@ -132,8 +137,9 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "BASEBALL_PROVIDER_SURFACE_AUDIT_ID",
         "",
     ).strip()
-    provider_surface_audit_season = int(
-        os.getenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "2026")
+    provider_surface_audit_season = _integer_env(
+        "BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON",
+        2026,
     )
     raw_provider_inventory_id = os.getenv(
         "BASEBALL_RAW_PROVIDER_INVENTORY_ID",
