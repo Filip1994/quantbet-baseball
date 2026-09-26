@@ -35,6 +35,7 @@ from .game_history_collection import collect_game_history
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
 from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
+from .mlb_identity_mapping_completion import complete_mlb_team_mappings
 from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
@@ -588,6 +589,14 @@ def collect_durable_once(
                 "BASEBALL_MLB_IDENTITY_MAPPING_VERSION",
                 f"mlb-{cycle_now.year}-v1",
             ).strip()
+            mlb_mapping_completion_id = os.getenv(
+                "BASEBALL_MLB_MAPPING_COMPLETION_ID",
+                "",
+            ).strip()
+            mlb_mapping_completion_date = os.getenv(
+                "BASEBALL_MLB_MAPPING_COMPLETION_DATE",
+                cycle_now.date().isoformat(),
+            ).strip()
             mlb_identity = {
                 "status": "DISABLED",
                 "schedule_calls": 0,
@@ -612,6 +621,62 @@ def collect_durable_once(
                     mapping_version=mlb_identity_version,
                     now=cycle_now,
                 )
+
+            mlb_mapping_completion = {
+                "status": "DISABLED",
+                "schedule_calls": 0,
+                "fixtures_seen": 0,
+                "candidate_fixtures": 0,
+                "team_mappings_inserted": 0,
+                "team_mappings_total": int(mlb_identity["team_mappings_total"]),
+                "mapping_failures": 0,
+                "ready_for_enrichment": 0,
+            }
+            if (
+                execution_mode == "SCHEDULED"
+                and mlb_mapping_completion_id
+                and not mlb_identity_enabled
+            ):
+                identity_repository = PostgreSQLMLBIdentityRepository(connection)
+                identity_client = OfficialMLBStatsClient(raw_archive=archive)
+                mlb_mapping_completion = complete_mlb_team_mappings(
+                    identity_client,
+                    identity_repository,
+                    date_iso=mlb_mapping_completion_date,
+                    mapping_version=mlb_identity_version,
+                    now=cycle_now,
+                )
+            elif mlb_mapping_completion_id and mlb_identity_enabled:
+                mlb_mapping_completion["status"] = "BLOCKED_BOOTSTRAP_CONFLICT"
+
+            summary["mlb_mapping_completion_id"] = mlb_mapping_completion_id
+            summary["mlb_mapping_completion_armed"] = int(
+                bool(mlb_mapping_completion_id)
+            )
+            summary["mlb_mapping_completion_status"] = str(
+                mlb_mapping_completion["status"]
+            )
+            summary["mlb_mapping_completion_schedule_calls"] = int(
+                mlb_mapping_completion["schedule_calls"]
+            )
+            summary["mlb_mapping_completion_fixtures_seen"] = int(
+                mlb_mapping_completion["fixtures_seen"]
+            )
+            summary["mlb_mapping_completion_candidate_fixtures"] = int(
+                mlb_mapping_completion["candidate_fixtures"]
+            )
+            summary["mlb_mapping_completion_team_mappings_inserted"] = int(
+                mlb_mapping_completion["team_mappings_inserted"]
+            )
+            summary["mlb_mapping_completion_team_mappings_total"] = int(
+                mlb_mapping_completion["team_mappings_total"]
+            )
+            summary["mlb_mapping_completion_mapping_failures"] = int(
+                mlb_mapping_completion["mapping_failures"]
+            )
+            summary["mlb_mapping_completion_ready_for_enrichment"] = int(
+                mlb_mapping_completion["ready_for_enrichment"]
+            )
 
             summary["mlb_identity_enabled"] = int(mlb_identity_enabled)
             summary["mlb_identity_status"] = str(mlb_identity["status"])
