@@ -661,9 +661,7 @@ class PostgreSQLEvidenceRepository:
             "latest_standings_observed_at": _iso_or_none(latest_standings),
             "team_statistics_snapshots": int(team_statistics_count),
             "distinct_team_statistics_teams": int(team_statistics_teams),
-            "latest_team_statistics_observed_at": _iso_or_none(
-                latest_team_statistics
-            ),
+            "latest_team_statistics_observed_at": _iso_or_none(latest_team_statistics),
             "reference_catalog_snapshots": int(catalog_count),
             "latest_catalog_observed_at": _iso_or_none(latest_catalog),
             "game_history_snapshots": int(game_history_count),
