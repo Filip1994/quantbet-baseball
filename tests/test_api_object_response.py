@@ -58,5 +58,5 @@ def test_team_statistics_supports_verified_object_response(
 
     assert response["team"]["id"] == 22
     assert client.request_count == 1
-    assert receipt.source if hasattr(receipt, "source") else receipt.ref
+    assert receipt.ref.startswith("file://")
     assert len(receipt.checksum) == 64
