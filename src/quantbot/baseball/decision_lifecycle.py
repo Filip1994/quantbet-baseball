@@ -636,9 +636,7 @@ class RegisteredPick:
         if self.market_family != "moneyline":
             raise EvidenceError("registered pick market must be moneyline")
         if not is_playable_bookmaker(self.bookmaker):
-            raise EvidenceError(
-                "registered pick bookmaker must be Bet365 or 1xBet"
-            )
+            raise EvidenceError("registered pick bookmaker must be Bet365 or 1xBet")
         if self.selection not in {"home", "away"}:
             raise EvidenceError("registered pick selection is unsupported")
         if self.state != "REGISTERED":
