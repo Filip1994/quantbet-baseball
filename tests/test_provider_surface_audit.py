@@ -1,9 +1,8 @@
 from pathlib import Path
-from types import SimpleNamespace
-
 import pytest
 
 from quantbot.baseball import provider_surface_audit, worker
+from quantbot.baseball.config import BaseballSettings
 from quantbot.baseball.api import BaseballAPIError
 from quantbot.baseball.raw_archive import ArchiveReceipt
 
@@ -96,10 +95,16 @@ def test_provider_surface_audit_is_bounded_and_recovers_contract(
     monkeypatch.setattr(
         provider_surface_audit.BaseballSettings,
         "from_env",
-        lambda _root: SimpleNamespace(
-            raw_archive_dir=Path("."),
+        lambda _root: BaseballSettings(
+            api_key="test",
+            api_base_url="https://example.invalid",
             api_request_budget=7500,
             api_max_attempts=3,
+            api_retry_base_seconds=0.0,
+            cache_dir=Path(".cache"),
+            raw_archive_dir=Path("."),
+            timezone_name="UTC",
+            paper_mode=True,
         ),
     )
     monkeypatch.setattr(
