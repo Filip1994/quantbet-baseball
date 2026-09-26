@@ -81,7 +81,7 @@ def run_raw_provider_inventory(
 
     archive = archive_from_env(root / "data/baseball/raw", require_remote=True)
     if not isinstance(archive, S3RawPayloadArchive):
-        raise RuntimeError("Remote S3 archive is required for raw provider inventory")
+        raise TypeError("Remote S3 archive is required for raw provider inventory")
 
     prefix = f"api-sports-baseball/{day}/"
     listed = archive.client.list_objects_v2(
