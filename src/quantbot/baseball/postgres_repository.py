@@ -10,6 +10,7 @@ from typing import Any, Protocol, Self
 from .evidence import OddsObservation, PickEvent, canonical_json
 from .evidence_repository import RepositoryStats
 from .fixture_evidence import FixtureObservation, canonical_fixture_json
+from .odds_poll_evidence import OddsPollAttempt, canonical_odds_poll_attempt_json
 from .runtime_evidence import CollectionCycle, canonical_collection_cycle_json
 
 
@@ -129,6 +130,7 @@ class PostgreSQLEvidenceRepository:
     ) -> bool:
         identity_columns = {
             "odds_observations": "observation_id",
+            "odds_poll_attempts": "poll_attempt_id",
             "pick_events": "pick_id",
             "fixture_observations": "fixture_observation_id",
             "collection_cycles": "cycle_id",
@@ -184,6 +186,47 @@ class PostgreSQLEvidenceRepository:
             "odds_observations",
             record.observation_id,
             self._observation_values(record),
+            columns,
+        )
+
+    @staticmethod
+    def _poll_attempt_values(record: OddsPollAttempt) -> tuple[Any, ...]:
+        return (
+            record.poll_attempt_id,
+            record.game_id,
+            record.provider,
+            record.provider_game_id,
+            record.attempted_at,
+            record.kickoff_at,
+            record.response_rows,
+            record.raw_market_rows,
+            record.canonical_rows,
+            record.source_payload_ref,
+            record.source_payload_checksum,
+            record.schema_version,
+            canonical_odds_poll_attempt_json(record),
+        )
+
+    def append_odds_poll_attempt(self, record: OddsPollAttempt) -> bool:
+        columns = (
+            "poll_attempt_id",
+            "game_id",
+            "provider",
+            "provider_game_id",
+            "attempted_at",
+            "kickoff_at",
+            "response_rows",
+            "raw_market_rows",
+            "canonical_rows",
+            "source_payload_ref",
+            "source_payload_checksum",
+            "schema_version",
+            "canonical_record",
+        )
+        return self._append(
+            "odds_poll_attempts",
+            record.poll_attempt_id,
+            self._poll_attempt_values(record),
             columns,
         )
 
@@ -475,6 +518,17 @@ class PostgreSQLEvidenceRepository:
             rows = cursor.fetchall()
         return tuple(PickEvent(**_canonical_object(row[0])) for row in rows)
 
+    def latest_odds_poll_times(self) -> dict[str, datetime]:
+        """Return the latest successful provider odds poll for every game."""
+
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT game_id, MAX(attempted_at) "
+                "FROM odds_poll_attempts GROUP BY game_id"
+            )
+            rows = cursor.fetchall()
+        return {str(game_id): attempted_at for game_id, attempted_at in rows}
+
     def latest_observation_times(self) -> dict[str, datetime]:
         """Return the latest captured pregame observation for every game."""
 
@@ -500,6 +554,12 @@ class PostgreSQLEvidenceRepository:
                 "FROM odds_observations"
             )
             odds_count, odds_games, bookmakers, latest_odds = cursor.fetchone()
+
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT game_id), MAX(attempted_at) "
+                "FROM odds_poll_attempts"
+            )
+            poll_count, polled_games, latest_poll = cursor.fetchone()
 
             cursor.execute("SELECT COUNT(*) FROM pick_events")
             pick_count = cursor.fetchone()[0]
@@ -547,6 +607,9 @@ class PostgreSQLEvidenceRepository:
             "odds_observations": int(odds_count),
             "distinct_quote_games": int(odds_games),
             "bookmakers": int(bookmakers),
+            "odds_poll_attempts": int(poll_count),
+            "distinct_polled_games": int(polled_games),
+            "latest_odds_poll_attempt_at": _iso_or_none(latest_poll),
             "pick_events": int(pick_count),
             "model_predictions": int(prediction_count),
             "value_evaluations": int(evaluation_count),
