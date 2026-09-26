@@ -33,6 +33,9 @@ from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
+from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
+from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
+from .official_mlb import OfficialMLBStatsClient
 from .odds_poll_evidence import OddsPollAttempt, build_odds_poll_attempt
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .provider_data_repository import PostgreSQLProviderDataRepository
@@ -549,6 +552,75 @@ def collect_durable_once(
             summary["game_history_calls"] = int(game_history["calls"])
             summary["game_history_rows"] = int(game_history["rows"])
             summary["game_history_inserted"] = int(game_history["inserted"])
+
+            mlb_identity_enabled = os.getenv(
+                "BASEBALL_ENABLE_MLB_IDENTITY_BOOTSTRAP", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            mlb_identity_date = os.getenv(
+                "BASEBALL_MLB_IDENTITY_DATE",
+                cycle_now.date().isoformat(),
+            ).strip()
+            mlb_identity_version = os.getenv(
+                "BASEBALL_MLB_IDENTITY_MAPPING_VERSION",
+                f"mlb-{cycle_now.year}-v1",
+            ).strip()
+            mlb_identity = {
+                "status": "DISABLED",
+                "schedule_calls": 0,
+                "fixtures_seen": 0,
+                "fixtures_already_linked": 0,
+                "team_mappings_before": 0,
+                "team_mappings_inserted": 0,
+                "team_mappings_total": 0,
+                "game_links_inserted": 0,
+                "game_links_total_for_target": 0,
+                "mapping_failures": 0,
+                "link_failures": 0,
+                "ready_for_enrichment": 0,
+            }
+            if execution_mode == "SCHEDULED" and mlb_identity_enabled:
+                identity_repository = PostgreSQLMLBIdentityRepository(connection)
+                identity_client = OfficialMLBStatsClient(raw_archive=archive)
+                mlb_identity = collect_mlb_identity_bootstrap(
+                    identity_client,
+                    identity_repository,
+                    date_iso=mlb_identity_date,
+                    mapping_version=mlb_identity_version,
+                    now=cycle_now,
+                )
+
+            summary["mlb_identity_enabled"] = int(mlb_identity_enabled)
+            summary["mlb_identity_status"] = str(mlb_identity["status"])
+            summary["mlb_identity_schedule_calls"] = int(
+                mlb_identity["schedule_calls"]
+            )
+            summary["mlb_identity_fixtures_seen"] = int(
+                mlb_identity["fixtures_seen"]
+            )
+            summary["mlb_identity_fixtures_already_linked"] = int(
+                mlb_identity["fixtures_already_linked"]
+            )
+            summary["mlb_identity_team_mappings_inserted"] = int(
+                mlb_identity["team_mappings_inserted"]
+            )
+            summary["mlb_identity_team_mappings_total"] = int(
+                mlb_identity["team_mappings_total"]
+            )
+            summary["mlb_identity_game_links_inserted"] = int(
+                mlb_identity["game_links_inserted"]
+            )
+            summary["mlb_identity_game_links_total_for_target"] = int(
+                mlb_identity["game_links_total_for_target"]
+            )
+            summary["mlb_identity_mapping_failures"] = int(
+                mlb_identity["mapping_failures"]
+            )
+            summary["mlb_identity_link_failures"] = int(
+                mlb_identity["link_failures"]
+            )
+            summary["mlb_identity_ready_for_enrichment"] = int(
+                mlb_identity["ready_for_enrichment"]
+            )
             summary["errors"] = (
                 int(summary["errors"])
                 + int(slow_provider["errors"])
