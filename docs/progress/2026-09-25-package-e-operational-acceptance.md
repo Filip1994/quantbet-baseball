@@ -1129,3 +1129,33 @@ Current implementation on the PR branch includes:
 - canonical `docs/DATA_SOURCE_ARCHITECTURE.md`.
 
 No player props, real-money path, MLB polling or bookmaker execution rules are changed by this Phase 1 work.
+
+
+## API-Sports Phase 1 catch-up and bounded slow-source acceptance — 2026-09-26
+
+The operational log was refreshed from live GitHub and Railway before any new provider action.
+
+Current main is `42a4ae569aeadc676114c6935b9c69722083cc4e` after PR #47. The relevant merged chain is:
+
+- PR #44 / migration 011: canonical API-Sports standings, team-statistics and reference-catalog evidence;
+- PR #45: nested standings-envelope parsing;
+- PR #46: stage/group/position-aware immutable standings identity;
+- PR #47 / migration 012: point-in-time API-Sports game-history evidence and local schedule/rest derivations.
+
+Live production before slow-source reactivation showed collection ON, canary OFF and slow-provider collection OFF. Natural cycle `99ba909b-f267-4c41-8917-9d03c745b7da` completed with 25 API requests, 23 due/selected odds games, 64 inserted odds observations and zero errors. Model/value/pick counts remain zero.
+
+The two accidentally-created temporary audit services are no longer present in Railway and no staged environment changes remain. Existing older helper services were left untouched pending dependency audit.
+
+For the post-fix acceptance, only the guarded Baseball worker was changed:
+
+```text
+BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION=true
+BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4
+PAPER_MODE=true
+```
+
+Railway variable deployment `55f45427-5c1e-4419-ae72-0ceade5025ac` reached SUCCESS with no pending migrations. No cron rewrite, helper service, Railway AI DB query, Football change, or extra API cap increase was used.
+
+Acceptance condition is unchanged: one natural cron must stay within four slow-source requests, persist standings/team-stat evidence, and report zero errors. Failure requires immediate slow-source shutdown and evidence inspection.
+
+Separate read-only observability work is in PR #48. It exposes durable count/freshness telemetry for the new provider tables through the existing repository health snapshot and dashboard; it introduces no provider request path or schema migration.
