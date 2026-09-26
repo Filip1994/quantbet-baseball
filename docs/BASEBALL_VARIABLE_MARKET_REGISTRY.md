@@ -98,8 +98,16 @@ Critical point-in-time rule: the requested `timecode` is **not** the authoritati
 - teams.away.id
 - teams.away.name
 - teams.away.logo
-- scores.home
-- scores.away
+- scores.home.hits
+- scores.home.errors
+- scores.home.innings.1..9
+- scores.home.innings.extra
+- scores.home.total
+- scores.away.hits
+- scores.away.errors
+- scores.away.innings.1..9
+- scores.away.innings.extra
+- scores.away.total
 
 The same top-level schema was observed for MLB, NPB and sampled non-MLB competitions.
 
@@ -115,18 +123,25 @@ The same top-level schema was observed for MLB, NPB and sampled non-MLB competit
 | season | league.season | ACTIVE | season identity |
 | home_team_id | teams.home.id | ACTIVE | team identity |
 | away_team_id | teams.away.id | ACTIVE | team identity |
-| home_score | scores.home | RESULT_ONLY | training/settlement only |
-| away_score | scores.away | RESULT_ONLY | training/settlement only |
+| home_score | scores.home.total | RESULT_ONLY | training/settlement only |
+| away_score | scores.away.total | RESULT_ONLY | training/settlement only |
+| home_hits | scores.home.hits | RESULT_ONLY | archived game-history/training evidence |
+| away_hits | scores.away.hits | RESULT_ONLY | archived game-history/training evidence |
+| home_errors | scores.home.errors | RESULT_ONLY | archived game-history/training evidence |
+| away_errors | scores.away.errors | RESULT_ONLY | archived game-history/training evidence |
+| inning scoring | scores.*.innings.1..9 | RESULT_ONLY | prior-game context/research only |
+| extra-inning scoring | scores.*.innings.extra | RESULT_ONLY | derive prior extra-inning workload for later games |
 
 ## 3.3 Derived schedule variables — zero extra provider requests
 
-From historical/current /games data:
+From archived historical/current /games data, using only game snapshots captured by the decision cutoff:
 
 - days rest;
-- hours since previous game;
-- back-to-back indicator;
-- previous extra-inning context when provider history proves it;
-- doubleheader indicator when fixture schedule proves it;
+- hours since previous scheduled first pitch;
+- recent game counts over rolling 72h/168h windows;
+- back-to-back schedule context;
+- previous extra-inning context from a completed prior game;
+- inferred doubleheader indicator when two same-team fixtures are scheduled on the same UTC date; this remains an inference until a stronger explicit provider field is verified;
 - home/away streak;
 - road-trip/homestand length after venue registry exists;
 - travel distance after venue registry exists;
