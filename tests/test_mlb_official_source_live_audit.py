@@ -105,7 +105,9 @@ def test_official_mlb_structured_source_audit() -> None:
     tx_summary = {
         "top_level_keys": sorted(transactions),
         "count": len(tx_rows),
-        "row_keys": sorted(tx_rows[0]) if tx_rows and isinstance(tx_rows[0], dict) else [],
+        "row_keys": sorted(tx_rows[0])
+        if tx_rows and isinstance(tx_rows[0], dict)
+        else [],
     }
 
     team_id = schedule_summary["teams"]["home"]["team_id"]
@@ -117,7 +119,9 @@ def test_official_mlb_structured_source_audit() -> None:
     roster_summary = {
         "top_level_keys": sorted(roster),
         "count": len(roster_rows),
-        "row_keys": sorted(roster_rows[0]) if roster_rows and isinstance(roster_rows[0], dict) else [],
+        "row_keys": sorted(roster_rows[0])
+        if roster_rows and isinstance(roster_rows[0], dict)
+        else [],
     }
 
     summary = {
