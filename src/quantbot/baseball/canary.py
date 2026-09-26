@@ -79,9 +79,11 @@ def run_canary_once(
                     "execution_mode": "CANARY",
                     "fixture_observations_inserted": 0,
                     "observations_inserted": 0,
+                    "playable_observations_inserted": 0,
                     "errors": 0,
                     "archive_verified": False,
                     "db_write_verified": False,
+                    "playable_bookmaker_verified": False,
                 }
                 status = "SKIPPED_LOCKED"
                 reasons = ("COLLECTOR_LOCKED",)
@@ -90,9 +92,11 @@ def run_canary_once(
                     "execution_mode": "UNKNOWN",
                     "fixture_observations_inserted": 0,
                     "observations_inserted": 0,
+                    "playable_observations_inserted": 0,
                     "errors": int(summary.get("errors", 0)),
                     "archive_verified": False,
                     "db_write_verified": False,
+                    "playable_bookmaker_verified": False,
                 }
                 status = "FAILED"
                 reasons = ("MISSING_COLLECTION_CYCLE_ID",)
@@ -109,6 +113,8 @@ def run_canary_once(
                     reasons_list.append("RAW_ARCHIVE_NOT_VERIFIED")
                 if not bool(evidence["db_write_verified"]):
                     reasons_list.append("POSTGRES_WRITES_NOT_VERIFIED")
+                if not bool(evidence["playable_bookmaker_verified"]):
+                    reasons_list.append("PLAYABLE_BOOKMAKER_NOT_VERIFIED")
                 reasons = tuple(sorted(set(reasons_list)))
                 status = "PASSED" if not reasons else "FAILED"
 
