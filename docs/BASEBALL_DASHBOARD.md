@@ -89,7 +89,7 @@ Reads existing database performance views:
 - average CLV;
 - model-version/bookmaker breakdown.
 
-The current 300 RSD figure is explicitly a paper-stake target. Until migration 008 becomes canonical production evidence, monetary dashboard P/L is a transparent derivation of `profit_per_unit × 300 RSD`, not a fabricated database column.
+Migration 008 makes the fixed 300 RSD paper stake canonical database evidence. The dashboard reads `settled_stake_minor` and `realized_profit_minor` from PostgreSQL instead of deriving monetary P/L in the frontend.
 
 ### History
 
