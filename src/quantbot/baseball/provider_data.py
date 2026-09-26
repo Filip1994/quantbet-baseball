@@ -426,6 +426,9 @@ def canonical_standings(
             "league_id": league_id,
             "season": season,
             "team_id": team_id,
+            "position": position,
+            "stage": stage,
+            "group_name": group_name,
             "observed_at": observed_at,
             "source_payload_checksum": receipt.checksum,
         }
