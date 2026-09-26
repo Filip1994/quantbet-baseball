@@ -1752,3 +1752,55 @@ Final production evidence:
 - Football repo remained read-only.
 
 The previous dashboard deployment failure under PR #31 is intentionally preserved as evidence: full-readiness prevented a false-green dashboard and forced the production SQL integration issue to be corrected before acceptance.
+
+
+## 81. Market acceptance canary PASSED — 2026-09-26
+
+Natural cron execution at 2026-09-26 06:31 UTC ran the armed bounded acceptance canary on the guarded Baseball production worker.
+
+Canary id: `5dbf934c-c5c6-565f-8425-f49b79964286`  
+Cycle id: `3b532cb1-70a0-4159-9839-fa2e8a4697c6`
+
+Acceptance evidence:
+
+- status: **PASSED**;
+- provider requests: **6 / 8**;
+- broad odds calls: **4**;
+- games seen: **65**;
+- pregame games: **41**;
+- games selected: **4**;
+- non-empty odds calls: **3**;
+- empty odds calls: **1**;
+- raw market rows observed: **522**;
+- canonical moneyline rows: **42**;
+- PostgreSQL odds observations inserted: **42**;
+- fixture observations inserted: **65**;
+- bookmaker records inspected by diagnostic probe: **21**;
+- collection errors: **0**;
+- raw archive verified: **true**;
+- PostgreSQL writes verified: **true**;
+- canary reason codes: **none**.
+
+Live schema evidence included exact `Home/Away` with Home/Away selections and also confirmed that `Match Winner` can contain Home/Draw/Away. The parser therefore correctly recognizes the two-way market while fail-closing the three-way semantic.
+
+Post-canary health:
+
+- bookmakers: **7**;
+- distinct quote games: **3**;
+- odds observations: **42**;
+- latest odds observed at: `2026-09-26T06:31:10.738698+00:00`.
+
+Scheduled-collection activation assessment immediately after the canary:
+
+- target: `SCHEDULED_COLLECTION`;
+- verdict: **READY**;
+- api key configured: true;
+- canary passed: true;
+- collection enabled: false;
+- migrations current: true;
+- paper mode: true;
+- raw archive configured: true;
+- runtime fresh: true;
+- reason codes: none.
+
+The next natural cron at 06:45 UTC returned `ALREADY_PASSED` for the same canary id and made no second canary ingestion run. Canary was then explicitly disarmed. Collection remains OFF and paper mode remains ON until the fixed 300 RSD stake migration and final downstream readiness checks are completed.
