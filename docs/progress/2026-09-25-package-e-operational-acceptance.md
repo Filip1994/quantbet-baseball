@@ -1168,3 +1168,10 @@ The first post-fix slow-source acceptance was intentionally stopped before a nat
 Production was returned to slow-provider OFF with the four-request cap and paper mode retained. No cap was increased and no manual provider call was used.
 
 PR #49 fixes only the request queue: all standings contexts remain canonical evidence, while team-statistics requests are stable-deduplicated by team ID. A regression test covers multi-group duplicate standings. Acceptance will resume after green CI and deployment.
+
+
+## Legacy helper-service read-only dependency audit — 2026-09-26
+
+Six older Railway helper services were inspected without executing them or querying PostgreSQL through them. Each is a Railway function-bun deployment with no returned public domain, volume, source-repository dependency, or repository-name reference. DB helpers carry only DB credentials/metadata; the API-Sports one-shot carries only provider credentials/metadata.
+
+No worker/dashboard dependency on those names was found. The services therefore appear operationally ad-hoc, but no deletion was performed. Primary-data health telemetry will replace the remaining need for helper-style inspection before any later cleanup.
