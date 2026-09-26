@@ -38,11 +38,13 @@ class FakeClient:
             raise BaseballAPIError("wrong parameter contract")
         if endpoint == "teams/statistics":
             return (
-                [{
-                    "team": {"id": params["team"]},
-                    "games": {"played": 100},
-                    "runs": {"for": 500, "against": 450},
-                }],
+                [
+                    {
+                        "team": {"id": params["team"]},
+                        "games": {"played": 100},
+                        "runs": {"for": 500, "against": 450},
+                    }
+                ],
                 ArchiveReceipt(
                     ref=f"s3://raw/team-{params['team']}.json",
                     checksum="b" * 64,
