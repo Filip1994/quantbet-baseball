@@ -2148,3 +2148,30 @@ Findings:
 - current worker/dashboard service configs do not depend on those service names.
 
 This is strong evidence that they are ad-hoc operational helpers rather than final architecture. They were deliberately **not deleted** in this audit. Durable health/dashboard telemetry is being added first so production observability no longer needs them, after which destructive cleanup can be handled as a separate bounded infrastructure change.
+
+
+## 2026-09-26 bounded slow-provider acceptance PASSED after unique-team fix
+
+PR #49 `Deduplicate slow team-statistics polling` merged as `c792e5cd4771d0d0a095e3c5d50ea8c38a39e02e` and deployed successfully before slow collection was re-enabled.
+
+The first natural post-fix production cycle was:
+
+- cycle: `184edb49-c692-4608-981a-098fbd245514`;
+- finished at approximately `2026-09-26T14:15:40Z`;
+- execution mode: `SCHEDULED`;
+- slow-provider enabled: `1`;
+- slow-provider requests: `4`;
+- standings calls: `1`;
+- standings inserted: `60`;
+- team-statistics calls: `3`;
+- team-statistics inserted: `3`;
+- team-statistics due but uncollected: `27`;
+- catalog calls: `0`;
+- game-history calls: `0`;
+- total cycle API requests: `26`;
+- API requests remaining in the cycle budget: `49`;
+- errors: `0`.
+
+This satisfies the bounded acceptance contract: the collector stayed within four slow requests, retained all 60 standings contexts, then used the remaining three requests for three unique team-stat snapshots without duplicate-team burn.
+
+Slow-provider collection remains enabled with `BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4` for controlled team-stat seeding. The cap was not increased. Standings are now on their daily cadence, so subsequent natural cycles should spend available slow budget on the remaining unique MLB teams until coverage approaches the actual team count. Game history remains correctly deferred until team-stat/catalog priority leaves request capacity.
