@@ -397,7 +397,7 @@ def derive_team_schedule_features(
     opponent = _opponent_id(target, team_id)
     assert opponent is not None
 
-    eligible: list[GameHistorySnapshot] = []
+    latest_by_game: dict[int, GameHistorySnapshot] = {}
     for game in history:
         if game.provider_game_id == target.provider_game_id:
             continue
@@ -405,9 +405,17 @@ def derive_team_schedule_features(
             continue
         if _team_site(game, team_id) is None:
             continue
-        if _timestamp(game.observed_at, "game.observed_at") > cutoff:
+        observed = _timestamp(game.observed_at, "game.observed_at")
+        if observed > cutoff:
             continue
-        eligible.append(game)
+        existing = latest_by_game.get(game.provider_game_id)
+        if existing is None or observed > _timestamp(
+            existing.observed_at,
+            "existing.observed_at",
+        ):
+            latest_by_game[game.provider_game_id] = game
+
+    eligible = list(latest_by_game.values())
 
     prior_played = [
         game
