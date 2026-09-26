@@ -91,10 +91,11 @@ class BaseballDashboardRepository:
 
     def snapshot(self) -> dict[str, Any]:
         now = datetime.now(UTC)
-        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
-            evidence = PostgreSQLEvidenceRepository(connection)
+        with psycopg.connect(self.database_url) as evidence_connection:
+            evidence = PostgreSQLEvidenceRepository(evidence_connection)
             health = evidence.health_snapshot()
 
+        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
             runtime = connection.execute(
                 """
                 SELECT run_id, started_at, finished_at, collection_enabled,
