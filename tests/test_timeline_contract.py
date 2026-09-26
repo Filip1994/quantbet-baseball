@@ -13,7 +13,7 @@ BASE = {
     "market_family": "moneyline",
     "line": None,
     "selection": "home",
-    "bookmaker": "book-a",
+    "bookmaker": "Bet365",
     "decimal_odds": 2.1,
     "raw_price": "+110",
     "retrieved_at": "2026-09-14T10:01:00+00:00",
