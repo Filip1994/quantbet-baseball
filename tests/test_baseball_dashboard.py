@@ -185,7 +185,10 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     assert "Primary evidence coverage" in research
     assert "Standings 30 teams" in research
     assert "team stats 18 teams" in research
-    assert "history 480 games (470 final-score, 468 inning-detail, 21 extra-inning)" in research
+    assert (
+        "history 480 games (470 final-score, 468 inning-detail, 21 extra-inning)"
+        in research
+    )
     assert "Paper P/L" in research
     assert "DB-backed" in research
     assert "No registered paper picks yet." in history
