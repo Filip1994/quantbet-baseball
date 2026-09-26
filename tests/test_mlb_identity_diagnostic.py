@@ -141,7 +141,9 @@ def test_registry_gap_diagnostic_finds_missing_teams_and_name_drift() -> None:
     assert result["registry_team_universe_total"] == 3
     assert result["missing_registry_mappings_count"] == 1
     assert result["missing_registry_mappings"][0]["api_sports_team_id"] == 3
-    assert result["missing_registry_mappings"][0]["api_sports_team_name"] == "Missing Club"
+    assert (
+        result["missing_registry_mappings"][0]["api_sports_team_name"] == "Missing Club"
+    )
     assert result["current_api_name_drifts_count"] == 1
     assert result["current_api_name_drifts"][0]["api_sports_team_id"] == 1
     assert (
