@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -6,8 +7,9 @@ import psycopg
 import pytest
 
 from quantbot.baseball.db import apply_migrations
-from quantbot.baseball.game_history import canonical_game_history
+from quantbot.baseball.game_history import GameHistorySnapshot, canonical_game_history
 from quantbot.baseball.game_history_repository import PostgreSQLGameHistoryRepository
+from quantbot.baseball.postgres_repository import PostgreSQLEvidenceRepository
 from quantbot.baseball.raw_archive import ArchiveReceipt
 
 
@@ -78,3 +80,61 @@ def test_game_history_repository_is_idempotent_and_point_in_time_queryable() -> 
     assert records[0].went_extra_innings is True
     assert counts["snapshots"] >= 1
     assert counts["distinct_games"] >= 1
+
+
+def _health_test_snapshot(*, provider_game_id: int, extra: int | None) -> GameHistorySnapshot:
+    return GameHistorySnapshot(
+        snapshot_id=str(uuid.uuid4()),
+        provider="api-sports-baseball",
+        provider_game_id=provider_game_id,
+        observed_at="2026-09-26T18:00:00+00:00",
+        scheduled_first_pitch="2026-09-25T23:00:00+00:00",
+        provider_timezone="UTC",
+        status_long="Finished",
+        status_short="FT",
+        league_id=1,
+        season=2026,
+        home_team_id=901,
+        home_team_name="Health Test Home",
+        away_team_id=902,
+        away_team_name="Health Test Away",
+        home_score=4,
+        away_score=3,
+        home_hits=8,
+        away_hits=7,
+        home_errors=0,
+        away_errors=0,
+        home_innings={"1": 1, "9": 0, "extra": extra},
+        away_innings={"1": 0, "9": 0, "extra": extra},
+        source_payload_ref=f"s3://raw/health-test-{provider_game_id}.json",
+        source_payload_checksum="b" * 64,
+    )
+
+
+def test_health_counts_only_non_null_extra_inning_values() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+
+    apply_migrations(Path("."), database_url)
+    regular = _health_test_snapshot(provider_game_id=990000001, extra=None)
+    extra = _health_test_snapshot(provider_game_id=990000002, extra=0)
+
+    with psycopg.connect(database_url) as connection:
+        history = PostgreSQLGameHistoryRepository(connection)
+        evidence = PostgreSQLEvidenceRepository(connection)
+        before = evidence.health_snapshot()["game_history_extra_inning_games"]
+
+        try:
+            assert history.append_snapshot(regular) is True
+            assert history.append_snapshot(extra) is True
+            after = evidence.health_snapshot()["game_history_extra_inning_games"]
+            assert after == before + 1
+        finally:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM api_sports_game_history_snapshots "
+                    "WHERE snapshot_id IN (%s, %s)",
+                    (regular.snapshot_id, extra.snapshot_id),
+                )
+            connection.commit()
