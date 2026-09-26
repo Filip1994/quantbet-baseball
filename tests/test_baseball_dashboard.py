@@ -95,6 +95,10 @@ class FakeRepository:
                 "brier_score": None,
                 "log_loss": None,
             },
+            "money": {
+                "settled_stake_minor": 0,
+                "realized_profit_minor": 0,
+            },
             "breakdown": [],
             "picks": [],
         }
@@ -140,5 +144,6 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
 
     assert "No settled research picks yet." in research
     assert "Paper P/L" in research
+    assert "DB-backed" in research
     assert "No registered paper picks yet." in history
     assert "300 RSD" in history or "300 RSD" in research
