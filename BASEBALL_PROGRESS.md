@@ -1677,3 +1677,30 @@ User execution policy is now explicit: **only Bet365 and 1xBet are playable**. O
 API-burn decision: do not re-fetch the already archived `teams/statistics`, `odds/bets` or `odds/bookmakers` payloads merely to inspect their schema. PR #25 introduced a zero-provider-request S3 archive inventory for that purpose and merged as `a74bca8687c6c3346a7872be0c60f9e4b811fb00`.
 
 At the first natural cron after that deployment, the worker exited before inventory execution because cleanup had set `BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON` to an empty string and the worker parsed it with `int("")`. No provider request was made by that failed runtime. Production variables were immediately restored to a safe state with the provider-surface audit ID empty, season `2026`, collection false, canary false and paper mode true. A code hardening patch is being carried in the provider-variable-policy branch so empty optional audit variables cannot crash the worker again.
+
+
+## 79. Zero-request provider inventory and playable-book policy merged — 2026-09-26
+
+The archive-only provider inventory completed from the existing S3 raw payloads with **provider_requests=0**. It recovered the exact object-shaped `teams/statistics` schemas already paid for during the prior bounded live audit and re-used the archived odds market/bookmaker catalogs instead of re-fetching them.
+
+Verified `teams/statistics` structure for both tested MLB and NPB teams includes home/away/all games played, wins, losses (provider spelling `loses`), win/loss percentages, runs scored totals/averages and runs allowed totals/averages. No additional provider calls were required.
+
+The archived bookmaker catalog confirmed canonical provider ids:
+
+- `1 = 1xbet`;
+- `2 = Bet365`.
+
+The archived bet catalog contains 83 definitions. Product scope remains full-game `Home/Away` moneyline first and full-game `Over/Under` next. Player props and inning-specific markets are retained only in immutable raw evidence and excluded from the compact game-level market path.
+
+PR #28 passed the full Baseball test suite and Railway runtime smoke, then squash-merged to main as `7669e99d6ce6f5e815c604b22c9bcf91f84e0738`.
+
+PR #28 enforcement:
+
+- Bet365 and 1xBet are the only playable bookmakers;
+- non-playable bookmakers may remain market-intelligence evidence but cannot be selected as a candidate/paper pick;
+- `RegisteredPick` fails closed for any bookmaker other than Bet365/1xBet;
+- compact odds processing retains approved game-level markets only and excludes player props / inning variants;
+- `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md` is now the canonical variable/market/source/API-refresh registry;
+- `docs/BASEBALL_RESEARCH_FEATURE_REGISTRY.md` now points to the canonical live registry and no longer treats player endpoints as verified.
+
+Railway worker deployment for this merge: `cef7b611-0c6f-4c7c-8702-26dbf06d61d1`; at the time of this log it had entered the deployment queue. Safety state remains collection OFF, canary OFF, paper mode ON.
