@@ -862,3 +862,14 @@ This canary therefore failed with `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIV
 ## Live one-request /games schema audit completed — 2026-09-26
 
 The guarded Baseball service completed audit `games-schema-live-20260926-1` using exactly one provider request to `/games?date=2026-09-26`. It returned 35 games: MLB 16, NPB 5, Asian Games 4, CPBL 3, KBO 3, Elitserien 2, Bundesliga 1, Division 1 1. MLB and sampled non-MLB rows exposed the same schedule/status schema and no injuries, pitchers, lineups, players, venue/stadium, roof, umpire, or weather fields. Raw payload archival succeeded. A later cron returned `ALREADY_DONE` with zero requests, proving one-shot idempotence. Audit flags were cleared; collection and canary remain off; paper mode remains on.
+
+
+## Live provider surface audit and zero-request archive follow-up — 2026-09-26
+
+Audit `provider-surface-live-20260926-1` consumed 9/12 bounded API requests and verified MLB/NPB standings, 83 provider bet definitions, 30 bookmaker definitions, the absence of the attempted `/players` search endpoint, and the object-response behavior of `teams/statistics` using `team+league+season`. Raw successful responses were durably archived.
+
+The follow-up policy is to inspect already archived `teams/statistics`, bet-catalog and bookmaker-catalog payloads through S3 with zero additional provider requests. PR #25 merged this archive-only inventory path as `a74bca8687c6c3346a7872be0c60f9e4b811fb00`.
+
+The first post-deploy cron did not reach the inventory because an empty optional `BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON` variable caused `int("")` to fail during worker startup. This failure made zero provider requests. The variable was restored to `2026` while keeping the corresponding audit ID empty, collection/canary disabled and paper mode true. A parser hardening fix is in progress.
+
+Execution boundary: Bet365 and 1xBet only. All other books are intelligence-only; player props remain outside product scope.
