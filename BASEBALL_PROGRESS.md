@@ -2175,3 +2175,48 @@ The first natural post-fix production cycle was:
 This satisfies the bounded acceptance contract: the collector stayed within four slow requests, retained all 60 standings contexts, then used the remaining three requests for three unique team-stat snapshots without duplicate-team burn.
 
 Slow-provider collection remains enabled with `BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4` for controlled team-stat seeding. The cap was not increased. Standings are now on their daily cadence, so subsequent natural cycles should spend available slow budget on the remaining unique MLB teams until coverage approaches the actual team count. Game history remains correctly deferred until team-stat/catalog priority leaves request capacity.
+
+
+## 2026-09-26 unique-team rollout complete; game-history seeded; MLB identity boundary merged
+
+Post-acceptance natural cycles confirmed the intended bounded rollout under `BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4`:
+
+- 14:30 UTC: distinct team-stat teams = 7;
+- 14:45 UTC: 11;
+- 15:01 UTC: 15;
+- 15:15 UTC: 19;
+- 15:30 UTC: 23;
+- 15:45 UTC: 27;
+- 16:01 UTC: **30 / 30 unique MLB teams**.
+
+At 16:01 UTC, cycle `72ee8695-407c-41d9-befb-7b8028b77532` used only three team-stat calls because three teams remained due, then spent the single remaining slow-source request on API-Sports season game history:
+
+- `game_history_calls=1`;
+- `game_history_requests=1`;
+- `game_history_rows=2433`;
+- `game_history_inserted=2433`;
+- `errors=0`;
+- durable health: `distinct_game_history_games=2433`.
+
+The next natural cycle `d75b4e17-4b38-49aa-86e4-2ff2d03b4b3d` at ~16:15 UTC showed:
+
+- team-stat due = 0;
+- slow-provider requests = 0;
+- game-history calls = 0;
+- game-history snapshots remain 2433;
+- errors = 0.
+
+This confirms both unique-team completion and game-history daily cadence without immediate re-poll burn.
+
+PR #48 `Expose primary provider evidence in production health` merged as `4f6f8b63cc1e7ce10a2241ed369012c6dd1c9757`. Production health now exposes durable counts/freshness for standings, team statistics, catalogs, game history and official MLB pregame evidence.
+
+PR #50 `Add fail-close official MLB game identity bridge` merged as `843703c799afc05ee3dcccc68c081800bf4fca91`. It adds migration 013, versioned API-Sports -> official MLB team mappings, fail-close API-Sports fixture -> MLB `gamePk` linking, and immutable provenance. It does **not** enable official MLB production polling. API-Sports remains canonical game identity; official MLB schedule remains identity-bridge only.
+
+PR #51 `Expose game-history evidence integrity health` is open while CI validates durable counts for final scores, hits, errors, inning detail, explicit `innings.extra`, and raw archive/checksum coverage. An initial PostgreSQL 18 smoke failure on `jsonb_object_length` was corrected to portable JSONB empty-object comparison; no schema/provider behavior changed.
+
+Unexpected Railway drift was also observed around 14:41 UTC:
+
+- new ad-hoc service `inspect-accepted-picks-v2` (`9316fd76-b624-4212-b237-bff9a67c0230`);
+- `query-production-db` was redeployed.
+
+Read-only audit shows these are Railway function-bun DB query helpers with no cron/domain/volume dependency. Their output confirmed accepted picks = 0. They are not used by the desired architecture and will not be used for further DB inspection. No blind deletion was performed.
