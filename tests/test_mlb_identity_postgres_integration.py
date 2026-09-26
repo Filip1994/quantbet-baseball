@@ -53,9 +53,7 @@ def _schedule():
                         "gamePk": 823570,
                         "gameDate": "2026-09-20T17:12:00Z",
                         "teams": {
-                            "home": {
-                                "team": {"id": 121, "name": "New York Mets"}
-                            },
+                            "home": {"team": {"id": 121, "name": "New York Mets"}},
                             "away": {
                                 "team": {
                                     "id": 143,
