@@ -2101,3 +2101,23 @@ Acceptance remains evidence-driven: the first natural cron must show standings/t
 Operational observability follow-up is isolated in PR #48, `Expose primary provider evidence in production health`. It adds PostgreSQL/dashboard counts and freshness for standings, team statistics, reference catalogs, game history, and official MLB enrichment without adding provider calls or migrations. PR #48 is not merged until CI passes.
 
 PR #13 remains open and intentionally unmerged.
+
+
+## 2026-09-26 slow-provider acceptance paused before API spend: duplicate team-stat polling defect
+
+Before the first natural cron on the newly enabled slow-provider deployment, code review found a concrete API-efficiency defect in `slow_provider_collection.py`.
+
+When fresh standings are fetched, all canonical standings rows are correctly retained. However, the next team-statistics queue was built directly from every standing record. MLB live standings can contain the same team in multiple stage/group contexts, so the fresh-standings path could schedule the same team-statistics endpoint more than once in the same bounded cycle.
+
+Safety action taken before accepting that behavior:
+
+- `BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION=false`;
+- `BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4` preserved;
+- `PAPER_MODE=true` reasserted;
+- no cap increase;
+- no helper service or forced cron;
+- the slow-enabled deployment produced no natural collection log before shutdown was initiated.
+
+PR #49 `Deduplicate slow team-statistics polling` now preserves every standings snapshot but derives the team-stat request queue from stable first-seen unique team IDs. A regression test models duplicate stage/group standing rows and proves a four-request cycle performs one standings request plus three different team-statistics requests.
+
+The bounded production acceptance will be re-run only after PR #49 passes both CI workflows and is deployed.
