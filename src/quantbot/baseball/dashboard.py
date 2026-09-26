@@ -436,7 +436,7 @@ class BaseballDashboard:
             ("Obs / request", efficiency_text),
         ]
         cycle_html = "".join(
-            f'<div><small>{escape(str(label))}</small><b>{escape(str(value))}</b></div>'
+            f"<div><small>{escape(str(label))}</small><b>{escape(str(value))}</b></div>"
             for label, value in cycle_items
         )
         return f"""
