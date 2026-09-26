@@ -33,6 +33,10 @@ The current repository still contains a legacy `players/statistics` client metho
 
 The exact observed field trees, market classifications, bookmaker policy and API-refresh policy live in `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`.
 
+Official MLB Stats API source contracts are also now live-verified for probable starters, active roster, transactions, venue metadata and lineup-capable game-feed state. Historical `timecode` replay returned a genuine pregame snapshot with both probable starters and populated 9-player batting orders. These remain ingestion-pending until raw archival and canonical point-in-time storage are implemented.
+
+Historical replay safety rule: persist and enforce the response `metaData.timeStamp`. A requested historical timecode can resolve to a slightly later provider snapshot, so requested time alone is not sufficient to prove absence of look-ahead leakage.
+
 ## 3. Feature families
 
 ### 3.1 Fixture and schedule context
@@ -225,16 +229,27 @@ No model may consume a source captured after `source_data_cutoff_at`.
 
 ## 6. Activation sequence
 
-1. repair live full-game moneyline canonicalization using exact canary schema evidence;
-2. pass bounded canary;
-3. enable scheduled raw/canonical collection in `PAPER_MODE=true`;
-4. inventory live provider schemas for standings/team/game context and keep unverified player endpoints disabled;
-5. add canonical venue registry and roof state;
-6. integrate weather snapshots;
-7. build immutable feature snapshots;
-8. train/evaluate simple game-level models;
-9. register only paper moneyline singles;
-10. expose 300 RSD paper stake/P&L in Research History.
+Completed production gates:
+
+1. full-game moneyline canonicalization validated against live provider schema;
+2. bounded market-acceptance canary passed;
+3. scheduled raw/canonical collection enabled with `PAPER_MODE=true`;
+4. standings/team/game provider schemas inventoried;
+5. Bet365/1xBet executable-book enforcement deployed;
+6. fixed 300 RSD paper stake persisted;
+7. adaptive odds polling hardened so only due games are selected and successful empty polls are durable evidence.
+
+Current build sequence:
+
+1. ingest verified official MLB probable-starter / roster / transaction evidence point-in-time;
+2. create canonical venue/roof registry;
+3. ingest expected/confirmed lineup states without conflation;
+4. integrate weather snapshots;
+5. assemble immutable feature snapshots using actual source timestamps;
+6. train/evaluate chronological Moneyline V1;
+7. produce genuine PICK/PASS decisions only after calibration acceptance;
+8. close the first real 300 RSD paper lifecycle through settlement and CLV;
+9. activate full-game totals only after Moneyline closes end to end.
 
 ## 7. Explicit non-goals
 
