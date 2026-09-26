@@ -138,6 +138,10 @@ class BaseballDashboardRepository:
             performance = connection.execute(
                 "SELECT * FROM baseball_moneyline_performance"
             ).fetchone()
+            money = connection.execute(
+                "SELECT settled_stake_minor, realized_profit_minor "
+                "FROM baseball_moneyline_dashboard"
+            ).fetchone()
             breakdown = connection.execute(
                 """
                 SELECT dimension, dimension_value, settled_picks,
@@ -170,7 +174,12 @@ class BaseballDashboardRepository:
                        s.outcome AS settlement_outcome,
                        s.profit_per_unit, s.closing_odds,
                        s.clv_status, s.clv_probability_delta,
-                       s.clv_price_ratio, s.settled_at
+                       s.clv_price_ratio, s.settled_at,
+                       r.paper_stake_minor, r.currency,
+                       CASE
+                           WHEN s.settlement_id IS NULL THEN NULL
+                           ELSE ROUND(s.profit_per_unit * r.paper_stake_minor)::BIGINT
+                       END AS paper_profit_minor
                 FROM registered_picks r
                 LEFT JOIN latest_fixture f ON f.game_id = r.game_id
                 LEFT JOIN pick_monitoring_states m ON m.pick_id = r.pick_id
@@ -189,6 +198,10 @@ class BaseballDashboardRepository:
             "gates": gate_map,
             "canary": dict(canary) if canary else None,
             "performance": dict(performance) if performance else {},
+            "money": dict(money) if money else {
+                "settled_stake_minor": 0,
+                "realized_profit_minor": 0,
+            },
             "breakdown": [dict(row) for row in breakdown],
             "picks": [dict(row) for row in picks],
         }
@@ -434,8 +447,11 @@ class BaseballDashboard:
     def _research_html(self, data: dict[str, Any]) -> str:
         p = data.get("performance") or {}
         settled = int(p.get("settled_picks") or 0)
-        profit_units = _number(p.get("realized_profit_per_unit")) or 0.0
-        paper_profit = profit_units * PAPER_STAKE_RSD
+        money = data.get("money") or {}
+        realized_minor = int(money.get("realized_profit_minor") or 0)
+        settled_stake_minor = int(money.get("settled_stake_minor") or 0)
+        paper_profit = realized_minor / 100
+        settled_stake = settled_stake_minor / 100
         cards = [
             ("Settled", settled, ""),
             (
@@ -444,11 +460,11 @@ class BaseballDashboard:
                 "",
             ),
             ("ROI", self._pct(p.get("roi_per_unit_staked")), ""),
-            ("Paper P/L", f"{paper_profit:+.0f} RSD", "derived @ 300 RSD target"),
+            ("Paper P/L", f"{paper_profit:+.0f} RSD", "DB-backed"),
             ("CLV coverage", self._pct(p.get("clv_coverage")), ""),
             ("Positive CLV", self._pct(p.get("positive_clv_rate")), ""),
             ("Brier", self._dec(p.get("brier_score")), ""),
-            ("Log loss", self._dec(p.get("log_loss")), ""),
+            ("Log loss", self._dec(p.get("log_loss")), f"settled stake {settled_stake:.0f} RSD"),
         ]
         cards_html = "".join(
             f'<article class="kpi"><small>{escape(str(label))}</small><b>{escape(str(value))}</b><span>{escape(note)}</span></article>'
@@ -500,8 +516,12 @@ class BaseballDashboard:
         home = row.get("home_team_name") or "Home"
         away = row.get("away_team_name") or "Away"
         result = row.get("settlement_outcome") or "PENDING"
-        profit = _number(row.get("profit_per_unit"))
-        pnl = "—" if profit is None else f"{profit * PAPER_STAKE_RSD:+.0f} RSD"
+        paper_profit_minor = row.get("paper_profit_minor")
+        pnl = (
+            "—"
+            if paper_profit_minor is None
+            else f"{int(paper_profit_minor) / 100:+.0f} RSD"
+        )
         clv = self._pct(row.get("clv_probability_delta"))
         bookmaker = str(row.get("bookmaker") or "—")
         book_class = "bet365" if "365" in bookmaker.casefold() else "one-x"
