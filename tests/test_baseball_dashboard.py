@@ -35,6 +35,27 @@ class FakeRepository:
                 "clv_available": 0,
                 "collection_cycles": 4,
                 "runtime_cycles": 72,
+                "standing_snapshots": 60,
+                "distinct_standing_teams": 30,
+                "latest_standings_observed_at": (
+                    now - timedelta(hours=2)
+                ).isoformat(),
+                "team_statistics_snapshots": 18,
+                "distinct_team_statistics_teams": 18,
+                "latest_team_statistics_observed_at": (
+                    now - timedelta(hours=2)
+                ).isoformat(),
+                "reference_catalog_snapshots": 2,
+                "latest_catalog_observed_at": (
+                    now - timedelta(days=1)
+                ).isoformat(),
+                "game_history_snapshots": 480,
+                "distinct_game_history_games": 480,
+                "latest_game_history_observed_at": (
+                    now - timedelta(hours=3)
+                ).isoformat(),
+                "official_mlb_pregame_snapshots": 0,
+                "latest_official_mlb_observed_at": None,
                 "latest_fixture_observed_at": (now - timedelta(hours=1)).isoformat(),
                 "latest_odds_observed_at": None,
                 "latest_collection_finished_at": None,
@@ -146,6 +167,10 @@ def test_system_page_renders_operational_evidence() -> None:
     assert "12 / 75" in html
     assert "Obs / request" in html
     assert "2.00" in html
+    assert "Primary provider evidence" in html
+    assert "Standings" in html
+    assert "Team stats" in html
+    assert "Game history" in html
 
 
 def test_research_and_history_render_empty_states_without_fabrication() -> None:
@@ -155,6 +180,9 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     history = dashboard.render("tab=history")
 
     assert "No settled research picks yet." in research
+    assert "Primary evidence coverage" in research
+    assert "Standings 30 teams" in research
+    assert "team stats 18 teams" in research
     assert "Paper P/L" in research
     assert "DB-backed" in research
     assert "No registered paper picks yet." in history
