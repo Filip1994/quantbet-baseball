@@ -448,7 +448,6 @@ def link_fixture_to_mlb_game(
     )
 
 
-
 def diagnose_fixture_schedule_match(
     fixture: FixtureObservation,
     schedule_payload: dict[str, Any],
