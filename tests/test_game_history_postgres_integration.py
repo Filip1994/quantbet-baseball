@@ -82,7 +82,9 @@ def test_game_history_repository_is_idempotent_and_point_in_time_queryable() -> 
     assert counts["distinct_games"] >= 1
 
 
-def _health_test_snapshot(*, provider_game_id: int, extra: int | None) -> GameHistorySnapshot:
+def _health_test_snapshot(
+    *, provider_game_id: int, extra: int | None
+) -> GameHistorySnapshot:
     return GameHistorySnapshot(
         snapshot_id=str(uuid.uuid4()),
         provider="api-sports-baseball",
