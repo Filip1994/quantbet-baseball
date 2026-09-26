@@ -13,6 +13,35 @@ class FakeClient:
         self.raw_archive = raw_archive
         self.request_count = 0
 
+    def get_object_with_receipt(
+        self,
+        endpoint,
+        params,
+        *,
+        ttl_seconds=0,
+        use_cache=True,
+    ):
+        del ttl_seconds, use_cache
+        self.request_count += 1
+        if endpoint != "teams/statistics":
+            raise AssertionError(endpoint)
+        return (
+            {
+                "team": {"id": params["team"]},
+                "league": {"id": params["league"], "season": params["season"]},
+                "games": {"played": {"all": 100, "home": 50, "away": 50}},
+                "points": {
+                    "for": {"total": {"all": 500}},
+                    "against": {"total": {"all": 450}},
+                },
+            },
+            ArchiveReceipt(
+                ref=f"s3://raw/team-{params['team']}.json",
+                checksum="b" * 64,
+                captured_at="2026-09-26T01:00:00+00:00",
+            ),
+        )
+
     def get_with_receipt(
         self,
         endpoint,
