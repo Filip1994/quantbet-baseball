@@ -1488,3 +1488,43 @@ Fix semantics:
 - innings variants remain excluded by exact market-name matching.
 
 Scheduled collection remains disabled and paper mode remains mandatory. The next acceptance action is a third bounded live canary after this commit is successfully deployed, with at most 4 broad odds calls under the unchanged 8-request total canary cap.
+
+
+## 74. Third bounded canary: parser fix deployed, but selected odds responses were empty — 2026-09-26
+
+Main commit `a4d20a9d624342a286603fe46bd2a4cf3dff3640` was deployed successfully in Railway as deployment `b57c3196-98f1-48ef-9c63-65666ed9c264`.
+
+The first natural cron after that successful deploy executed another bounded canary at `2026-09-26T00:16:00.231890365Z`.
+
+Canary evidence:
+
+- canary id: `6f337f6f-d35a-595d-9874-f5d909a5dca0`;
+- cycle id: `88839d4c-7b40-4fe6-b3e4-c4d132339c19`;
+- API requests: 6 of max 8;
+- games seen: 64;
+- pregame games: 49;
+- games selected: 4;
+- odds calls: 4;
+- provider/API errors: 0;
+- fixture observations inserted: 64;
+- odds payload rows: 0;
+- empty odds calls: 4;
+- non-empty odds calls: 0;
+- bookmaker records: 0;
+- raw market rows: 0;
+- canonical rows: 0;
+- PostgreSQL odds observations inserted: 0;
+- canary status: `FAILED`;
+- reason codes: `POSTGRES_WRITES_NOT_VERIFIED`, `RAW_ARCHIVE_NOT_VERIFIED`.
+
+Interpretation:
+
+The Home/Away canonicalization fix is deployed, but this run did not exercise it because all four selected provider odds responses were empty. This means the current acceptance blocker is no longer a proven parser mismatch; it is now odds coverage/availability and/or event-selection timing for the sampled games.
+
+Immediate safety action:
+
+- `BASEBALL_ENABLE_CANARY=false`;
+- `BASEBALL_ENABLE_COLLECTION=false`;
+- `PAPER_MODE=true`.
+
+Do not widen the parser further based on this result. The next investigation should determine why four selected pregame games had empty odds responses, using historical live payloads and provider coverage evidence before spending additional API budget.
