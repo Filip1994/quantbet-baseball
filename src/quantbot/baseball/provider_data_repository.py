@@ -313,7 +313,9 @@ class PostgreSQLProviderDataRepository:
             standings = int(cursor.fetchone()[0])
             cursor.execute("SELECT COUNT(*) FROM api_sports_team_statistics_snapshots")
             team_stats = int(cursor.fetchone()[0])
-            cursor.execute("SELECT COUNT(*) FROM api_sports_reference_catalog_snapshots")
+            cursor.execute(
+                "SELECT COUNT(*) FROM api_sports_reference_catalog_snapshots"
+            )
             catalogs = int(cursor.fetchone()[0])
         return {
             "standing_snapshots": standings,
