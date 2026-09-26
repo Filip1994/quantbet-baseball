@@ -2051,3 +2051,53 @@ Current implementation on the PR branch includes:
 - canonical `docs/DATA_SOURCE_ARCHITECTURE.md`.
 
 No player props, real-money path, MLB polling or bookmaker execution rules are changed by this Phase 1 work.
+
+
+## 2026-09-26 API-Sports primary-data completion and slow-source acceptance handoff
+
+Fresh GitHub/Railway read-back supersedes the older disabled-collection state recorded earlier in this branch.
+
+Canonical mainline progression:
+
+- PR #44 `Canonicalize API-Sports primary team data` merged as `a13aa208473eb476811e4176c9653c841c7f0ebf`;
+- migration `011_api_sports_primary_data.sql` introduced immutable standings, team-statistics and reference-catalog snapshots;
+- first bounded slow-provider acceptance exposed the live nested MLB standings envelope;
+- PR #45 `Handle nested API-Sports standings response` merged as `69f5417a24622b908fd973e9581e03fef3d0f461`;
+- live standings evidence then exposed repeated team identities across stage/group/position contexts;
+- PR #46 `Harden API-Sports standings row identity` merged as `9665fbc8167ca1c58052c8104bc096cace36ab7a`;
+- PR #47 `Add API-Sports point-in-time game history` merged as current main `42a4ae569aeadc676114c6935b9c69722083cc4e`;
+- migration `012_api_sports_game_history.sql` is live and predeploy now reports no pending migrations.
+
+PR #47 adds archived league-season `/games` evidence with final scores, hits, errors, inning-by-inning scoring including `innings.extra`, point-in-time snapshot selection, and local schedule/rest derivations. Historical replay remains fail-closed: a payload retrieved now is not treated as though it existed before its real retrieval time.
+
+Production read-back before the new bounded acceptance:
+
+- worker deployment `7708bc7c-1eb2-4a95-a976-a1d5d70c9e16`: SUCCESS on `42a4ae...`;
+- dashboard deployment `eb9a423c-eff6-44ee-a3e0-66cbc3f19f61`: SUCCESS on the same commit;
+- collection enabled: true;
+- canary enabled: false;
+- slow provider enabled: false;
+- latest inspected natural cycle before activation: `99ba909b-f267-4c41-8917-9d03c745b7da` at ~13:46 UTC;
+- that cycle used 25/75 API requests, selected 23/23 due games, inserted 64 odds observations, and reported zero errors;
+- durable health then showed 96 distinct fixtures, 2,080 fixture observations, 1,264 odds observations, 271 successful odds-poll attempts, 15 distinct quote games, 7 bookmakers, and zero model predictions/value evaluations/registered picks/settled picks.
+
+Railway cleanup verification:
+
+- accidental services `75aa2d42-4ba0-4b0d-b5df-8b414f6a2ad8` and `4033089c-e820-4753-842a-d637c22dfdaf` are absent from the live service inventory;
+- Railway reports no staged/pending environment work for those removals;
+- legacy helper services still exist and must be audited before any deletion; no bulk deletion was performed.
+
+Bounded slow-provider acceptance was then armed exactly as designed:
+
+- `BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION=true`;
+- `BASEBALL_MAX_SLOW_PROVIDER_REQUESTS=4`;
+- `PAPER_MODE=true` explicitly reasserted;
+- variable deployment `55f45427-5c1e-4419-ae72-0ceade5025ac` reached SUCCESS on the unchanged main commit;
+- predeploy reported `migrations_applied: ()`;
+- no helper service, forced cron, or Football resource was used.
+
+Acceptance remains evidence-driven: the first natural cron must show standings/team-stat requests and zero errors within the four-request cap. If it fails, slow-provider collection must be switched off immediately rather than increasing the cap.
+
+Operational observability follow-up is isolated in PR #48, `Expose primary provider evidence in production health`. It adds PostgreSQL/dashboard counts and freshness for standings, team statistics, reference catalogs, game history, and official MLB enrichment without adding provider calls or migrations. PR #48 is not merged until CI passes.
+
+PR #13 remains open and intentionally unmerged.
