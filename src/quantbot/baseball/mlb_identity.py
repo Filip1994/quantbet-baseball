@@ -64,6 +64,19 @@ def _normalized_name(value: Any) -> str:
     return " ".join(str(value or "").split()).casefold()
 
 
+_PROVIDER_TEAM_NAME_ALIASES: dict[str, dict[str, str]] = {
+    "mlb-2026-v1": {
+        "st.louis cardinals": "st. louis cardinals",
+    }
+}
+
+
+def _provider_name_for_schedule_match(value: Any, mapping_version: str) -> str:
+    normalized = _normalized_name(value)
+    aliases = _PROVIDER_TEAM_NAME_ALIASES.get(mapping_version, {})
+    return aliases.get(normalized, normalized)
+
+
 def _canonical_json(value: Any) -> str:
     payload = value.to_dict() if hasattr(value, "to_dict") else value
     return json.dumps(
@@ -294,7 +307,10 @@ def propose_team_identity_mappings(
     verified_at: datetime | None = None,
     kickoff_tolerance: timedelta = timedelta(minutes=30),
 ) -> tuple[MLBTeamIdentityMapping, MLBTeamIdentityMapping]:
-    """Bootstrap two team mappings from an exact-name, same-game identity proof.
+    """Bootstrap two team mappings from deterministic name/time identity proof.
+
+    Only explicit aliases scoped to the requested mapping version may bridge a
+    provider spelling difference. No fuzzy matching is permitted.
 
     This helper is for controlled registry construction. Production game linking
     must use a pre-existing versioned registry and therefore does not depend on
@@ -307,9 +323,9 @@ def propose_team_identity_mappings(
         game
         for game in _schedule_games(schedule_payload)
         if _normalized_name(game.home_team_name)
-        == _normalized_name(fixture.home_team_name)
+        == _provider_name_for_schedule_match(fixture.home_team_name, version)
         and _normalized_name(game.away_team_name)
-        == _normalized_name(fixture.away_team_name)
+        == _provider_name_for_schedule_match(fixture.away_team_name, version)
         and _within_tolerance(fixture, game, kickoff_tolerance)
     ]
     if len(candidates) != 1:
