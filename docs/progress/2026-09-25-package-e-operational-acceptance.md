@@ -896,3 +896,10 @@ Worker deployment `af32f80a-3c57-4985-ba09-925bb1c0eeb7` also reached SUCCESS. W
 Canary `5dbf934c-c5c6-565f-8425-f49b79964286` passed on natural cron with 6/8 total provider requests, 4 odds calls, 522 raw market rows, 42 canonical moneyline rows and 42 PostgreSQL inserts. Archive verification and DB-write verification were both true, with zero collection errors and no canary reason codes.
 
 The post-canary `SCHEDULED_COLLECTION` gate returned **READY** with canary_passed=true, PAPER_MODE=true, collection_enabled=false, migrations_current=true, raw_archive_configured=true and runtime_fresh=true. The next cron returned `ALREADY_PASSED` rather than re-running provider ingestion. Canary was explicitly disarmed afterward; scheduled collection remains disabled pending fixed 300 RSD paper-stake deployment and final downstream checks.
+
+
+## Fixed 300 RSD paper stake deployed — 2026-09-26
+
+PR #35 merged as `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`. Worker predeploy applied `008_paper_stake_rsd.sql` and deployment `7ea4ea81-e3d6-4425-9ec9-c47ccb7b37d4` reached SUCCESS. The fixed 300 RSD stake is now enforced in both domain and PostgreSQL evidence, with DB-backed settled stake and realized paper P/L projections.
+
+The first dashboard deployment correctly failed before migration 008 existed. After the worker migration, dashboard redeploy `4ba844a2-0eec-461b-a210-086b8c544efe` reached SUCCESS on full-snapshot readiness. Collection remained disabled during the schema transition.
