@@ -850,3 +850,10 @@ Live-history payloads in the repository proved that API-Sports Baseball market i
 PR #22 fixed both behaviors and passed Baseball tests plus Railway runtime smoke before merging to main as `a4d20a9d624342a286603fe46bd2a4cf3dff3640`.
 
 No collection activation occurred. Next requirement: deploy this commit and run one bounded canary with <=8 total provider attempts and <=4 broad odds calls.
+
+
+## Third bounded canary after Home/Away fix — 2026-09-26
+
+Deployment `b57c3196-98f1-48ef-9c63-65666ed9c264` successfully ran main commit `a4d20a9d624342a286603fe46bd2a4cf3dff3640`. The next natural cron executed bounded canary `6f337f6f-d35a-595d-9874-f5d909a5dca0` (cycle `88839d4c-7b40-4fe6-b3e4-c4d132339c19`). It used 6/8 provider requests and selected 4 games for odds, but all four odds responses were empty: 0 payload rows, 0 bookmaker records, 0 raw market rows, 0 canonical rows, 0 PostgreSQL odds observations, and 0 API errors.
+
+This canary therefore failed with `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`. It did not invalidate the Home/Away parser fix because no market payload reached the parser. Canary was disarmed again, collection remains disabled, and paper mode remains true.
