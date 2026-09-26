@@ -104,11 +104,7 @@ def _record_runtime(
             collection_enabled=collection_enabled,
             mode=str(result["mode"]),
             status=str(result["status"]),
-            stats=dict(
-                result.get("collection")
-                or result.get("games_schema_audit")
-                or {}
-            ),
+            stats=dict(result.get("collection") or result.get("games_schema_audit") or {}),
         )
         return repository.health_snapshot()
 
