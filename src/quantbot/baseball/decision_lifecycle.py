@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
 
+from .bookmakers import is_playable_bookmaker
 from .evidence import EvidenceError, OddsObservation
 from .market import devig_two_way
 from .value import edge, expected_value_per_unit, fair_decimal_odds
@@ -408,7 +409,11 @@ def build_moneyline_pair_evaluations(
 def select_best_candidate(
     evaluations: tuple[MoneylineEvaluation, ...],
 ) -> MoneylineEvaluation | None:
-    eligible = [item for item in evaluations if item.outcome == "CANDIDATE"]
+    eligible = [
+        item
+        for item in evaluations
+        if item.outcome == "CANDIDATE" and is_playable_bookmaker(item.bookmaker)
+    ]
     if not eligible:
         return None
     return max(
@@ -630,6 +635,10 @@ class RegisteredPick:
             _nonempty(getattr(self, field), field)
         if self.market_family != "moneyline":
             raise EvidenceError("registered pick market must be moneyline")
+        if not is_playable_bookmaker(self.bookmaker):
+            raise EvidenceError(
+                "registered pick bookmaker must be Bet365 or 1xBet"
+            )
         if self.selection not in {"home", "away"}:
             raise EvidenceError("registered pick selection is unsupported")
         if self.state != "REGISTERED":
