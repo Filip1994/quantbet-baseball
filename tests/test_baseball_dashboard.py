@@ -37,18 +37,14 @@ class FakeRepository:
                 "runtime_cycles": 72,
                 "standing_snapshots": 60,
                 "distinct_standing_teams": 30,
-                "latest_standings_observed_at": (
-                    now - timedelta(hours=2)
-                ).isoformat(),
+                "latest_standings_observed_at": (now - timedelta(hours=2)).isoformat(),
                 "team_statistics_snapshots": 18,
                 "distinct_team_statistics_teams": 18,
                 "latest_team_statistics_observed_at": (
                     now - timedelta(hours=2)
                 ).isoformat(),
                 "reference_catalog_snapshots": 2,
-                "latest_catalog_observed_at": (
-                    now - timedelta(days=1)
-                ).isoformat(),
+                "latest_catalog_observed_at": (now - timedelta(days=1)).isoformat(),
                 "game_history_snapshots": 480,
                 "distinct_game_history_games": 480,
                 "latest_game_history_observed_at": (
