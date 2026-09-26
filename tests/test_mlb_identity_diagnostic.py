@@ -11,6 +11,7 @@ from quantbot.baseball.fixture_evidence import FixtureObservation
 from quantbot.baseball.mlb_identity_diagnostic import (
     _read_verified_schedule_payload,
     diagnose_mlb_identity_coverage,
+    diagnose_registry_gaps,
 )
 
 
@@ -83,6 +84,74 @@ class FakeRepository:
                 mlb_schedule_source_payload_checksum="b" * 64,
             )
         return None
+
+
+def test_registry_gap_diagnostic_finds_missing_teams_and_name_drift() -> None:
+    fixture = _fixture(
+        1001,
+        home_id=1,
+        home_name="Mapped Home Renamed",
+        away_id=2,
+        away_name="Mapped Away",
+    )
+    mappings = (
+        SimpleNamespace(
+            api_sports_team_id=1,
+            api_sports_team_name="Mapped Home",
+            official_mlb_team_id=101,
+            official_mlb_team_name="Official Home",
+        ),
+        SimpleNamespace(
+            api_sports_team_id=2,
+            api_sports_team_name="Mapped Away",
+            official_mlb_team_id=102,
+            official_mlb_team_name="Official Away",
+        ),
+    )
+    standings = [
+        {
+            "team_id": 1,
+            "team_name": "Mapped Home Renamed",
+            "observed_at": "2026-09-26T14:00:00+00:00",
+            "source_payload_ref": "s3://raw/standings.json",
+            "source_payload_checksum": "c" * 64,
+        },
+        {
+            "team_id": 2,
+            "team_name": "Mapped Away",
+            "observed_at": "2026-09-26T14:00:00+00:00",
+            "source_payload_ref": "s3://raw/standings.json",
+            "source_payload_checksum": "c" * 64,
+        },
+        {
+            "team_id": 3,
+            "team_name": "Missing Club",
+            "observed_at": "2026-09-26T14:00:00+00:00",
+            "source_payload_ref": "s3://raw/standings.json",
+            "source_payload_checksum": "c" * 64,
+        },
+    ]
+
+    result = diagnose_registry_gaps(
+        standings=standings,
+        mappings=mappings,
+        fixtures=(fixture,),
+    )
+
+    assert result["registry_team_universe_total"] == 3
+    assert result["missing_registry_mappings_count"] == 1
+    assert result["missing_registry_mappings"][0]["api_sports_team_id"] == 3
+    assert result["missing_registry_mappings"][0]["api_sports_team_name"] == "Missing Club"
+    assert result["current_api_name_drifts_count"] == 1
+    assert result["current_api_name_drifts"][0]["api_sports_team_id"] == 1
+    assert (
+        result["current_api_name_drifts"][0]["mapped_api_sports_team_name"]
+        == "Mapped Home"
+    )
+    assert (
+        result["current_api_name_drifts"][0]["current_api_sports_team_name"]
+        == "Mapped Home Renamed"
+    )
 
 
 def test_identity_diagnostic_is_read_only_coverage_evidence() -> None:
