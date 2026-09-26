@@ -84,11 +84,11 @@ def test_official_mlb_structured_source_audit() -> None:
         "top_level_keys": sorted(feed),
         "game_data_keys": sorted(game_data),
         "live_data_keys": sorted(live_data),
-        "venue_keys": sorted((game_data.get("venue") or {})),
-        "weather_keys": sorted((game_data.get("weather") or {})),
+        "venue_keys": sorted(game_data.get("venue") or {}),
+        "weather_keys": sorted(game_data.get("weather") or {}),
         "boxscore_keys": sorted(boxscore),
         "boxscore_team_keys": {
-            side: sorted(((boxscore.get("teams") or {}).get(side) or {}))
+            side: sorted((boxscore.get("teams") or {}).get(side) or {})
             for side in ("away", "home")
         },
     }
