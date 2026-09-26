@@ -880,3 +880,12 @@ Execution boundary: Bet365 and 1xBet only. All other books are intelligence-only
 The zero-provider-request S3 inventory recovered the archived MLB/NPB team-statistics object schemas and catalog data without new API-Sports calls. Provider bookmaker ids are now evidence-backed: 1xBet id 1 and Bet365 id 2. PR #28 then enforced those two as the only executable/paper-pick bookmakers while preserving other books for intelligence-only evidence. Player props and inning variants were removed from compact game-level processing but remain present in immutable raw payloads.
 
 PR #28 passed Baseball tests plus Railway runtime smoke and merged as `7669e99d6ce6f5e815c604b22c9bcf91f84e0738`. The canonical registry is `docs/BASEBALL_VARIABLE_MARKET_REGISTRY.md`. Collection and canary remain disabled; paper mode remains enabled.
+
+
+## Production dashboard full-readiness acceptance — 2026-09-26
+
+The dedicated `quantbet-baseball-dashboard` service is production-online at `https://quantbet-baseball-dashboard-production.up.railway.app`. It is DB-read-only, has no API-Sports credential, performs no provider calls and is isolated from the cron worker.
+
+PRs #29–#32 established the dashboard and hardened readiness. The key acceptance gate is now strong: `/readyz` executes the complete production dashboard snapshot. This intentionally exposed and then eliminated a psycopg `dict_row` mismatch with the existing tuple-based evidence repository. Final dashboard deployment `a5aed490-7fba-4057-8ea1-22b2394f0e94` reached SUCCESS and Railway reported `Healthcheck succeeded` on the full snapshot path.
+
+Worker deployment `af32f80a-3c57-4985-ba09-925bb1c0eeb7` also reached SUCCESS. Worker cron/start semantics are unchanged; collection and canary remain off and paper mode remains on. No provider requests were introduced by dashboard activity.
