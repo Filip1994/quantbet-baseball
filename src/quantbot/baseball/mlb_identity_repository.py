@@ -184,7 +184,6 @@ class PostgreSQLMLBIdentityRepository:
                 result.append(MLBTeamIdentityMapping(**value))
         return tuple(result)
 
-
     def latest_mlb_fixtures_for_schedule_date(
         self,
         *,
