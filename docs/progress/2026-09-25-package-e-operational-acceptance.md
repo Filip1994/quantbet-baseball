@@ -857,3 +857,8 @@ No collection activation occurred. Next requirement: deploy this commit and run 
 Deployment `b57c3196-98f1-48ef-9c63-65666ed9c264` successfully ran main commit `a4d20a9d624342a286603fe46bd2a4cf3dff3640`. The next natural cron executed bounded canary `6f337f6f-d35a-595d-9874-f5d909a5dca0` (cycle `88839d4c-7b40-4fe6-b3e4-c4d132339c19`). It used 6/8 provider requests and selected 4 games for odds, but all four odds responses were empty: 0 payload rows, 0 bookmaker records, 0 raw market rows, 0 canonical rows, 0 PostgreSQL odds observations, and 0 API errors.
 
 This canary therefore failed with `POSTGRES_WRITES_NOT_VERIFIED` and `RAW_ARCHIVE_NOT_VERIFIED`. It did not invalidate the Home/Away parser fix because no market payload reached the parser. Canary was disarmed again, collection remains disabled, and paper mode remains true.
+
+
+## Live one-request /games schema audit completed — 2026-09-26
+
+The guarded Baseball service completed audit `games-schema-live-20260926-1` using exactly one provider request to `/games?date=2026-09-26`. It returned 35 games: MLB 16, NPB 5, Asian Games 4, CPBL 3, KBO 3, Elitserien 2, Bundesliga 1, Division 1 1. MLB and sampled non-MLB rows exposed the same schedule/status schema and no injuries, pitchers, lineups, players, venue/stadium, roof, umpire, or weather fields. Raw payload archival succeeded. A later cron returned `ALREADY_DONE` with zero requests, proving one-shot idempotence. Audit flags were cleared; collection and canary remain off; paper mode remains on.
