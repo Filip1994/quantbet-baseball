@@ -270,6 +270,7 @@ def run_once(root: Path | None = None) -> dict[str, object]:
                 date_iso=mlb_identity_diagnostic_date,
                 mapping_version=mlb_identity_mapping_version,
                 observed_by=datetime.now(UTC),
+                root=project_root,
             )
         diagnostic["diagnostic_id"] = mlb_identity_diagnostic_id
         result["mlb_identity_diagnostic"] = diagnostic
