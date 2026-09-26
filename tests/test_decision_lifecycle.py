@@ -1,3 +1,7 @@
+from dataclasses import replace
+
+import pytest
+
 from quantbot.baseball.decision_lifecycle import (
     build_model_prediction,
     build_moneyline_pair_evaluations,
@@ -6,7 +10,7 @@ from quantbot.baseball.decision_lifecycle import (
     requested_verification,
     select_best_candidate,
 )
-from quantbot.baseball.evidence import OddsObservation
+from quantbot.baseball.evidence import EvidenceError, OddsObservation
 
 
 def _observation(
@@ -200,3 +204,6 @@ def test_ready_final_quote_can_register_immutable_paper_pick() -> None:
     assert pick.entry_odds == 2.00
     assert pick.paper_mode is True
     assert pick.state == "REGISTERED"
+
+    with pytest.raises(EvidenceError, match="bookmaker is not playable"):
+        replace(pick, bookmaker="Pinnacle")
