@@ -1,12 +1,9 @@
 """Canonical bookmaker execution policy for QuantBet Baseball."""
 
-from typing import Any
-
-
 PLAYABLE_BOOKMAKERS = frozenset({"bet365", "1xbet"})
 
 
-def normalize_bookmaker(value: Any) -> str:
+def normalize_bookmaker(value: object) -> str:
     """Normalize provider bookmaker names without inventing unsupported aliases."""
     return " ".join(str(value or "").strip().casefold().split())
 
