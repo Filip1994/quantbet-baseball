@@ -64,9 +64,7 @@ class FakeRepository:
                     now - timedelta(hours=1)
                 ).isoformat(),
                 "mlb_identity_game_links": 15,
-                "latest_mlb_identity_link_at": (
-                    now - timedelta(hours=1)
-                ).isoformat(),
+                "latest_mlb_identity_link_at": (now - timedelta(hours=1)).isoformat(),
                 "latest_fixture_observed_at": (now - timedelta(hours=1)).isoformat(),
                 "latest_odds_observed_at": None,
                 "latest_collection_finished_at": None,
