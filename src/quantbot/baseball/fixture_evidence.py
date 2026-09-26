@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from .evidence import EvidenceError
@@ -15,6 +15,10 @@ _PROVIDER = "api-sports-baseball"
 _FIXTURE_NAMESPACE = uuid.uuid5(
     uuid.NAMESPACE_URL,
     "https://quantbet-baseball/fixture-observation/v1",
+)
+_SCHEDULE_SNAPSHOT_NAMESPACE = uuid.uuid5(
+    uuid.NAMESPACE_URL,
+    "https://quantbet-baseball/api-sports-schedule-snapshot/v1",
 )
 
 
@@ -149,6 +153,125 @@ def canonical_fixture_json(record: FixtureObservation) -> str:
         sort_keys=True,
         separators=(",", ":"),
         ensure_ascii=True,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class FixtureScheduleSnapshot:
+    snapshot_id: str
+    snapshot_group_id: str
+    provider: str
+    query_date: str
+    observed_at: str
+    response_rows: int
+    provider_game_ids: tuple[int, ...]
+    source_payload_ref: str
+    source_payload_checksum: str
+    schema_version: str = "1.0"
+
+    def __post_init__(self) -> None:
+        for name in (
+            "snapshot_id",
+            "snapshot_group_id",
+            "provider",
+            "query_date",
+            "observed_at",
+            "source_payload_ref",
+            "source_payload_checksum",
+            "schema_version",
+        ):
+            _text(getattr(self, name), name)
+        if self.provider != _PROVIDER:
+            raise EvidenceError("provider is unsupported")
+        try:
+            date.fromisoformat(self.query_date)
+        except ValueError as exc:
+            raise EvidenceError("query_date must be YYYY-MM-DD") from exc
+        _timestamp(self.observed_at, "observed_at")
+        if self.response_rows < 0:
+            raise EvidenceError("response_rows cannot be negative")
+        normalized_ids = tuple(
+            sorted(
+                {
+                    _positive_int(value, "provider_game_id")
+                    for value in self.provider_game_ids
+                }
+            )
+        )
+        if normalized_ids != self.provider_game_ids:
+            raise EvidenceError("provider_game_ids must be unique and sorted")
+        if self.response_rows < len(self.provider_game_ids):
+            raise EvidenceError(
+                "response_rows cannot be smaller than canonical game IDs"
+            )
+        checksum = self.source_payload_checksum
+        if len(checksum) != 64 or any(
+            char not in "0123456789abcdefABCDEF" for char in checksum
+        ):
+            raise EvidenceError("source_payload_checksum must be a SHA-256 hex digest")
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def canonical_fixture_schedule_snapshot_json(record: FixtureScheduleSnapshot) -> str:
+    return json.dumps(
+        record.to_dict(),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=True,
+    )
+
+
+def build_fixture_schedule_snapshot(
+    *,
+    snapshot_group_id: str,
+    query_date: str,
+    records: tuple[FixtureObservation, ...],
+    response_rows: int,
+    receipt: ArchiveReceipt,
+) -> FixtureScheduleSnapshot:
+    """Record exact canonical membership of one fresh API-Sports date response."""
+
+    _text(snapshot_group_id, "snapshot_group_id")
+    try:
+        date.fromisoformat(query_date)
+    except ValueError as exc:
+        raise EvidenceError("query_date must be YYYY-MM-DD") from exc
+    _timestamp(receipt.captured_at, "observed_at")
+    if response_rows < 0:
+        raise EvidenceError("response_rows cannot be negative")
+    for record in records:
+        if record.source_payload_ref != receipt.ref:
+            raise EvidenceError("fixture source ref disagrees with schedule receipt")
+        if record.source_payload_checksum.lower() != receipt.checksum.lower():
+            raise EvidenceError(
+                "fixture source checksum disagrees with schedule receipt"
+            )
+
+    provider_game_ids = tuple(sorted({record.provider_game_id for record in records}))
+    identity = {
+        "snapshot_group_id": snapshot_group_id,
+        "query_date": query_date,
+        "observed_at": receipt.captured_at,
+        "source_payload_checksum": receipt.checksum.lower(),
+    }
+    snapshot_id = str(
+        uuid.uuid5(
+            _SCHEDULE_SNAPSHOT_NAMESPACE,
+            json.dumps(identity, sort_keys=True, separators=(",", ":")),
+        )
+    )
+    return FixtureScheduleSnapshot(
+        snapshot_id=snapshot_id,
+        snapshot_group_id=snapshot_group_id,
+        provider=_PROVIDER,
+        query_date=query_date,
+        observed_at=receipt.captured_at,
+        response_rows=response_rows,
+        provider_game_ids=provider_game_ids,
+        source_payload_ref=receipt.ref,
+        source_payload_checksum=receipt.checksum.lower(),
     )
 
 

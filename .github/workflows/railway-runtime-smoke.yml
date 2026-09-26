@@ -10,6 +10,11 @@ on:
       - "src/quantbot/baseball/decision_lifecycle.py"
       - "src/quantbot/baseball/decision_repository.py"
       - "src/quantbot/baseball/durable_collector.py"
+      - "src/quantbot/baseball/fixture_evidence.py"
+      - "src/quantbot/baseball/mlb_identity.py"
+      - "src/quantbot/baseball/mlb_identity_bootstrap.py"
+      - "src/quantbot/baseball/mlb_identity_diagnostic.py"
+      - "src/quantbot/baseball/mlb_identity_repository.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
@@ -63,6 +68,11 @@ on:
       - "src/quantbot/baseball/decision_lifecycle.py"
       - "src/quantbot/baseball/decision_repository.py"
       - "src/quantbot/baseball/durable_collector.py"
+      - "src/quantbot/baseball/fixture_evidence.py"
+      - "src/quantbot/baseball/mlb_identity.py"
+      - "src/quantbot/baseball/mlb_identity_bootstrap.py"
+      - "src/quantbot/baseball/mlb_identity_diagnostic.py"
+      - "src/quantbot/baseball/mlb_identity_repository.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
@@ -145,6 +155,7 @@ jobs:
           src/quantbot/baseball/decision_lifecycle.py
           src/quantbot/baseball/decision_repository.py
           src/quantbot/baseball/durable_collector.py
+          src/quantbot/baseball/fixture_evidence.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/moneyline_monitoring.py
@@ -202,6 +213,7 @@ jobs:
           src/quantbot/baseball/decision_lifecycle.py
           src/quantbot/baseball/decision_repository.py
           src/quantbot/baseball/durable_collector.py
+          src/quantbot/baseball/fixture_evidence.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/moneyline_monitoring.py

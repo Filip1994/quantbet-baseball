@@ -25,7 +25,12 @@ from .collector import (
 from .config import BaseballSettings
 from .db import database_url_from_env
 from .evidence import OddsObservation
-from .fixture_evidence import FixtureObservation, canonical_fixture_observation
+from .fixture_evidence import (
+    FixtureObservation,
+    FixtureScheduleSnapshot,
+    build_fixture_schedule_snapshot,
+    canonical_fixture_observation,
+)
 from .game_history_collection import collect_game_history
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
@@ -59,6 +64,11 @@ class CollectorRepository(Protocol):
         self,
         records: tuple[FixtureObservation, ...],
     ) -> int: ...
+
+    def append_fixture_schedule_snapshot(
+        self,
+        record: FixtureScheduleSnapshot,
+    ) -> bool: ...
 
 
 class CollectorClient(Protocol):
@@ -117,6 +127,8 @@ def collect_with_dependencies(
     errors = 0
     fixture_observations = 0
     fixtures_inserted = 0
+    schedule_snapshots_inserted = 0
+    schedule_snapshot_group_id = str(uuid.uuid4())
 
     for date_value in (now.date(), now.date() + timedelta(days=1)):
         try:
@@ -137,6 +149,16 @@ def collect_with_dependencies(
         )
         fixture_observations += len(fixture_records)
         fixtures_inserted += repository.append_fixture_observations(fixture_records)
+        snapshot = build_fixture_schedule_snapshot(
+            snapshot_group_id=schedule_snapshot_group_id,
+            query_date=date_value.isoformat(),
+            records=fixture_records,
+            response_rows=len(date_games),
+            receipt=schedule_receipt,
+        )
+        schedule_snapshots_inserted += int(
+            repository.append_fixture_schedule_snapshot(snapshot)
+        )
 
         for game in date_games:
             game_id = _game_id(game)
@@ -301,6 +323,8 @@ def collect_with_dependencies(
         "games_seen": len(games),
         "fixture_observations": fixture_observations,
         "fixture_observations_inserted": fixtures_inserted,
+        "schedule_snapshot_group_id": schedule_snapshot_group_id,
+        "schedule_snapshots_inserted": schedule_snapshots_inserted,
         "pregame_games": len(learning),
         "due_events": len(due),
         "not_due_events": max(0, len(learning) - len(due)),

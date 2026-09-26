@@ -9,7 +9,12 @@ from typing import Any, Protocol, Self
 
 from .evidence import OddsObservation, PickEvent, canonical_json
 from .evidence_repository import RepositoryStats
-from .fixture_evidence import FixtureObservation, canonical_fixture_json
+from .fixture_evidence import (
+    FixtureObservation,
+    FixtureScheduleSnapshot,
+    canonical_fixture_json,
+    canonical_fixture_schedule_snapshot_json,
+)
 from .odds_poll_evidence import OddsPollAttempt, canonical_odds_poll_attempt_json
 from .runtime_evidence import CollectionCycle, canonical_collection_cycle_json
 
@@ -133,6 +138,7 @@ class PostgreSQLEvidenceRepository:
             "odds_poll_attempts": "poll_attempt_id",
             "pick_events": "pick_id",
             "fixture_observations": "fixture_observation_id",
+            "api_sports_game_schedule_snapshots": "snapshot_id",
             "collection_cycles": "cycle_id",
         }
         identity_column = identity_columns[table]
@@ -393,6 +399,43 @@ class PostgreSQLEvidenceRepository:
             self._connection.rollback()
             raise
         return inserted
+
+    def append_fixture_schedule_snapshot(
+        self,
+        record: FixtureScheduleSnapshot,
+    ) -> bool:
+        columns = (
+            "snapshot_id",
+            "snapshot_group_id",
+            "provider",
+            "query_date",
+            "observed_at",
+            "response_rows",
+            "provider_game_ids",
+            "source_payload_ref",
+            "source_payload_checksum",
+            "schema_version",
+            "canonical_record",
+        )
+        values = (
+            record.snapshot_id,
+            record.snapshot_group_id,
+            record.provider,
+            record.query_date,
+            record.observed_at,
+            record.response_rows,
+            list(record.provider_game_ids),
+            record.source_payload_ref,
+            record.source_payload_checksum,
+            record.schema_version,
+            canonical_fixture_schedule_snapshot_json(record),
+        )
+        return self._append(
+            "api_sports_game_schedule_snapshots",
+            record.snapshot_id,
+            values,
+            columns,
+        )
 
     def append_collection_cycle(self, record: CollectionCycle) -> bool:
         columns = (
