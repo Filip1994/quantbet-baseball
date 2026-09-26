@@ -453,12 +453,9 @@ def collect_durable_once(
                 schema_probe=execution_mode == "CANARY",
             )
 
-            slow_provider_enabled = (
-                os.getenv("BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION", "false")
-                .strip()
-                .lower()
-                in {"1", "true", "yes", "on"}
-            )
+            slow_provider_enabled = os.getenv(
+                "BASEBALL_ENABLE_SLOW_PROVIDER_COLLECTION", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
             max_slow_provider_requests = int(
                 os.getenv("BASEBALL_MAX_SLOW_PROVIDER_REQUESTS", "8")
             )
@@ -500,9 +497,7 @@ def collect_durable_once(
 
             summary["slow_provider_enabled"] = int(slow_provider_enabled)
             summary["slow_provider_requests"] = int(slow_provider["requests"])
-            summary["slow_standings_calls"] = int(
-                slow_provider["standings_calls"]
-            )
+            summary["slow_standings_calls"] = int(slow_provider["standings_calls"])
             summary["slow_standings_inserted"] = int(
                 slow_provider["standings_inserted"]
             )
@@ -516,12 +511,8 @@ def collect_durable_once(
                 slow_provider["team_statistics_due_uncollected"]
             )
             summary["slow_catalog_calls"] = int(slow_provider["catalog_calls"])
-            summary["slow_catalogs_inserted"] = int(
-                slow_provider["catalogs_inserted"]
-            )
-            summary["errors"] = int(summary["errors"]) + int(
-                slow_provider["errors"]
-            )
+            summary["slow_catalogs_inserted"] = int(slow_provider["catalogs_inserted"])
+            summary["errors"] = int(summary["errors"]) + int(slow_provider["errors"])
             summary["api_requests"] = client.request_count
             summary["api_remaining"] = client.remaining_budget
             summary["fixture_observations_inserted"] = (
