@@ -62,6 +62,7 @@ def test_compact_odds_keeps_playable_books_and_game_level_target_markets() -> No
     assert result["bookmaker_names"] == ["1xbet", "OtherBook", "bet365"]
 
     bet365 = next(item for item in result["bookmakers"] if item["name"] == "bet365")
+    assert bet365["playable"] is True
     assert {item["name"] for item in bet365["markets"]} == {
         "Moneyline",
         "Over/Under",
@@ -69,9 +70,11 @@ def test_compact_odds_keeps_playable_books_and_game_level_target_markets() -> No
     assert all(item["name"] != "Player Strikeouts" for item in bet365["markets"])
 
     one_x = next(item for item in result["bookmakers"] if item["name"] == "1xbet")
+    assert one_x["playable"] is True
     assert [item["name"] for item in one_x["markets"]] == ["Home/Away"]
 
     other = next(item for item in result["bookmakers"] if item["name"] == "OtherBook")
+    assert other["playable"] is False
     assert {item["name"] for item in other["markets"]} == {
         "Home/Away",
         "Over/Under",
