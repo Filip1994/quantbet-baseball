@@ -168,6 +168,9 @@ def test_migrations_and_repository_are_idempotent() -> None:
         assert health["game_history_extra_inning_games"] >= 0
         assert health["game_history_archived_rows"] >= 0
         assert health["official_mlb_pregame_snapshots"] >= 0
+        assert health["mlb_identity_team_mappings"] >= 0
+        assert health["mlb_identity_mapping_versions"] >= 0
+        assert health["mlb_identity_game_links"] >= 0
 
 
 class _FreshQuoteClient:

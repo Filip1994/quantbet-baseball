@@ -419,6 +419,11 @@ class BaseballDashboard:
                 health.get("latest_game_history_observed_at"),
             ),
             (
+                "MLB identity",
+                health.get("mlb_identity_game_links", 0),
+                health.get("latest_mlb_identity_link_at"),
+            ),
+            (
                 "MLB enrich",
                 health.get("official_mlb_pregame_snapshots", 0),
                 health.get("latest_official_mlb_observed_at"),
@@ -526,6 +531,8 @@ class BaseballDashboard:
             f"({health.get('game_history_final_score_rows', 0)} final-score, "
             f"{health.get('game_history_inning_rows', 0)} inning-detail, "
             f"{health.get('game_history_extra_inning_games', 0)} extra-inning) · "
+            f"MLB identity {health.get('mlb_identity_team_mappings', 0)} team maps / "
+            f"{health.get('mlb_identity_game_links', 0)} game links · "
             f"MLB enrichment {health.get('official_mlb_pregame_snapshots', 0)} snapshots"
         )
         cards = [

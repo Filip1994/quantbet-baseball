@@ -656,6 +656,21 @@ class PostgreSQLEvidenceRepository:
             )
             official_mlb_count, latest_official_mlb = cursor.fetchone()
 
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT mapping_version), MAX(verified_at) "
+                "FROM official_mlb_team_identity_mappings"
+            )
+            (
+                mlb_identity_team_mappings,
+                mlb_identity_mapping_versions,
+                latest_mlb_identity_mapping_at,
+            ) = cursor.fetchone()
+
+            cursor.execute(
+                "SELECT COUNT(*), MAX(linked_at) FROM official_mlb_game_identity_links"
+            )
+            mlb_identity_game_links, latest_mlb_identity_link_at = cursor.fetchone()
+
         return {
             "fixture_observations": int(fixture_count),
             "distinct_fixtures": int(fixture_games),
@@ -696,6 +711,13 @@ class PostgreSQLEvidenceRepository:
             "latest_game_history_observed_at": _iso_or_none(latest_game_history),
             "official_mlb_pregame_snapshots": int(official_mlb_count),
             "latest_official_mlb_observed_at": _iso_or_none(latest_official_mlb),
+            "mlb_identity_team_mappings": int(mlb_identity_team_mappings),
+            "mlb_identity_mapping_versions": int(mlb_identity_mapping_versions),
+            "latest_mlb_identity_mapping_at": _iso_or_none(
+                latest_mlb_identity_mapping_at
+            ),
+            "mlb_identity_game_links": int(mlb_identity_game_links),
+            "latest_mlb_identity_link_at": _iso_or_none(latest_mlb_identity_link_at),
             "latest_fixture_observed_at": _iso_or_none(latest_fixture),
             "latest_odds_observed_at": _iso_or_none(latest_odds),
             "latest_collection_finished_at": _iso_or_none(latest_collection),
