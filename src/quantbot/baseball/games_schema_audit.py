@@ -31,7 +31,10 @@ def summarize_games(rows: list[dict[str, Any]]) -> dict[str, Any]:
         league_name = str((league or {}).get("name") or "UNKNOWN")
         league_id = (league or {}).get("id")
         league_counts[league_name] += 1
-        league_ids.setdefault(league_name, league_id if isinstance(league_id, int) else None)
+        league_ids.setdefault(
+            league_name,
+            league_id if isinstance(league_id, int) else None,
+        )
         if league_name not in samples:
             teams = row.get("teams") or {}
             samples[league_name] = {
@@ -40,14 +43,26 @@ def summarize_games(rows: list[dict[str, Any]]) -> dict[str, Any]:
                 "time": row.get("time"),
                 "timezone": row.get("timezone"),
                 "status": row.get("status"),
-                "home": (teams.get("home") or {}).get("name") if isinstance(teams, dict) else None,
-                "away": (teams.get("away") or {}).get("name") if isinstance(teams, dict) else None,
+                "home": (
+                    (teams.get("home") or {}).get("name")
+                    if isinstance(teams, dict)
+                    else None
+                ),
+                "away": (
+                    (teams.get("away") or {}).get("name")
+                    if isinstance(teams, dict)
+                    else None
+                ),
                 "top_level_keys": _keys(row),
                 "league_keys": _keys(row.get("league")),
                 "country_keys": _keys(row.get("country")),
                 "teams_keys": _keys(row.get("teams")),
-                "home_team_keys": _keys((teams or {}).get("home") if isinstance(teams, dict) else None),
-                "away_team_keys": _keys((teams or {}).get("away") if isinstance(teams, dict) else None),
+                "home_team_keys": _keys(
+                    (teams or {}).get("home") if isinstance(teams, dict) else None
+                ),
+                "away_team_keys": _keys(
+                    (teams or {}).get("away") if isinstance(teams, dict) else None
+                ),
                 "status_keys": _keys(row.get("status")),
                 "scores_keys": _keys(row.get("scores")),
                 "optional_fields_present": {
@@ -79,7 +94,9 @@ def summarize_games(rows: list[dict[str, Any]]) -> dict[str, Any]:
             for name, count in sorted(league_counts.items())
         ],
         "mlb_sample": mlb,
-        "non_mlb_samples": [samples[name] | {"league": name} for name in non_mlb_names],
+        "non_mlb_samples": [
+            samples[name] | {"league": name} for name in non_mlb_names
+        ],
         "mlb_present": mlb is not None,
         "non_mlb_league_count": len([name for name in samples if name != "MLB"]),
     }
@@ -95,7 +112,12 @@ def already_completed(audit_id: str) -> bool:
     return row is not None
 
 
-def run_games_schema_audit(root: Path, *, audit_id: str, date_iso: str) -> dict[str, Any]:
+def run_games_schema_audit(
+    root: Path,
+    *,
+    audit_id: str,
+    date_iso: str,
+) -> dict[str, Any]:
     if already_completed(audit_id):
         return {
             "status": "ALREADY_DONE",
