@@ -135,7 +135,10 @@ def collect_slow_provider_data(
         league_id=league_id,
         season=season,
     )
-    if _due(standings_seen, now, standings_cadence) and client.request_count - requests_before < budget:
+    if (
+        _due(standings_seen, now, standings_cadence)
+        and client.request_count - requests_before < budget
+    ):
         try:
             rows, receipt = client.standings_with_receipt(league_id, season)
             records = canonical_standings(
@@ -174,9 +177,7 @@ def collect_slow_provider_data(
                 season,
             )
             record = canonical_team_statistics(payload, receipt)
-            summary["team_statistics_calls"] = (
-                int(summary["team_statistics_calls"]) + 1
-            )
+            summary["team_statistics_calls"] = int(summary["team_statistics_calls"]) + 1
             if repository.append_team_statistics(record):
                 summary["team_statistics_inserted"] = (
                     int(summary["team_statistics_inserted"]) + 1
