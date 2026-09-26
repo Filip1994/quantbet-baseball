@@ -105,7 +105,10 @@ def _record_runtime(
             mode=str(result["mode"]),
             status=str(result["status"]),
             stats=dict(
-                result.get("collection") or result.get("games_schema_audit") or {}
+                result.get("collection")
+                or result.get("provider_surface_audit")
+                or result.get("games_schema_audit")
+                or {}
             ),
         )
         return repository.health_snapshot()
@@ -124,6 +127,13 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "BASEBALL_GAMES_SCHEMA_AUDIT_DATE",
         started_at.date().isoformat(),
     ).strip()
+    provider_surface_audit_id = os.getenv(
+        "BASEBALL_PROVIDER_SURFACE_AUDIT_ID",
+        "",
+    ).strip()
+    provider_surface_audit_season = int(
+        os.getenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "2026")
+    )
 
     result: dict[str, object] = {
         "status": "ready",
@@ -131,6 +141,7 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "collection_enabled": collection_enabled,
         "canary_enabled": canary_enabled,
         "games_schema_audit_armed": bool(games_schema_audit_id),
+        "provider_surface_audit_armed": bool(provider_surface_audit_id),
     }
 
     # Fail closed if both paths are armed. A canary must never coexist with
@@ -153,6 +164,18 @@ def run_once(root: Path | None = None) -> dict[str, object]:
                 date_iso=games_schema_audit_date,
             )
             result["games_schema_audit"] = audit
+            if audit.get("status") not in {"COMPLETE", "ALREADY_DONE"}:
+                result["status"] = "audit-failed"
+
+        if provider_surface_audit_id and not canary_enabled:
+            from .provider_surface_audit import run_provider_surface_audit
+
+            audit = run_provider_surface_audit(
+                project_root,
+                audit_id=provider_surface_audit_id,
+                season=provider_surface_audit_season,
+            )
+            result["provider_surface_audit"] = audit
             if audit.get("status") not in {"COMPLETE", "ALREADY_DONE"}:
                 result["status"] = "audit-failed"
 
