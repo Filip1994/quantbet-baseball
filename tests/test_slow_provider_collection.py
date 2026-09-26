@@ -168,9 +168,7 @@ def test_slow_sources_are_not_repolled_before_cadence() -> None:
         payload, receipt = client.team_statistics_with_receipt(team_id, 1, 2026)
         from quantbot.baseball.provider_data import canonical_team_statistics
 
-        repository.append_team_statistics(
-            canonical_team_statistics(payload, receipt)
-        )
+        repository.append_team_statistics(canonical_team_statistics(payload, receipt))
     repository.catalog_times = {
         "BET_TYPES": now - timedelta(days=1),
         "BOOKMAKERS": now - timedelta(days=1),
