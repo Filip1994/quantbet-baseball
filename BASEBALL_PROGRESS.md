@@ -1825,3 +1825,42 @@ Migration 008 makes paper stake evidence canonical:
 The first dashboard deploy raced ahead of the worker migration and correctly failed full-readiness on missing `settled_stake_minor`. After migration 008 was applied, dashboard redeploy `4ba844a2-0eec-461b-a210-086b8c544efe` reached SUCCESS with the same full-snapshot readiness gate. This is preserved as positive fail-closed migration-order evidence.
 
 Worker safety remains PAPER_MODE=true, canary=false and collection=false at this checkpoint.
+
+
+## 2026-09-26 post-activation live read-back and API-burn diagnosis
+
+This entry records a fresh read-only production verification after scheduled collection activation.
+
+Authoritative live evidence:
+
+- GitHub default branch remains `main` at `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`;
+- PR #34 is merged as `35f76de13ee42e4d93df4a8334e4bb1faba92b0d`;
+- PR #35 is merged as `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`;
+- PR #13 remains open and intentionally unmerged;
+- guarded Railway target is still project `believable-contentment`, production environment `32ceeb6e-a8a8-4f98-b757-58d63417e496`;
+- worker `quantbet-baseball` latest deployment `cce8c01e-013e-4f53-87fe-5c2414b1f36a` is SUCCESS on main `8eb5dc6`;
+- dashboard latest deployment `4ba844a2-0eec-461b-a210-086b8c544efe` is SUCCESS on the same main commit;
+- dashboard Railway healthcheck step completed successfully with configured path `/readyz`; public root requests observed by Railway returned HTTP 200;
+- migration 008 is proven applied by pre-deploy output `('008_paper_stake_rsd.sql',)`; the subsequent redeploy reports no pending migrations;
+- immediately pre-activation activation-gate evidence reported `paper_mode=true`, `canary_passed=true`, `migrations_current=true`, raw archive configured, and no blocker codes;
+- current worker runtime evidence reports `collection_enabled=true` and `canary_enabled=false`.
+
+First observed scheduled collection cycle after activation:
+
+- cycle `ecd78577-abb1-4d08-b740-24bcb33411d0`;
+- execution mode `SCHEDULED`;
+- 56 / 75 API requests used;
+- 54 broad odds calls;
+- 65 games seen, 54 pregame games, 54 games selected;
+- 2,757 compact raw market rows;
+- 190 canonical moneyline rows inserted;
+- zero collector/provider errors;
+- durable health after the cycle: 96 distinct fixtures, 390 fixture observations, 232 odds observations, 15 distinct quote games, 7 bookmakers, and zero model predictions/value evaluations/registered picks/settled picks.
+
+### API-burn root cause found
+
+Code review of `src/quantbot/baseball/durable_collector.py` found a deterministic scheduler bypass. The collector correctly builds a `due` list using `is_observation_due(...)`, but selection then iterates over `(due, learning)`. The `learning` list contains every eligible pregame game inside 36 hours, so unused request capacity is filled with games that are explicitly not due. With 54 eligible games and a broad-odds cap above that count, all 54 games are polled on every 15-minute cron regardless of the intended 120/60/30/15-minute adaptive cadence.
+
+This explains the observed 54 odds calls in one cycle and is a real API-efficiency defect, not a tuning preference.
+
+Immediate engineering action: preserve collection activation, fix scheduled selection so non-due games cannot consume broad discovery capacity, add regression coverage and explicit efficiency telemetry, and validate the change before production merge. Do not lower the global budget/cap as a substitute for correcting scheduling semantics.
