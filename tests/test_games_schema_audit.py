@@ -15,7 +15,13 @@ def test_summarize_games_compares_mlb_and_non_mlb_without_inference() -> None:
             "timezone": "UTC",
             "week": 1,
             "country": {"id": 1, "name": "USA", "code": "US", "flag": "x"},
-            "league": {"id": 1, "name": "MLB", "type": "League", "season": 2026, "logo": "x"},
+            "league": {
+                "id": 1,
+                "name": "MLB",
+                "type": "League",
+                "season": 2026,
+                "logo": "x",
+            },
             "teams": {
                 "home": {"id": 10, "name": "Home MLB", "logo": "x"},
                 "away": {"id": 11, "name": "Away MLB", "logo": "x"},
@@ -30,7 +36,13 @@ def test_summarize_games_compares_mlb_and_non_mlb_without_inference() -> None:
             "timezone": "UTC",
             "week": 1,
             "country": {"id": 2, "name": "Japan", "code": "JP", "flag": "x"},
-            "league": {"id": 2, "name": "NPB", "type": "League", "season": 2026, "logo": "x"},
+            "league": {
+                "id": 2,
+                "name": "NPB",
+                "type": "League",
+                "season": 2026,
+                "logo": "x",
+            },
             "teams": {
                 "home": {"id": 20, "name": "Home NPB", "logo": "x"},
                 "away": {"id": 21, "name": "Away NPB", "logo": "x"},
@@ -45,7 +57,10 @@ def test_summarize_games_compares_mlb_and_non_mlb_without_inference() -> None:
     assert summary["results_count"] == 2
     assert summary["mlb_present"] is True
     assert summary["non_mlb_league_count"] == 1
-    assert summary["mlb_sample"]["top_level_keys"] == summary["non_mlb_samples"][0]["top_level_keys"]
+    assert (
+        summary["mlb_sample"]["top_level_keys"]
+        == summary["non_mlb_samples"][0]["top_level_keys"]
+    )
     assert not any(summary["mlb_sample"]["optional_fields_present"].values())
 
 
