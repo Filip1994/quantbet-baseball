@@ -72,6 +72,20 @@ def _optional_positive_int(value: Any, field: str) -> int | None:
     return _positive_int(value, field)
 
 
+def _optional_nonnegative_int(value: Any, field: str) -> int | None:
+    if value in (None, ""):
+        return None
+    if isinstance(value, bool):
+        raise EvidenceError(f"{field} must be a non-negative integer")
+    try:
+        number = int(value)
+    except (TypeError, ValueError) as exc:
+        raise EvidenceError(f"{field} must be a non-negative integer") from exc
+    if number < 0:
+        raise EvidenceError(f"{field} must be a non-negative integer")
+    return number
+
+
 def _optional_float(value: Any, field: str) -> float | None:
     if value in (None, ""):
         return None
@@ -306,25 +320,25 @@ def canonical_pregame_snapshot(
         away_team_name=_string(away_team.get("name")),
         home_team_id=_positive_int(home_team.get("id"), "home_team.id"),
         home_team_name=_string(home_team.get("name")),
-        away_record_wins=_optional_positive_int(
+        away_record_wins=_optional_nonnegative_int(
             away_record.get("wins"), "away_record.wins"
         ),
-        away_record_losses=_optional_positive_int(
+        away_record_losses=_optional_nonnegative_int(
             away_record.get("losses"), "away_record.losses"
         ),
-        away_record_games_played=_optional_positive_int(
+        away_record_games_played=_optional_nonnegative_int(
             away_record.get("gamesPlayed"), "away_record.gamesPlayed"
         ),
         away_record_win_pct=_optional_float(
             away_record.get("winningPercentage"), "away_record.winningPercentage"
         ),
-        home_record_wins=_optional_positive_int(
+        home_record_wins=_optional_nonnegative_int(
             home_record.get("wins"), "home_record.wins"
         ),
-        home_record_losses=_optional_positive_int(
+        home_record_losses=_optional_nonnegative_int(
             home_record.get("losses"), "home_record.losses"
         ),
-        home_record_games_played=_optional_positive_int(
+        home_record_games_played=_optional_nonnegative_int(
             home_record.get("gamesPlayed"), "home_record.gamesPlayed"
         ),
         home_record_win_pct=_optional_float(
