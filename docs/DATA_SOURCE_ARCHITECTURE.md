@@ -42,7 +42,8 @@ Canonical source facts:
 - league ID;
 - season;
 - home/away team IDs;
-- final scores for result/settlement only.
+- final scores for result/settlement only;
+- hits/errors/inning-by-inning scoring retained as historical result evidence.
 
 Current-game final scores never become pregame model features.
 
@@ -187,6 +188,7 @@ After venue registry exists:
 | game discovery/result monitoring | scheduled/due-driven |
 | standings | daily |
 | team statistics | daily / after completed-game window |
+| league-season game-history snapshot | daily / local replay thereafter |
 | bookmaker catalog | weekly or provider change |
 | bet-type catalog | weekly or provider change |
 | leagues/seasons/teams/static metadata | cached/versioned |
