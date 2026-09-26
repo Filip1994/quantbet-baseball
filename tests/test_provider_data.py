@@ -130,3 +130,35 @@ def test_canonical_standings_flattens_live_nested_provider_envelope() -> None:
     assert len(records) == 1
     assert records[0].team_id == 22
     assert records[0].stage == "MLB"
+
+
+def test_standings_same_team_can_exist_in_multiple_provider_groups() -> None:
+    base = {
+        "stage": "MLB",
+        "games": {
+            "played": 160,
+            "win": {"total": 90, "percentage": ".563"},
+            "lose": {"total": 70, "percentage": ".438"},
+        },
+        "points": {"for": 800, "against": 720},
+        "team": {"id": 22, "name": "Example Team"},
+    }
+    rows = [[
+        {**base, "position": 1, "group": {"name": "American League"}},
+        {**base, "position": 2, "group": {"name": "AL East"}},
+    ]]
+
+    records = canonical_standings(
+        rows,
+        _receipt(),
+        league_id=1,
+        season=2026,
+    )
+
+    assert len(records) == 2
+    assert records[0].team_id == records[1].team_id == 22
+    assert records[0].snapshot_id != records[1].snapshot_id
+    assert {record.group_name for record in records} == {
+        "American League",
+        "AL East",
+    }
