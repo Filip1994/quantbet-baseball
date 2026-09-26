@@ -209,7 +209,9 @@ class OfficialMLBPregameSnapshot:
         retrieved = _iso_timestamp(self.retrieved_at, "retrieved_at")
         kickoff = _iso_timestamp(self.scheduled_first_pitch, "scheduled_first_pitch")
         if observed >= kickoff:
-            raise EvidenceError("official MLB pregame snapshot must precede first pitch")
+            raise EvidenceError(
+                "official MLB pregame snapshot must precede first pitch"
+            )
         if retrieved < observed:
             raise EvidenceError("retrieved_at cannot precede source_observed_at")
         _checksum(self.source_payload_checksum)
@@ -370,9 +372,7 @@ def canonical_pregame_snapshot(
         left_line_ft=_optional_float(field.get("leftLine"), "venue.leftLine"),
         left_center_ft=_optional_float(field.get("leftCenter"), "venue.leftCenter"),
         center_ft=_optional_float(field.get("center"), "venue.center"),
-        right_center_ft=_optional_float(
-            field.get("rightCenter"), "venue.rightCenter"
-        ),
+        right_center_ft=_optional_float(field.get("rightCenter"), "venue.rightCenter"),
         right_line_ft=_optional_float(field.get("rightLine"), "venue.rightLine"),
         venue_timezone=_string(timezone.get("id")) or None,
         venue_utc_offset_at_game=_optional_float(
