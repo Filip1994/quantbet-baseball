@@ -630,6 +630,27 @@ class PostgreSQLEvidenceRepository:
             )
 
             cursor.execute(
+                "SELECT "
+                "COUNT(*) FILTER (WHERE home_score IS NOT NULL AND away_score IS NOT NULL), "
+                "COUNT(*) FILTER (WHERE home_hits IS NOT NULL AND away_hits IS NOT NULL), "
+                "COUNT(*) FILTER (WHERE home_errors IS NOT NULL AND away_errors IS NOT NULL), "
+                "COUNT(*) FILTER (WHERE jsonb_object_length(home_innings) > 0 "
+                "AND jsonb_object_length(away_innings) > 0), "
+                "COUNT(*) FILTER (WHERE home_innings ? 'extra' OR away_innings ? 'extra'), "
+                "COUNT(*) FILTER (WHERE source_payload_ref <> '' "
+                "AND length(source_payload_checksum) = 64) "
+                "FROM api_sports_game_history_snapshots"
+            )
+            (
+                game_history_score_rows,
+                game_history_hit_rows,
+                game_history_error_rows,
+                game_history_inning_rows,
+                game_history_extra_inning_games,
+                game_history_archived_rows,
+            ) = cursor.fetchone()
+
+            cursor.execute(
                 "SELECT COUNT(*), MAX(source_observed_at) "
                 "FROM official_mlb_pregame_snapshots"
             )
@@ -666,6 +687,12 @@ class PostgreSQLEvidenceRepository:
             "latest_catalog_observed_at": _iso_or_none(latest_catalog),
             "game_history_snapshots": int(game_history_count),
             "distinct_game_history_games": int(game_history_games),
+            "game_history_final_score_rows": int(game_history_score_rows),
+            "game_history_hit_rows": int(game_history_hit_rows),
+            "game_history_error_rows": int(game_history_error_rows),
+            "game_history_inning_rows": int(game_history_inning_rows),
+            "game_history_extra_inning_games": int(game_history_extra_inning_games),
+            "game_history_archived_rows": int(game_history_archived_rows),
             "latest_game_history_observed_at": _iso_or_none(latest_game_history),
             "official_mlb_pregame_snapshots": int(official_mlb_count),
             "latest_official_mlb_observed_at": _iso_or_none(latest_official_mlb),
