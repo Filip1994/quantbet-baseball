@@ -129,7 +129,13 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
             if _norm(market_name) in TARGET_MARKET_NAMES:
                 markets.append(market)
         if markets:
-            bookmakers.append({"name": bookmaker_name, "markets": markets})
+            bookmakers.append(
+                {
+                    "name": bookmaker_name,
+                    "playable": _is_playable_book,
+                    "markets": markets,
+                }
+            )
     return {
         "bookmakers": bookmakers,
         "bookmaker_names": sorted({r["name"] for r in records if r["name"]}),
