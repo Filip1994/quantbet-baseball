@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from quantbot.baseball.decision_lifecycle import (
@@ -201,6 +203,8 @@ def test_ready_final_quote_can_register_immutable_paper_pick() -> None:
     assert pick.entry_observation_id == final_home.observation_id
     assert pick.entry_odds == 2.00
     assert pick.paper_mode is True
+    assert pick.paper_stake_minor == 30_000
+    assert pick.currency == "RSD"
     assert pick.state == "REGISTERED"
 
 
@@ -319,3 +323,74 @@ def test_registered_pick_rejects_non_playable_bookmaker() -> None:
             entry_observation=final_home,
             registered_at="2026-09-20T17:02:12+00:00",
         )
+
+
+def test_registered_pick_rejects_noncanonical_paper_stake() -> None:
+    prediction = _prediction()
+    home = _observation(
+        observation_id="00000000-0000-0000-0000-000000000121",
+        selection="home",
+        odds=2.10,
+        observed_at="2026-09-20T17:00:00+00:00",
+        bookmaker="Bet365",
+    )
+    away = _observation(
+        observation_id="00000000-0000-0000-0000-000000000122",
+        selection="away",
+        odds=1.80,
+        observed_at="2026-09-20T17:00:00+00:00",
+        bookmaker="Bet365",
+    )
+    preliminary = select_best_candidate(
+        build_moneyline_pair_evaluations(
+            prediction,
+            home,
+            away,
+            stage="PRELIMINARY",
+            evaluated_at="2026-09-20T17:01:00+00:00",
+            min_edge=0.0,
+            min_expected_value=-1.0,
+            max_uncertainty=0.05,
+            max_quote_age_seconds=300,
+        )
+    )
+    assert preliminary is not None
+    request = requested_verification(
+        preliminary,
+        requested_at="2026-09-20T17:01:30+00:00",
+    )
+    final = next(
+        item
+        for item in build_moneyline_pair_evaluations(
+            prediction,
+            home,
+            away,
+            stage="FINAL",
+            evaluated_at="2026-09-20T17:01:40+00:00",
+            min_edge=0.0,
+            min_expected_value=-1.0,
+            max_uncertainty=0.05,
+            max_quote_age_seconds=300,
+        )
+        if item.selection == request.selection
+    )
+    ready = ready_verification(
+        request,
+        home=home,
+        away=away,
+        final_evaluation=final,
+        decided_at="2026-09-20T17:01:41+00:00",
+    )
+    pick = build_registered_pick(
+        verification=ready,
+        final_evaluation=final,
+        prediction=prediction,
+        entry_observation=home if ready.selection == "home" else away,
+        registered_at="2026-09-20T17:01:42+00:00",
+    )
+
+    with pytest.raises(EvidenceError, match="paper stake must be fixed at 300 RSD"):
+        replace(pick, paper_stake_minor=50_000)
+
+    with pytest.raises(EvidenceError, match="paper pick currency must be RSD"):
+        replace(pick, currency="EUR")

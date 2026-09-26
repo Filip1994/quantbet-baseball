@@ -312,7 +312,8 @@ class PostgreSQLMoneylineSettlementRepository:
                 "SELECT registered_picks, closing_finalizations, settled_picks, "
                 "pending_settlement, wins, losses, pushes, realized_profit_per_unit, "
                 "clv_available, clv_unavailable, average_clv_probability_delta, "
-                "average_clv_price_ratio FROM baseball_moneyline_dashboard"
+                "average_clv_price_ratio, settled_stake_minor, realized_profit_minor "
+                "FROM baseball_moneyline_dashboard"
             )
             row = cursor.fetchone()
         if row is None:
@@ -332,4 +333,6 @@ class PostgreSQLMoneylineSettlementRepository:
                 None if row[10] is None else float(row[10])
             ),
             "average_clv_price_ratio": None if row[11] is None else float(row[11]),
+            "settled_stake_minor": int(row[12]),
+            "realized_profit_minor": int(row[13]),
         }
