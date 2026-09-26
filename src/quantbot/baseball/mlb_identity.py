@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import uuid
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
-from typing import Any, Iterable
+from typing import Any
 
 from .evidence import EvidenceError
 from .fixture_evidence import FixtureObservation
