@@ -136,9 +136,14 @@ def test_mlb_identity_repository_is_immutable_and_idempotent() -> None:
         assert 186584 in fixture_by_id
         assert fixture_by_id[186584] == _fixture()
 
-        assert repository.append_team_mapping(mappings[0]) is True
-        assert repository.append_team_mapping(mappings[1]) is True
-        assert repository.append_team_mapping(mappings[0]) is False
+        provider_date_fixtures = repository.latest_mlb_fixtures_for_provider_query_date(
+            date_iso="2026-09-20",
+            observed_by=datetime(2026, 9, 20, 17, 0, tzinfo=UTC),
+        )
+        assert provider_date_fixtures == (_fixture(),)
+
+        assert repository.append_team_mappings_atomically(mappings) == 2
+        assert repository.append_team_mappings_atomically(mappings) == 0
         assert repository.append_game_link(link) is True
         assert repository.append_game_link(link) is False
         stored_link = repository.game_link_for_provider_game(
