@@ -1704,3 +1704,51 @@ PR #28 enforcement:
 - `docs/BASEBALL_RESEARCH_FEATURE_REGISTRY.md` now points to the canonical live registry and no longer treats player endpoints as verified.
 
 Railway worker deployment for this merge: `cef7b611-0c6f-4c7c-8702-26dbf06d61d1`; at the time of this log it had entered the deployment queue. Safety state remains collection OFF, canary OFF, paper mode ON.
+
+
+## 80. Production Baseball operations dashboard online — 2026-09-26
+
+A dedicated read-only Railway service, `quantbet-baseball-dashboard` (service id `3c73f36a-7ab3-479b-9726-c26a81996728`), is now online in the guarded Baseball project/environment.
+
+Public domain:
+
+- `https://quantbet-baseball-dashboard-production.up.railway.app`
+
+Dashboard design/behavior:
+
+- separate continuously running service from the cron worker;
+- PostgreSQL read-only control plane;
+- System / Research / History views;
+- evidence-driven green / amber / red / locked states;
+- worker freshness, database, API credential configuration, raw archive, migrations, paper mode, collection lock, canary state, fixture freshness and odds freshness;
+- API budget/headroom and latest bounded canary evidence;
+- lifecycle counts from fixture evidence through predictions, verification, registration, monitoring, closing, settlement and CLV;
+- research performance projections and immutable pick history;
+- only Bet365 and 1xBet shown as executable bookmakers;
+- no fake/demo picks or probabilities;
+- no API-Sports client or API_BASEBALL_KEY on the dashboard service;
+- dashboard refreshes do not consume provider requests.
+
+Implementation milestones:
+
+- PR #29 merged as `0ccbe2912f581b97629abf97b9dbe3118ac86810` and introduced the dashboard, entrypoint, tests and dashboard contract;
+- PR #30 merged as `7c19d2c3d30546ce3543de28210260d9388fd901` and added the root Railpack discovery entrypoint required by Railpack 0.40.0;
+- PR #31 merged as `bf51a56f95b168b7d64d1228dff3065930dc293e` and strengthened `/readyz` plus startup to require the complete dashboard snapshot, not merely `SELECT 1`;
+- that stronger readiness correctly exposed a dashboard-only psycopg row-factory integration bug: `PostgreSQLEvidenceRepository.health_snapshot()` expects tuple rows while the dashboard had attached `dict_row` to the same connection;
+- PR #32 fixed the boundary by using a normal tuple connection for the shared evidence repository and a separate `dict_row` connection for dashboard-specific queries; it merged as `dbf916faaea4e7d6761d5bdbf7eafae91aec245e`.
+
+Final production evidence:
+
+- dashboard deployment `a5aed490-7fba-4057-8ea1-22b2394f0e94` reached SUCCESS;
+- Railway full healthcheck on `/readyz` succeeded on the first attempt after the row-factory fix;
+- because `/readyz` now executes the complete dashboard snapshot, SUCCESS proves the current production System/Research/History query set is readable against PostgreSQL;
+- worker deployment `af32f80a-3c57-4985-ba09-925bb1c0eeb7` also reached SUCCESS on the same main commit;
+- worker start command remains `PYTHONPATH=src python -m quantbot.baseball.worker`;
+- worker cron remains `*/15 * * * *`;
+- worker restart policy remains NEVER;
+- scheduled collection remains disabled;
+- canary remains disabled;
+- paper mode remains enabled;
+- Football repo remained read-only.
+
+The previous dashboard deployment failure under PR #31 is intentionally preserved as evidence: full-readiness prevented a false-green dashboard and forced the production SQL integration issue to be corrected before acceptance.
