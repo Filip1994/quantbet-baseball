@@ -185,20 +185,20 @@ class PostgreSQLMLBIdentityRepository:
         return tuple(result)
 
 
-    def latest_mlb_fixtures_around_date(
+    def latest_mlb_fixtures_for_schedule_date(
         self,
         *,
         date_iso: str,
         observed_by: datetime,
-        padding: timedelta,
     ) -> tuple[FixtureObservation, ...]:
         target = date.fromisoformat(date_iso)
         if observed_by.tzinfo is None or observed_by.utcoffset() is None:
             raise ValueError("observed_by must be timezone-aware")
-        if padding.total_seconds() < 0:
-            raise ValueError("padding cannot be negative")
-        start = datetime.combine(target, time.min, tzinfo=UTC) - padding
-        end = datetime.combine(target + timedelta(days=1), time.min, tzinfo=UTC) + padding
+        # MLB games assigned to one North-American schedule date can cross UTC
+        # midnight. 06:00Z -> 06:00Z captures that slate without pulling the
+        # prior US evening into the same identity proof.
+        start = datetime.combine(target, time(6), tzinfo=UTC)
+        end = datetime.combine(target + timedelta(days=1), time(6), tzinfo=UTC)
         query = """
             SELECT DISTINCT ON (provider_game_id)
                 canonical_record
