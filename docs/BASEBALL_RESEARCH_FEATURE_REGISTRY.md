@@ -1,241 +1,558 @@
-# Baseball Research Feature Registry v1
+# Baseball Research Feature Registry v2
 
-**Scope:** game-level Baseball research and paper moneyline picks only.  
-**Player props:** permanently excluded.  
-**Paper stake target:** 300 RSD per registered single.  
-**Operating rule:** retain complete raw provider payloads, but expose only point-in-time-safe fields to a model.
+**Status:** canonical variable and source policy  
+**Updated:** 2026-09-26  
+**Primary product:** game-level Baseball research, PAPER mode  
+**Playable books:** Bet365 and 1xBet only  
+**Markets in product scope:** full-game Moneyline; full-game Over/Under after its closed loop is implemented  
+**Player props:** permanently excluded  
+**Paper stake target:** 300 RSD per registered single
 
-## 1. Core rule
+## 1. Governing rule
 
-"Use everything the API returns" means:
+The engine follows:
 
-1. every fresh provider response is archived in full before canonicalization;
-2. every model feature keeps source provenance and a cutoff timestamp;
-3. fields that are post-game, in-game, stale, ambiguous, or not available at the decision time are retained as raw evidence but are not model inputs;
-4. feature promotion is versioned and testable;
-5. absence is explicit: missing, unavailable, not applicable, or provider-unsupported are distinct states.
+`capture wide -> archive raw -> verify semantics -> verify point-in-time availability -> promote useful features -> test chronologically -> model`
 
-This avoids losing potentially useful information without introducing look-ahead leakage.
+"Maximum variables" means maximum credible evidence coverage, not maximum columns in the model.
 
-## 2. Current provider surface
+A provider field is never promoted solely because it exists.
 
-The repository already has API-Sports Baseball client methods for:
+Every variable belongs to one of these classes:
 
-- games by date;
-- one game by ID;
-- games by league/season;
-- standings;
-- team statistics;
+| Class | Meaning |
+|---|---|
+| MODEL | Eligible to become a game-level model feature after chronological validation |
+| MARKET | Market evidence used for probability, edge, executable quote or CLV |
+| CONTROL | Needed for identity, scheduling, lifecycle, freshness or provenance; not predictive by itself |
+| OUTCOME | Used only after first pitch for result/settlement/evaluation |
+| RAW_ONLY | Archived for future research but not currently modeled |
+| EXTERNAL | Required from a verified non-API-Sports source |
+| REJECTED | Deliberately excluded as noise, leakage, unsupported semantics or out-of-scope product data |
+
+No missing value is silently converted to zero.
+
+## 2. Live-verified API-Sports Baseball surface
+
+The following statements are based on live provider responses captured by the guarded Baseball Railway service on 2026-09-26.
+
+### 2.1 `/games`
+
+A single live `/games?date=2026-09-26` response returned 35 games across MLB, NPB, Asian Games, CPBL, KBO, Elitserien, Bundesliga and Division 1.
+
+MLB and sampled non-MLB rows exposed the same schema.
+
+Verified fields:
+
+| Provider field | Class | Use |
+|---|---|---|
+| id | CONTROL | canonical game identity |
+| date | CONTROL / MODEL-derived | first pitch; derive rest/time-of-day with point-in-time schedule |
+| time | CONTROL | display only when redundant with timestamp/date |
+| timestamp | CONTROL | canonical temporal ordering |
+| timezone | CONTROL | normalize local/UTC schedule |
+| week | REJECTED from model | provider schedule label; retain raw only |
+| status.long | CONTROL | lifecycle |
+| status.short | CONTROL | lifecycle |
+| country.id/name/code | CONTROL | league geography / identity |
+| country.flag | REJECTED | presentation asset only |
+| league.id | CONTROL | canonical competition identity |
+| league.name | CONTROL / segmentation | league-level research grouping |
+| league.type | CONTROL | identity |
+| league.season | CONTROL | season key |
+| league.logo | REJECTED | presentation asset only |
+| teams.home.id | CONTROL | team identity |
+| teams.home.name | CONTROL | display/identity |
+| teams.home.logo | REJECTED | presentation asset only |
+| teams.away.id | CONTROL | team identity |
+| teams.away.name | CONTROL | display/identity |
+| teams.away.logo | REJECTED | presentation asset only |
+| scores.home | OUTCOME | result/settlement only |
+| scores.away | OUTCOME | result/settlement only |
+
+The live `/games` response did **not** contain:
+
+- injuries;
+- probable/confirmed starting pitchers;
+- lineups;
 - player statistics;
-- pregame odds.
+- stadium/venue;
+- roof;
+- weather;
+- umpire.
 
-The production collector currently calls only schedule/game and odds paths. Standings, team statistics, player statistics and additional game context are research inputs to be integrated after the live odds schema gate is repaired.
+Therefore those must not be fabricated from `/games`.
 
-## 3. Feature families
+### 2.2 `/standings`
 
-### 3.1 Fixture and schedule context
+Live MLB standings returned one response group containing 60 team rows.  
+Live NPB standings returned one response group containing 12 team rows.
 
-Candidate fields/derivations:
+Verified row fields:
 
-- game ID;
+| Provider field | Class | Candidate use |
+|---|---|---|
+| position | MODEL candidate | season strength/context; validate incremental signal |
+| games.played | MODEL / denominator | normalize rate and run-differential features |
+| games.win.total | MODEL candidate | season baseline |
+| games.win.percentage | MODEL candidate | season baseline |
+| games.lose.total | MODEL candidate | season baseline |
+| games.lose.percentage | MODEL candidate | season baseline |
+| points.for | MODEL candidate | runs scored baseline |
+| points.against | MODEL candidate | runs allowed baseline |
+| group.name | CONTROL / segmentation | division/group context |
+| stage | CONTROL / segmentation | competition stage |
+| description | RAW_ONLY | provider competition annotation; do not NLP-model by default |
+| form | RAW_ONLY pending evidence | live samples were null; no assumption that it is populated |
+| team.id/name | CONTROL | identity |
+| team.logo | REJECTED | presentation only |
+| country / league identity | CONTROL | provenance / segmentation |
+
+Preferred derived candidates from standings:
+
+- win percentage;
+- loss percentage;
+- run differential = points.for - points.against;
+- runs scored per game;
+- runs allowed per game;
+- run differential per game.
+
+Do not use raw position as a substitute for underlying team strength without validation.
+
+### 2.3 `/teams/statistics`
+
+Live requests proved the endpoint exists and requires at least:
+
+- `team`;
+- `league`;
+- season context used by the project.
+
+The provider returns an object response rather than the list contract assumed by the generic client.
+
+The first bounded audit archived the raw MLB and NPB responses before the generic parser rejected the object shape.
+
+**Policy:** do not spend duplicate provider requests merely to rediscover that payload. The S3 raw-archive inventory is the authoritative next source for the exact field tree.
+
+Until the archive inventory is incorporated below, individual team-stat field names are **PENDING_VERIFICATION** and must not be invented.
+
+### 2.4 Player endpoint status
+
+A live request to `/players?search=ohtani` returned:
+
+`This endpoint do not exist.`
+
+Therefore:
+
+- generic `/players` search is REJECTED as an API-Sports Baseball dependency;
+- do not burn requests retrying it;
+- `players/statistics` remains unverified until an exact supported contract is proven from official/live evidence;
+- starting-pitcher, lineup, injury and granular MLB player evidence must currently be treated as EXTERNAL unless a verified Baseball endpoint proves otherwise.
+
+### 2.5 `/odds/bets`
+
+Live response:
+
+- 83 provider market definitions.
+
+This endpoint is a catalog, not a per-cycle data source.
+
+It should be fetched rarely and cached/versioned.
+
+Product market policy:
+
+| Market family | Product status |
+|---|---|
+| exact full-game `Home/Away` | ACTIVE Moneyline |
+| exact full-game `Moneyline` if provider supplies it | accepted canonical alias only after exact semantics verification |
+| exact full-game `Over/Under` | PLANNED/ACTIVE data collection for Totals v1 |
+| `Match Winner` with Home/Draw/Away | REJECTED from two-way Moneyline |
+| first-5 / first-3 / first-7 / inning variants | REJECTED from current product |
+| team totals | REJECTED from current product |
+| run line / spread | RAW_ONLY; not current product |
+| player strikeouts/hits/HR/RBI/total bases/runs/etc. | REJECTED permanently as product markets |
+
+Market matching must use exact canonical names/IDs, not broad substring tokens such as `total` or `winner`.
+
+### 2.6 `/odds/bookmakers`
+
+Live response:
+
+- 30 provider bookmaker definitions;
+- canonical sample confirmed `1xbet` as bookmaker ID 1.
+
+Execution boundary:
+
+| Bookmaker | Status |
+|---|---|
+| Bet365 | PLAYABLE |
+| 1xBet / 1xbet | PLAYABLE |
+| every other provider bookmaker | INTELLIGENCE_ONLY |
+
+Rules:
+
+1. A registered paper pick must reference Bet365 or 1xBet.
+2. Final quote verification must use the same playable bookmaker identity.
+3. Closing quote / CLV for the execution record must use the same playable-book methodology.
+4. If neither playable book offers a valid fresh quote, result is PASS / NO_PLAYABLE_QUOTE.
+5. The engine must never silently substitute Pinnacle, WilliamHill, Betano, Marathon, BetVictor or another bookmaker.
+6. Other bookmakers may contribute to market consensus/dispersion research only.
+
+## 3. MLB maximum evidence universe
+
+MLB gets the richest evidence set available because free structured MLB-specific sources can supplement API-Sports.
+
+### 3.1 API-Sports evidence used for MLB
+
+Verified now:
+
+- schedule/game identity;
+- team identity;
 - league/season;
-- scheduled first pitch;
-- home/away identity;
-- provider game status;
-- home/away schedule density;
-- previous-game finish time;
-- days/rest hours since previous game;
-- travel proxy where venue coordinates are known;
-- doubleheader indicator;
-- series game number when derivable without future data.
+- first-pitch timestamp/timezone;
+- game lifecycle status;
+- standings;
+- season W/L rates;
+- season runs for/against;
+- bookmaker catalog;
+- market catalog;
+- pregame odds;
+- market movement from stored observations;
+- Bet365/1xBet executable quotes when present.
 
-Source:
-- API-Sports Baseball `games` history and current schedule.
+Pending exact raw-schema inventory:
 
-Point-in-time rule:
-- only observations captured before the model cutoff.
+- `teams/statistics` fields.
 
-### 3.2 Team strength and current state
+Never assume unverified Baseball endpoints.
 
-Retain the full raw `standings` and `teams/statistics` responses.
+### 3.2 External MLB evidence
 
-Candidate modeled features are promoted only after their exact live schema is observed. Possible families include:
+These are separate from API-Sports and require verified point-in-time ingestion.
 
-- win/loss record;
-- home/away performance;
-- runs scored/allowed;
-- recent form;
-- offensive rate statistics;
-- defensive/pitching rate statistics;
-- run differential;
-- opponent-adjusted or rolling versions where enough history exists.
+High priority:
 
-Do not hard-code provider field names until live payload inventory proves them.
+- probable starting pitcher;
+- confirmed starting pitcher;
+- starter handedness;
+- starting lineup;
+- lineup confirmation timestamp;
+- injuries / IL / roster transactions;
+- bullpen recent workload;
+- pitcher workload/rest;
+- Baseball Savant / Statcast batting and pitching quality;
+- park factors;
+- stadium coordinates/elevation;
+- roof type/state where verifiable;
+- weather forecast.
 
-### 3.3 Pitching
+Candidate game-level derived features include:
 
-Starting pitching is a high-priority game-level input, not a player-prop product.
+#### Starting pitcher
 
-Candidate features when pregame identity/data are available:
-
-- probable/confirmed starter identity;
+- starter identity and confirmation state;
 - throwing hand;
-- season and rolling run prevention;
-- strikeout/walk indicators;
-- workload and days rest;
-- recent pitch/inning workload;
-- home/away and handedness splits;
-- opponent matchup aggregates.
+- days rest;
+- prior-start workload;
+- rolling workload;
+- strikeout/walk quality;
+- velocity trend;
+- pitch mix;
+- whiff/chase quality;
+- hard contact/barrel quality allowed;
+- platoon splits;
+- expected starter length.
 
-Bullpen candidates:
+#### Bullpen
 
-- team bullpen usage over prior 1/2/3 days;
-- recent innings/pitches where available;
-- availability proxy;
-- relief performance and handedness mix.
+- bullpen innings last 1/2/3 days;
+- reliever appearance counts;
+- consecutive-day usage;
+- high-leverage reliever availability;
+- closer/setup availability;
+- aggregate relief quality;
+- fatigue-adjusted effective bullpen strength.
 
-All pitcher/player data must be aggregated into game-level win-probability inputs.
+#### Batting / lineup
 
-### 3.4 Batting and lineup context
+- confirmed batting order;
+- expected lineup when not confirmed, explicitly marked expected;
+- regular starters missing;
+- lineup strength versus RHP/LHP;
+- K%, BB%, power/contact profile;
+- exit velocity / hard-hit / barrel signals where point-in-time safe;
+- platoon composition;
+- lineup strength delta from team baseline.
 
-If the provider exposes reliable pregame lineup/player participation data, preserve it and derive team-level features such as:
+#### Defense / running
 
-- expected/confirmed batting order;
-- missing regular starters;
-- batter handedness mix;
-- platoon splits versus opposing starter hand;
-- rolling offense quality;
-- lineup-strength delta versus team baseline.
+Use only if stable and demonstrably incremental:
 
-No player betting markets are generated.
+- team/position defensive quality;
+- Statcast fielding metrics;
+- catcher/run-control evidence;
+- baserunning value.
 
-### 3.5 Market state
+#### Rest / travel
 
-From immutable odds observations:
+Derive locally from the stored schedule and venue registry:
 
-- bookmaker;
-- home/away prices;
-- de-vigged market probability;
-- opening/current/final verified quote;
-- quote age;
-- cross-book dispersion;
-- line movement;
-- model-vs-market edge;
-- CLV after closing.
+- days/hours rest;
+- previous game finish;
+- extra-inning fatigue;
+- doubleheader status;
+- consecutive games;
+- road-trip/homestand length;
+- venue-to-venue distance;
+- timezone shift;
+- east/west travel.
 
-Market prices are evidence and calibration inputs; they must not overwrite independently produced model probabilities.
+Do not spend provider requests for values that can be derived from already stored fixtures.
 
-### 3.6 Park, venue and roof
+#### Park / roof
 
-Required canonical venue context:
-
-- stadium/venue identity;
+- venue identity;
 - latitude/longitude;
-- roof type;
-- roof state when known;
 - elevation;
-- park-factor version.
+- park factor;
+- park-factor version;
+- field orientation only with verified source;
+- roof type;
+- roof state if known pregame.
 
-Weather is not applied when the roof is known closed or the venue is a fixed indoor dome.
+#### Weather
 
-A static/reviewed venue registry is preferred over free-text geocoding at decision time.
+Open-Meteo forecast, captured before first pitch:
 
-### 3.7 Weather
-
-Live source:
-- Open-Meteo Forecast API.
-
-Canonical pregame snapshot fields:
-
-- temperature at first pitch;
-- relative humidity;
+- temperature;
+- humidity;
 - dew point;
-- precipitation probability;
-- precipitation amount;
 - surface pressure;
+- precipitation probability;
+- precipitation;
 - cloud cover;
+- visibility when useful;
 - wind speed;
 - wind direction;
 - wind gusts;
-- weather code.
+- weather code;
+- day/night state.
 
-The snapshot is taken at stadium coordinates and archived in full. The canonical row points to the archived payload checksum/ref.
+Derived only after validation:
 
-For historical model work, do not use observed final weather as if it had been known pregame. Historical forecast/single-run data must be aligned to the decision cutoff.
+- air-density proxy;
+- wind outward/inward component when field orientation is verified;
+- temperature trajectory during expected game window;
+- rain-delay risk proxy;
+- park x weather interaction.
 
-### 3.8 Derived interaction features
+Outdoor weather is not applied to a known closed/fixed roof.
 
-Only after raw feature quality is verified:
+## 4. Non-MLB league policy
 
-- wind component toward/away from center field;
-- temperature/air-density run-environment proxy;
-- starter hand × opponent lineup handedness;
-- bullpen fatigue × expected starter length;
-- park × weather interaction;
-- rest/travel × bullpen state;
-- market disagreement × model uncertainty.
+Collection may remain broader than MLB, but **feature availability is league-specific**.
 
-These are derived features; the raw components must remain available for replay.
+Verified cross-league parity:
 
-## 4. Feature snapshot provenance contract
+- `/games` schema: same in sampled MLB/NPB/CPBL/KBO/etc.;
+- `/standings`: same core structure confirmed for MLB and NPB.
 
-Every model prediction must reference one immutable feature snapshot containing at least:
+Do not pretend MLB-only external features exist for other leagues.
 
-- `game_id`;
-- `snapshot_id`;
-- `feature_version`;
-- `generated_at`;
-- `source_data_cutoff_at`;
+For NPB/KBO/CPBL/other leagues:
+
+1. use provider schedule/status;
+2. use verified standings;
+3. use verified team statistics only after exact endpoint coverage is demonstrated;
+4. use available odds;
+5. use Bet365/1xBet only for executable paper picks;
+6. external weather/venue data can be added only with verified venue identity;
+7. injuries/starters/lineups remain missing unless a credible structured point-in-time source is implemented.
+
+Missing rich features should reduce confidence / eligibility rather than be imputed from MLB priors without evidence.
+
+## 5. Market-specific feature relevance
+
+### 5.1 Moneyline
+
+Highest-priority evidence:
+
+- confirmed/probable starter;
+- starter quality and rest;
+- bullpen quality and fatigue;
+- confirmed lineup / lineup quality;
+- team offensive baseline;
+- team run prevention;
+- season strength;
+- park;
+- meaningful weather/roof;
+- rest/travel;
+- playable Bet365/1xBet price;
+- cross-book market consensus/dispersion.
+
+### 5.2 Full-game Over/Under
+
+Highest-priority evidence:
+
+- both starting pitchers;
+- both bullpens;
+- both lineups/offenses;
+- park factor;
+- roof;
+- temperature;
+- wind;
+- pressure/humidity/air-density candidates;
+- bullpen fatigue;
+- run-scoring baseline;
+- exact total line;
+- Bet365/1xBet Over and Under prices;
+- market consensus at the **same exact line**.
+
+Do not compare model probability for 8.5 against market 9.5.
+
+### 5.3 Player props
+
+REJECTED.
+
+Player-level data may support the game model, but no player betting market is generated.
+
+## 6. API-burn policy
+
+The 7,500/day API limit is a ceiling, not a target.
+
+### 6.1 Static / slow-changing catalogs
+
+`odds/bets`, `odds/bookmakers`, league identity and similar catalogs:
+
+- fetch only for explicit refresh/schema audit;
+- cache/version locally;
+- no per-cycle calls.
+
+### 6.2 Schedule
+
+- store fixture history durably;
+- do not repeatedly refetch historical dates;
+- discover relevant near-term games using bounded date pages;
+- use game-by-ID refresh only for active lifecycle needs such as result settlement.
+
+### 6.3 Standings
+
+- one league snapshot can serve every game in that league;
+- refresh on a coarse cadence, not every 15-minute worker cycle;
+- archive each fresh response;
+- derive team features locally.
+
+### 6.4 Team statistics
+
+- one team-season snapshot is reused across all candidate games until meaningful new game data can change it;
+- do not fetch per model, per bookmaker or per odds refresh;
+- prefer event-driven refresh after completed games or coarse daily caching.
+
+### 6.5 Odds
+
+Provider requests are prioritized:
+
+1. active pick final/monitoring/closing needs;
+2. settlement/result lifecycle;
+3. games in a proven odds-availability window;
+4. research discovery.
+
+Do not scan every listed game every 15 minutes simply because budget exists.
+
+Each odds response may contain multiple bookmakers. Do not make separate provider calls merely to fetch Bet365 and 1xBet if one response already returns both.
+
+### 6.6 Weather / external data
+
+Cache by venue + forecast generation + game window.
+
+Do not call weather repeatedly when the source snapshot is still within the defined freshness policy.
+
+## 7. Explicitly rejected/noise fields
+
+Not model features:
+
+- logos;
+- flags;
+- provider image URLs;
+- textual schedule labels such as `week` unless later proven semantically valuable;
+- raw IDs as numeric predictors;
+- bookmaker ID as a causal baseball feature;
+- league logo;
+- team logo;
+- final score before settlement;
+- postgame stats in a pregame snapshot;
+- closing line as an input to the earlier prediction;
+- random news sentiment;
+- generic "motivation";
+- player-prop market values;
+- arbitrary raw field dumps with no semantic contract.
+
+Identity fields remain stored even when they are not predictive.
+
+## 8. Point-in-time and leakage rules
+
+Every model prediction references an immutable feature snapshot containing:
+
+- game_id;
+- snapshot_id;
+- feature_version;
+- generated_at;
+- source_data_cutoff_at;
+- kickoff_at;
 - canonical feature values;
-- per-source observation/capture timestamps;
-- raw source refs/checksums;
-- null/missing reason codes;
-- venue/roof context;
-- weather snapshot ref when applicable.
+- source names;
+- observed/captured timestamps;
+- raw payload refs/checksums;
+- missing reason codes.
 
 Invariant:
 
-`source_data_cutoff_at <= predicted_at < kickoff_at`.
+`source_data_cutoff_at <= predicted_at < kickoff_at`
 
-No model may consume a source captured after `source_data_cutoff_at`.
+Historical training may only use information that was knowable at that historical cutoff.
 
-## 5. Raw-versus-model policy
+## 9. Missingness
 
-### Always retain raw
+Examples:
 
-- complete API-Sports envelopes for every called endpoint;
-- complete Open-Meteo response used by the decision;
-- provider fields not yet promoted to features;
-- provider schema additions.
+- `STARTER_UNKNOWN`
+- `LINEUP_NOT_CONFIRMED`
+- `INJURY_SOURCE_UNAVAILABLE`
+- `TEAM_STATS_UNAVAILABLE_FOR_LEAGUE`
+- `WEATHER_NOT_APPLICABLE_ROOF_CLOSED`
+- `ROOF_STATUS_UNKNOWN`
+- `BET365_QUOTE_UNAVAILABLE`
+- `1XBET_QUOTE_UNAVAILABLE`
+- `NO_PLAYABLE_QUOTE`
 
-### Model eligibility requires
+Missing is never zero.
 
-- pregame availability;
-- stable identity/meaning;
-- replayable provenance;
-- acceptable missingness;
-- no result leakage;
-- documented transformation;
-- chronological validation.
+## 10. Feature admission
 
-## 6. Activation sequence
+A candidate becomes an active model feature only when:
 
-1. repair live full-game moneyline canonicalization using exact canary schema evidence;
-2. pass bounded canary;
-3. enable scheduled raw/canonical collection in `PAPER_MODE=true`;
-4. inventory live provider schemas for standings/team/player/game context;
-5. add canonical venue registry and roof state;
-6. integrate weather snapshots;
-7. build immutable feature snapshots;
-8. train/evaluate simple game-level models;
-9. register only paper moneyline singles;
-10. expose 300 RSD paper stake/P&L in Research History.
+1. source and semantics are verified;
+2. timestamp is point-in-time safe;
+3. missingness is understood;
+4. replay is possible;
+5. transformation is versioned;
+6. chronological out-of-sample testing exists;
+7. calibration does not materially worsen;
+8. the feature shows stable incremental information or useful uncertainty reduction.
 
-## 7. Explicit non-goals
+Use ablation testing.
 
-- no player-prop selection;
-- no real-money execution;
-- no automated bankroll staking;
-- no live betting;
-- no using postgame data in pregame features;
-- no treating every raw provider field as automatically useful.
+Intuition alone is insufficient.
+
+## 11. Current implementation priorities
+
+1. complete zero-request inventory of already archived provider payloads;
+2. update this registry with the exact `teams/statistics` field tree and market/bookmaker catalogs;
+3. enforce playable-book boundary Bet365/1xBet in the decision path;
+4. preserve all other bookmaker observations for market intelligence only;
+5. finish Moneyline live odds acceptance;
+6. implement fixed 300 RSD paper stake migration safely;
+7. integrate MLB external starter/lineup/injury/park/weather evidence;
+8. build immutable feature snapshots;
+9. validate a chronological model;
+10. build full-game totals closed loop;
+11. expose all evidence and system health in the read-only Baseball dashboard.

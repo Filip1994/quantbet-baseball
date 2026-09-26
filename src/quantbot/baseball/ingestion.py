@@ -8,16 +8,13 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+from .bookmaker_policy import normalize_bookmaker
 from .evidence import OddsObservation
 from .raw_archive import ArchiveReceipt
 
 _MONEYLINE_MARKETS = {
     "moneyline",
     "home/away",
-    "match winner",
-    "game winner",
-    "match result",
-    "game result",
 }
 _OBSERVATION_NAMESPACE = uuid.uuid5(
     uuid.NAMESPACE_URL,
@@ -102,7 +99,7 @@ def canonical_moneyline_observations(
     for bookmaker in odds.get("bookmakers") or []:
         if not isinstance(bookmaker, dict):
             continue
-        bookmaker_name = str(bookmaker.get("name") or "").strip()
+        bookmaker_name = normalize_bookmaker(bookmaker.get("name"))
         if not bookmaker_name:
             continue
 

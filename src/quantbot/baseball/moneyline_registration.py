@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from .api import BaseballAPIBudgetExceeded, BaseballAPIError
+from .bookmaker_policy import is_playable_bookmaker, normalize_bookmaker
 from .collector import compact_odds
 from .decision_lifecycle import (
     FinalQuoteVerification,
@@ -100,11 +101,14 @@ def evaluate_preliminary_moneyline(
     evaluated_at: datetime,
     policy: MoneylineDecisionPolicy,
 ) -> PreliminaryResult | None:
+    canonical_bookmaker = normalize_bookmaker(bookmaker)
+    if not is_playable_bookmaker(canonical_bookmaker):
+        raise ValueError("moneyline bookmaker is not playable")
     checked = _utc(evaluated_at, "evaluated_at")
     repository.append_prediction(prediction)
     pair = repository.latest_moneyline_pair(
         prediction.game_id,
-        bookmaker,
+        canonical_bookmaker,
         as_of=checked,
     )
     if pair is None:
@@ -221,6 +225,13 @@ def verify_and_register_moneyline(
             repository,
             claim,
             registered_at=_now(clock),
+        )
+    if not is_playable_bookmaker(preliminary.bookmaker):
+        return _reject(
+            repository,
+            claim,
+            reason="BOOKMAKER_NOT_PLAYABLE",
+            decided_at=_now(clock),
         )
 
     prediction = repository.get_prediction(preliminary.prediction_id)

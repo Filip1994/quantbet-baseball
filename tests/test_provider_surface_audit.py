@@ -179,3 +179,33 @@ def test_worker_runs_surface_audit_only_when_storage_ready(
     assert result["provider_surface_audit"]["provider_requests"] == 8
     assert result["collection_enabled"] is False
     assert result["canary_enabled"] is False
+
+
+def test_worker_defaults_empty_optional_surface_audit_season(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("BASEBALL_ENABLE_COLLECTION", "false")
+    monkeypatch.setenv("BASEBALL_ENABLE_CANARY", "false")
+    monkeypatch.setenv("BASEBALL_PROVIDER_SURFACE_AUDIT_ID", "surface-empty-season")
+    monkeypatch.setenv("BASEBALL_PROVIDER_SURFACE_AUDIT_SEASON", "")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://example.invalid/db")
+    monkeypatch.setattr(worker, "apply_migrations", lambda _root: ())
+    monkeypatch.setattr(worker, "_record_activation_gate", lambda *_a, **_k: None)
+    monkeypatch.setattr(worker, "_record_runtime", lambda *_a, **_k: None)
+
+    calls = []
+
+    def fake_run(_root, *, audit_id, season):
+        calls.append((audit_id, season))
+        return {
+            "status": "COMPLETE",
+            "provider_surface_audit_id": audit_id,
+            "provider_requests": 0,
+        }
+
+    monkeypatch.setattr(provider_surface_audit, "run_provider_surface_audit", fake_run)
+
+    result = worker.run_once(Path("."))
+
+    assert calls == [("surface-empty-season", 2026)]
+    assert result["status"] == "ready"

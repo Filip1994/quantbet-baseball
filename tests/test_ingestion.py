@@ -137,3 +137,13 @@ def test_post_kickoff_observation_is_rejected() -> None:
         )
         == ()
     )
+
+
+def test_normalizes_provider_bookmaker_identity() -> None:
+    mixed_case = snapshot()
+    mixed_case["odds"]["bookmakers"][0]["name"] = "Bet365"
+
+    rows = canonical_moneyline_observations(mixed_case, receipt())
+
+    assert len(rows) == 1
+    assert rows[0].bookmaker == "bet365"

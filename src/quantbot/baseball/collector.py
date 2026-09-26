@@ -6,34 +6,16 @@ from pathlib import Path
 from typing import Any
 
 from .api import BaseballAPIBudgetExceeded, BaseballAPIClient, BaseballAPIError
+from .bookmaker_policy import is_playable_bookmaker
 from .lifecycle import flatten_market_observations
 from .scheduler import build_scheduler_record, is_observation_due
 
-LOCAL_BOOKMAKER_TOKENS = (
-    "bet365",
-    "1xbet",
-    "superbet",
-    "mozzart",
-    "maxbet",
-    "soccerbet",
-    "meridian",
-    "admiralbet",
-    "balkanbet",
-)
-TARGET_MARKET_TOKENS = (
-    "moneyline",
-    "home/away",
-    "winner",
-    "run line",
-    "spread",
-    "total",
-    "over/under",
-    "strikeout",
-    "hits",
-    "total bases",
-    "runs",
-    "rbi",
-    "home run",
+TARGET_MARKET_NAMES = frozenset(
+    {
+        "home/away",
+        "moneyline",
+        "over/under",
+    }
 )
 
 
@@ -134,19 +116,21 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
     market_names: set[str] = set()
     for record in records:
         bookmaker_name = record["name"]
-        keep_bookmaker = any(
-            token in _norm(bookmaker_name) for token in LOCAL_BOOKMAKER_TOKENS
-        )
+        _is_playable_book = is_playable_bookmaker(bookmaker_name)
         markets: list[dict[str, Any]] = []
         for market in record["markets"]:
             market_name = market["name"]
             market_names.add(market_name)
-            if keep_bookmaker or any(
-                token in _norm(market_name) for token in TARGET_MARKET_TOKENS
-            ):
+            if _norm(market_name) in TARGET_MARKET_NAMES:
                 markets.append(market)
-        if keep_bookmaker or markets:
-            bookmakers.append({"name": bookmaker_name, "markets": markets})
+        if markets:
+            bookmakers.append(
+                {
+                    "name": bookmaker_name,
+                    "playable": _is_playable_book,
+                    "markets": markets,
+                }
+            )
     return {
         "bookmakers": bookmakers,
         "bookmaker_names": sorted({r["name"] for r in records if r["name"]}),

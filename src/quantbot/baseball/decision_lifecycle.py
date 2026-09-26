@@ -9,6 +9,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
 
+from .bookmaker_policy import is_playable_bookmaker
 from .evidence import EvidenceError, OddsObservation
 from .market import devig_two_way
 from .value import edge, expected_value_per_unit, fair_decimal_odds
@@ -630,6 +631,8 @@ class RegisteredPick:
             _nonempty(getattr(self, field), field)
         if self.market_family != "moneyline":
             raise EvidenceError("registered pick market must be moneyline")
+        if not is_playable_bookmaker(self.bookmaker):
+            raise EvidenceError("registered pick bookmaker is not playable")
         if self.selection not in {"home", "away"}:
             raise EvidenceError("registered pick selection is unsupported")
         if self.state != "REGISTERED":
