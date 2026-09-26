@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import urlsplit
@@ -131,6 +131,69 @@ def diagnose_mlb_identity_coverage(
     }
 
 
+def diagnose_registry_gaps(
+    *,
+    standings: list[dict[str, object]],
+    mappings: tuple[MLBTeamIdentityMapping, ...],
+    fixtures: tuple[FixtureObservation, ...],
+) -> dict[str, object]:
+    """Compare the canonical 30-team provider universe with versioned mappings."""
+
+    mapped_by_api = {row.api_sports_team_id: row for row in mappings}
+    missing: list[dict[str, object]] = []
+    for row in standings:
+        team_id = int(row["team_id"])
+        if team_id in mapped_by_api:
+            continue
+        missing.append(
+            {
+                "api_sports_team_id": team_id,
+                "api_sports_team_name": str(row["team_name"]),
+                "standing_observed_at": str(row["observed_at"]),
+                "source_payload_ref": str(row["source_payload_ref"]),
+                "source_payload_checksum": str(row["source_payload_checksum"]),
+            }
+        )
+
+    drifts: list[dict[str, object]] = []
+    seen_drift: set[tuple[int, str]] = set()
+    for fixture in fixtures:
+        for side in ("home", "away"):
+            team_id = getattr(fixture, f"{side}_team_id")
+            current_name = getattr(fixture, f"{side}_team_name")
+            mapping = mapped_by_api.get(team_id)
+            if mapping is None:
+                continue
+            if mapping.api_sports_team_name.casefold() == current_name.casefold():
+                continue
+            key = (team_id, current_name.casefold())
+            if key in seen_drift:
+                continue
+            seen_drift.add(key)
+            drifts.append(
+                {
+                    "api_sports_team_id": team_id,
+                    "mapped_api_sports_team_name": mapping.api_sports_team_name,
+                    "current_api_sports_team_name": current_name,
+                    "official_mlb_team_id": mapping.official_mlb_team_id,
+                    "official_mlb_team_name": mapping.official_mlb_team_name,
+                    "provider_game_id": fixture.provider_game_id,
+                    "side": side,
+                    "fixture_observed_at": fixture.observed_at,
+                    "fixture_source_payload_ref": fixture.source_payload_ref,
+                    "fixture_source_payload_checksum": fixture.source_payload_checksum,
+                }
+            )
+
+    return {
+        "registry_team_universe_total": len(standings),
+        "missing_registry_mappings_count": len(missing),
+        "missing_registry_mappings": missing,
+        "current_api_name_drifts_count": len(drifts),
+        "current_api_name_drifts": drifts,
+    }
+
+
 def _read_verified_schedule_payload(
     archive: S3RawPayloadArchive,
     *,
@@ -204,6 +267,42 @@ def run_mlb_identity_diagnostic(
         fixtures = repository.latest_mlb_fixtures_for_schedule_date(
             date_iso=date_iso,
             observed_by=observed_by,
+        )
+        mappings = repository.team_mappings(mapping_version)
+        season = date.fromisoformat(date_iso).year
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT DISTINCT ON (team_id)
+                    team_id,
+                    team_name,
+                    observed_at,
+                    source_payload_ref,
+                    source_payload_checksum
+                FROM api_sports_standing_snapshots
+                WHERE league_id = 1
+                  AND season = %s
+                  AND observed_at <= %s
+                ORDER BY team_id, observed_at DESC, snapshot_id DESC
+                """,
+                (season, observed_by),
+            )
+            standing_rows = [
+                {
+                    "team_id": row[0],
+                    "team_name": row[1],
+                    "observed_at": row[2].isoformat(),
+                    "source_payload_ref": row[3],
+                    "source_payload_checksum": row[4],
+                }
+                for row in cursor.fetchall()
+            ]
+        result.update(
+            diagnose_registry_gaps(
+                standings=standing_rows,
+                mappings=mappings,
+                fixtures=fixtures,
+            )
         )
 
     result["archive_reads"] = 0
