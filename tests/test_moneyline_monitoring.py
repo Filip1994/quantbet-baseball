@@ -17,7 +17,7 @@ def _pick() -> RegisteredPick:
         game_id="30",
         market_family="moneyline",
         selection="home",
-        bookmaker="book-a",
+        bookmaker="bet365",
         entry_observation_id="00000000-0000-0000-0000-000000000305",
         entry_odds=2.0,
         model_probability=0.55,
@@ -102,7 +102,7 @@ class _Client:
                 {
                     "bookmakers": [
                         {
-                            "name": "book-a",
+                            "name": "bet365",
                             "bets": [
                                 {
                                     "name": "Moneyline",
