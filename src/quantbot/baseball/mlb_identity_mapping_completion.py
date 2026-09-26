@@ -12,7 +12,11 @@ from typing import Any, Protocol
 
 from .evidence import EvidenceError
 from .fixture_evidence import FixtureObservation
-from .mlb_identity import MLBTeamIdentityMapping, propose_team_identity_mappings
+from .mlb_identity import (
+    MLBTeamIdentityMapping,
+    diagnose_fixture_schedule_match,
+    propose_team_identity_mappings,
+)
 from .official_mlb import OfficialMLBError
 from .raw_archive import ArchiveReceipt
 
@@ -102,6 +106,8 @@ def complete_mlb_team_mappings(
         "team_mappings_total": len(existing),
         "mapping_failures": 0,
         "failed_provider_game_ids": [],
+        "schedule_time_shift_matches": 0,
+        "schedule_time_shift_provider_game_ids": [],
         "ready_for_enrichment": 0,
     }
     if len(existing) >= expected_team_count:
@@ -150,6 +156,7 @@ def complete_mlb_team_mappings(
     proposed_by_api: dict[int, MLBTeamIdentityMapping] = {}
     proposed_by_mlb: dict[int, MLBTeamIdentityMapping] = {}
     failed_games: list[int] = []
+    schedule_time_shift_games: list[int] = []
 
     for fixture in candidates:
         try:
@@ -162,8 +169,27 @@ def complete_mlb_team_mappings(
                 kickoff_tolerance=kickoff_tolerance,
             )
         except EvidenceError:
-            failed_games.append(fixture.provider_game_id)
-            continue
+            diagnostic = diagnose_fixture_schedule_match(
+                fixture,
+                payload,
+                kickoff_tolerance=kickoff_tolerance,
+            )
+            if (
+                diagnostic["classification"] == "FIRST_PITCH_MISMATCH"
+                and diagnostic["exact_pair_candidates"] == 1
+            ):
+                proposed = propose_team_identity_mappings(
+                    fixture,
+                    payload,
+                    receipt,
+                    mapping_version=mapping_version,
+                    verified_at=now,
+                    kickoff_tolerance=timedelta(days=1),
+                )
+                schedule_time_shift_games.append(fixture.provider_game_id)
+            else:
+                failed_games.append(fixture.provider_game_id)
+                continue
 
         fixture_failed = False
         for candidate in proposed:
@@ -197,8 +223,11 @@ def complete_mlb_team_mappings(
             failed_games.append(fixture.provider_game_id)
 
     failed_games = sorted(set(failed_games))
+    schedule_time_shift_games = sorted(set(schedule_time_shift_games))
     summary["mapping_failures"] = len(failed_games)
     summary["failed_provider_game_ids"] = failed_games
+    summary["schedule_time_shift_matches"] = len(schedule_time_shift_games)
+    summary["schedule_time_shift_provider_game_ids"] = schedule_time_shift_games
     if failed_games:
         summary["status"] = "FAILED"
         return summary
