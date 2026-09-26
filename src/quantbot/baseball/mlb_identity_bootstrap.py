@@ -33,12 +33,11 @@ class MLBIdentityBootstrapClient(Protocol):
 
 
 class MLBIdentityBootstrapRepository(Protocol):
-    def latest_mlb_fixtures_around_date(
+    def latest_mlb_fixtures_for_schedule_date(
         self,
         *,
         date_iso: str,
         observed_by: datetime,
-        padding: timedelta,
     ) -> tuple[FixtureObservation, ...]: ...
 
     def team_mappings(self, mapping_version: str) -> tuple[MLBTeamIdentityMapping, ...]:
@@ -101,10 +100,9 @@ def collect_mlb_identity_bootstrap(
         raise ValueError("expected_team_count must be positive")
     target_day = _date(date_iso)
     now = _utc(now)
-    fixtures = repository.latest_mlb_fixtures_around_date(
+    fixtures = repository.latest_mlb_fixtures_for_schedule_date(
         date_iso=target_day.isoformat(),
         observed_by=now,
-        padding=timedelta(hours=12),
     )
     existing_links = {
         fixture.provider_game_id: repository.game_link_for_provider_game(
