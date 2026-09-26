@@ -388,6 +388,9 @@ def derive_team_schedule_features(
 
     cutoff = _timestamp(cutoff_at, "cutoff_at")
     target_start = _timestamp(target.scheduled_first_pitch, "target.scheduled_first_pitch")
+    target_observed = _timestamp(target.observed_at, "target.observed_at")
+    if target_observed > cutoff:
+        raise EvidenceError("target schedule snapshot exceeds decision cutoff")
     if cutoff >= target_start:
         raise EvidenceError("schedule feature cutoff must precede target first pitch")
 
