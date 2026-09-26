@@ -889,3 +889,10 @@ The dedicated `quantbet-baseball-dashboard` service is production-online at `htt
 PRs #29–#32 established the dashboard and hardened readiness. The key acceptance gate is now strong: `/readyz` executes the complete production dashboard snapshot. This intentionally exposed and then eliminated a psycopg `dict_row` mismatch with the existing tuple-based evidence repository. Final dashboard deployment `a5aed490-7fba-4057-8ea1-22b2394f0e94` reached SUCCESS and Railway reported `Healthcheck succeeded` on the full snapshot path.
 
 Worker deployment `af32f80a-3c57-4985-ba09-925bb1c0eeb7` also reached SUCCESS. Worker cron/start semantics are unchanged; collection and canary remain off and paper mode remains on. No provider requests were introduced by dashboard activity.
+
+
+## Market acceptance canary PASSED — 2026-09-26
+
+Canary `5dbf934c-c5c6-565f-8425-f49b79964286` passed on natural cron with 6/8 total provider requests, 4 odds calls, 522 raw market rows, 42 canonical moneyline rows and 42 PostgreSQL inserts. Archive verification and DB-write verification were both true, with zero collection errors and no canary reason codes.
+
+The post-canary `SCHEDULED_COLLECTION` gate returned **READY** with canary_passed=true, PAPER_MODE=true, collection_enabled=false, migrations_current=true, raw_archive_configured=true and runtime_fresh=true. The next cron returned `ALREADY_PASSED` rather than re-running provider ingestion. Canary was explicitly disarmed afterward; scheduled collection remains disabled pending fixed 300 RSD paper-stake deployment and final downstream checks.
