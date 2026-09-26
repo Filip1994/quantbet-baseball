@@ -475,11 +475,10 @@ def diagnose_fixture_schedule_match(
         away_name_exact = _normalized_name(game.away_team_name) == _normalized_name(
             fixture.away_team_name
         )
-        reverse_orientation = (
-            _normalized_name(game.home_team_name)
-            == _normalized_name(fixture.away_team_name)
-            and _normalized_name(game.away_team_name)
-            == _normalized_name(fixture.home_team_name)
+        reverse_orientation = _normalized_name(game.home_team_name) == _normalized_name(
+            fixture.away_team_name
+        ) and _normalized_name(game.away_team_name) == _normalized_name(
+            fixture.home_team_name
         )
         rows.append(
             {
@@ -498,9 +497,7 @@ def diagnose_fixture_schedule_match(
             }
         )
 
-    eligible = [
-        row for row in rows if row["exact_pair"] and row["within_tolerance"]
-    ]
+    eligible = [row for row in rows if row["exact_pair"] and row["within_tolerance"]]
     exact_pair = [row for row in rows if row["exact_pair"]]
     reverse_near = [
         row
@@ -521,9 +518,7 @@ def diagnose_fixture_schedule_match(
         classification = "AMBIGUOUS_EXACT_MATCH"
     elif exact_pair:
         classification = (
-            "FIRST_PITCH_MISMATCH"
-            if len(exact_pair) == 1
-            else "AMBIGUOUS_EXACT_PAIR"
+            "FIRST_PITCH_MISMATCH" if len(exact_pair) == 1 else "AMBIGUOUS_EXACT_PAIR"
         )
     elif reverse_near:
         classification = (
