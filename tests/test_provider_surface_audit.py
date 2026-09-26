@@ -3,8 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from quantbot.baseball import provider_surface_audit
-from quantbot.baseball import worker
+from quantbot.baseball import provider_surface_audit, worker
 from quantbot.baseball.api import BaseballAPIError
 from quantbot.baseball.raw_archive import ArchiveReceipt
 
