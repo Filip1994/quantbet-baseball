@@ -426,7 +426,7 @@ class BaseballDashboard:
         ]
         provider_html = "".join(
             f'<div class="metric"><small>{escape(label)}</small><b>{count}</b>'
-            f'<span>{escape(_fmt_age(_age(data["generated_at"], stamp)))}</span></div>'
+            f"<span>{escape(_fmt_age(_age(data['generated_at'], stamp)))}</span></div>"
             for label, count, stamp in provider_evidence
         )
         reasons = gate.get("reason_codes") or []
