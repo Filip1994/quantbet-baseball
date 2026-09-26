@@ -99,7 +99,9 @@ def test_mlb_identity_repository_is_immutable_and_idempotent() -> None:
             date_iso="2026-09-20",
             observed_by=datetime(2026, 9, 20, 17, 0, tzinfo=UTC),
         )
-        assert [item.provider_game_id for item in fixtures] == [186584]
+        fixture_by_id = {item.provider_game_id: item for item in fixtures}
+        assert 186584 in fixture_by_id
+        assert fixture_by_id[186584] == _fixture()
 
         assert repository.append_team_mapping(mappings[0]) is True
         assert repository.append_team_mapping(mappings[1]) is True
