@@ -127,4 +127,6 @@ def test_official_mlb_structured_source_audit() -> None:
         "transactions": tx_summary,
         "active_roster": roster_summary,
     }
-    warnings.warn("MLB_SOURCE_AUDIT=" + json.dumps(summary, sort_keys=True), stacklevel=1)
+    warnings.warn(
+        "MLB_SOURCE_AUDIT=" + json.dumps(summary, sort_keys=True), stacklevel=1
+    )
