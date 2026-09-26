@@ -325,7 +325,6 @@ def test_registered_pick_rejects_non_playable_bookmaker() -> None:
         )
 
 
-
 def test_registered_pick_rejects_noncanonical_paper_stake() -> None:
     prediction = _prediction()
     home = _observation(
