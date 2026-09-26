@@ -50,8 +50,10 @@ Candidate fields/derivations:
 - home/away identity;
 - provider game status;
 - home/away schedule density;
-- previous-game finish time;
-- days/rest hours since previous game;
+- previous-game first-pitch time from canonical API-Sports history;
+- hours since previous first pitch and UTC calendar days off;
+- games played in the prior 72h/168h windows;
+- previous-game extra-inning indicator;
 - travel proxy where venue coordinates are known;
 - doubleheader indicator;
 - series game number when derivable without future data.
@@ -242,15 +244,16 @@ Completed production gates:
 
 Current build sequence:
 
-1. ingest verified official MLB probable-starter / roster / transaction evidence point-in-time;
-2. create canonical venue/roof registry;
-3. ingest expected/confirmed lineup states without conflation;
-4. integrate weather snapshots;
-5. assemble immutable feature snapshots using actual source timestamps;
-6. train/evaluate chronological Moneyline V1;
-7. produce genuine PICK/PASS decisions only after calibration acceptance;
-8. close the first real 300 RSD paper lifecycle through settlement and CLV;
-9. activate full-game totals only after Moneyline closes end to end.
+1. finish API-Sports primary-provider canonical ingestion for standings, team statistics and league-season game history;
+2. derive schedule density, rest, prior extra-inning and home/road context locally from archived API-Sports history;
+3. ingest official MLB granular enrichment point-in-time: starter, lineup, roster, transactions, bullpen and venue/roof;
+4. create/version the canonical venue/roof registry;
+5. integrate archived Open-Meteo forecast snapshots only after venue/roof reliability is established;
+6. assemble immutable feature snapshots using actual source timestamps;
+7. train/evaluate chronological Moneyline V1;
+8. produce genuine PICK/PASS decisions only after calibration acceptance;
+9. close the first real 300 RSD paper lifecycle through settlement and CLV;
+10. activate full-game totals only after Moneyline closes end to end.
 
 ## 7. Explicit non-goals
 
