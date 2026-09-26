@@ -184,8 +184,6 @@ def test_client_archives_feed_and_keeps_timecode_separate_from_cutoff(tmp_path) 
     assert snapshot.source_payload_ref.startswith("file://")
     assert len(snapshot.source_payload_checksum) == 64
     assert snapshot.source_observed_at == "2026-09-20T15:12:58+00:00"
-    archived = json.loads(
-        next(tmp_path.rglob("*.json")).read_text(encoding="utf-8")
-    )
+    archived = json.loads(next(tmp_path.rglob("*.json")).read_text(encoding="utf-8"))
     assert archived["endpoint"].endswith("/feed/live")
     assert archived["params"] == {"timecode": "20260920_151000"}
