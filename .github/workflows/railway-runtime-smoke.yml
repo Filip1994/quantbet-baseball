@@ -44,6 +44,7 @@ on:
       - "tests/test_settlement_lifecycle.py"
       - "tests/test_settlement_postgres_integration.py"
       - "tests/test_postgres_integration.py"
+      - "tests/test_game_history_postgres_integration.py"
       - "tests/test_provider_data.py"
       - "tests/test_slow_provider_collection.py"
       - "tests/test_api_object_response.py"
@@ -96,6 +97,7 @@ on:
       - "tests/test_settlement_lifecycle.py"
       - "tests/test_settlement_postgres_integration.py"
       - "tests/test_postgres_integration.py"
+      - "tests/test_game_history_postgres_integration.py"
       - "tests/test_provider_data.py"
       - "tests/test_slow_provider_collection.py"
       - "tests/test_api_object_response.py"
@@ -176,6 +178,7 @@ jobs:
           tests/test_settlement_lifecycle.py
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
+          tests/test_game_history_postgres_integration.py
           tests/test_provider_data.py
           tests/test_slow_provider_collection.py
           tests/test_api_object_response.py
@@ -230,6 +233,7 @@ jobs:
           tests/test_settlement_lifecycle.py
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
+          tests/test_game_history_postgres_integration.py
           tests/test_provider_data.py
           tests/test_slow_provider_collection.py
           tests/test_api_object_response.py
@@ -259,6 +263,7 @@ jobs:
           tests/test_settlement_lifecycle.py
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
+          tests/test_game_history_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_postgres_integration.py
           tests/test_mlb_identity_bootstrap.py
