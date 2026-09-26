@@ -204,7 +204,6 @@ def test_ready_final_quote_can_register_immutable_paper_pick() -> None:
     assert pick.state == "REGISTERED"
 
 
-
 def test_non_playable_bookmaker_is_never_selected_as_candidate() -> None:
     home = _observation(
         observation_id="00000000-0000-0000-0000-000000000101",
