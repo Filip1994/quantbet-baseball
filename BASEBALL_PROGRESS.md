@@ -1528,3 +1528,62 @@ Immediate safety action:
 - `PAPER_MODE=true`.
 
 Do not widen the parser further based on this result. The next investigation should determine why four selected pregame games had empty odds responses, using historical live payloads and provider coverage evidence before spending additional API budget.
+
+
+## 75. Single-response games schema audit across MLB and other leagues — 2026-09-26
+
+A fresh one-request provider diagnostic was attempted through the Railway agent, but Railway's agent security model does not expose `API_BASEBALL_KEY` or `API_BASEBALL_BASE_URL` values to the agent, so **zero new provider requests were made**.
+
+Instead, one original archived API-Sports `/games` response already retained in the repository was audited as a single-response schema comparison:
+
+- source: `data/baseball/raw_api/2026-09-14/20260914T202857.785122Z_games_6722c60d17a2750c.json`;
+- provider request: `games?date=2026-09-14`;
+- captured at: `2026-09-14T20:28:57.785309+00:00`;
+- API results: 13;
+- API errors: none.
+
+League coverage in this one response:
+
+- MLB (id 1): 7 games;
+- NPB (id 2): 3 games;
+- LMB (id 21): 1 game;
+- PCL (id 4): 1 game;
+- CPBL (id 29): 1 game.
+
+The MLB rows and non-MLB rows exposed the same top-level game-record keys:
+
+- `id`;
+- `date`;
+- `time`;
+- `timestamp`;
+- `timezone`;
+- `week`;
+- `status`;
+- `country`;
+- `league`;
+- `teams`;
+- `scores`.
+
+Nested schemas were also the same across sampled leagues:
+
+- league: `id,name,type,season,logo`;
+- country: `id,name,code,flag`;
+- teams: `home,away`, each with `id,name,logo`;
+- status: `long,short`;
+- scores: `home,away`.
+
+In this endpoint response there were no fields for:
+
+- injuries;
+- probable or confirmed starting pitchers;
+- lineups;
+- weather;
+- venue/stadium metadata;
+- stadium coordinates;
+- roof state;
+- umpire;
+- player statistics.
+
+No MLB-only top-level fields were found, and no non-MLB-only top-level fields were found in this single response.
+
+Interpretation: the generic `/games` endpoint is schedule/result metadata and does not by itself provide the rich pregame context required by the research model. MLB enrichment must therefore come from additional verified provider endpoints and/or external structured sources. Historical raw evidence should be preferred over spending new provider requests when the question can already be answered from archived payloads.
