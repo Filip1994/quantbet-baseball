@@ -181,7 +181,6 @@ def test_worker_runs_surface_audit_only_when_storage_ready(
     assert result["canary_enabled"] is False
 
 
-
 def test_worker_uses_default_surface_audit_season_when_env_blank(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
