@@ -235,7 +235,12 @@ class TeamStatisticsSnapshot:
     def __post_init__(self) -> None:
         if self.provider != _PROVIDER:
             raise EvidenceError("team statistics provider is unsupported")
-        for field in ("snapshot_id", "team_name", "source_payload_ref", "schema_version"):
+        for field in (
+            "snapshot_id",
+            "team_name",
+            "source_payload_ref",
+            "schema_version",
+        ):
             _text(getattr(self, field), field)
         for field in ("league_id", "team_id"):
             _integer(getattr(self, field), field, minimum=1)
