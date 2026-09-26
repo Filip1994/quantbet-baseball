@@ -79,10 +79,14 @@ def diagnose_mlb_identity_coverage(
                 {
                     "provider_game_id": fixture.provider_game_id,
                     "kickoff_at": fixture.kickoff_at,
+                    "provider_status": fixture.provider_status,
+                    "observed_at": fixture.observed_at,
                     "home_team_id": fixture.home_team_id,
                     "home_team_name": fixture.home_team_name,
                     "away_team_id": fixture.away_team_id,
                     "away_team_name": fixture.away_team_name,
+                    "source_payload_ref": fixture.source_payload_ref,
+                    "source_payload_checksum": fixture.source_payload_checksum,
                     "link_present": link is not None,
                     "missing_team_mappings": missing,
                     "reason_code": (
