@@ -1062,3 +1062,70 @@ Bounded official MLB Stats API audit passed with 136 tests / 6 skipped. Historic
 The 2m58s difference between requested timecode and response metadata timestamp is a critical anti-leakage finding. Historical feature ingestion must use the actual provider response metadata timestamp as source cutoff evidence. A requested timestamp alone is insufficient.
 
 PR #42, `Document verified official MLB source contracts`, passed tests and was squash-merged as `74eeb9cf3220225143c780425269860c2d711c31`. The canonical variable and research feature registries now record these source contracts, current scheduled-collection state and migration-009 empty-poll semantics.
+
+
+## 2026-09-26 source hierarchy lock and post-migration burn acceptance
+
+### Adaptive odds cadence production acceptance
+
+Migration 009 was validated across consecutive natural cron cycles.
+
+Seed cycle `9cdcda9b-e5e3-489a-92bf-eea9e307875c` at 08:01 UTC:
+
+- pregame games: 52;
+- due events: 52;
+- odds calls: 52;
+- successful immutable poll attempts inserted: 52;
+- canonical quote rows: 148;
+- errors: 0.
+
+Next cycle `316946c5-cb31-4afb-bef5-fffb07c49fc9` at 08:15 UTC:
+
+- pregame games: 51;
+- due events: 7;
+- not-due events: 44;
+- odds calls: 7;
+- poll attempts inserted: 7;
+- canonical rows: 28;
+- errors: 0.
+
+This closes the successful-empty-response burn defect. Games successfully checked in the prior cycle no longer become immediately due merely because no canonical quote row existed.
+
+### Canonical source hierarchy locked
+
+The governing source architecture is now:
+
+- API-Sports Baseball = primary provider;
+- official MLB Stats API = granular baseball enrichment only;
+- Open-Meteo = weather only;
+- QuantBet = local derivations and models.
+
+API-Sports remains canonical for games, schedule/history, results/status, standings, team statistics, odds, bookmaker/market intelligence and settlement evidence. MLB must not become a parallel source for those facts. MLB schedule access is permitted only as an identity bridge to obtain `gamePk` needed to fetch granular starter/lineup/roster/bullpen/venue enrichment.
+
+### Official MLB enrichment boundary merged
+
+PR #43 `Add official MLB point-in-time pregame evidence` was tightened to enrichment-only semantics, passed Baseball tests + Railway runtime smoke, and was squash-merged as `262b5d2e85909245ca221c192f691292d041da56`.
+
+The merged boundary stores no MLB team-strength/standings duplication. It preserves probable starters, batting-order presence, bullpen identity, venue/roof/location metadata, raw provenance and actual `metaData.timeStamp` cutoff semantics. Scheduled MLB enrichment polling is still OFF pending cross-provider identity mapping.
+
+Worker deployment `b64eb7f3-6fbd-45c2-84c2-ad2bfd6a7d24` and dashboard deployment `d854b489-a9ac-4ba8-8bba-8cd105271c84` are SUCCESS on this commit.
+
+### Phase 1 API-Sports primary-data work
+
+PR #44 `Canonicalize API-Sports primary team data` is in progress.
+
+Current implementation on the PR branch includes:
+
+- support for the live-verified object-shaped `teams/statistics` response;
+- immutable standings evidence;
+- immutable overall/home/away team-statistics evidence;
+- non-redundant compact team-strength feature view;
+- immutable bookmaker and bet-type reference catalog snapshots;
+- migration 011 + PostgreSQL repository;
+- low-frequency slow-source collector that can consume only leftover per-cycle request capacity after settlement, registered-pick monitoring, schedule discovery and adaptive odds;
+- daily standings/team-stat cadence;
+- weekly catalog cadence;
+- default-OFF production feature flag pending CI + bounded activation acceptance;
+- canonical `docs/DATA_SOURCE_ARCHITECTURE.md`.
+
+No player props, real-money path, MLB polling or bookmaker execution rules are changed by this Phase 1 work.
