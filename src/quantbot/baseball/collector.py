@@ -6,13 +6,10 @@ from pathlib import Path
 from typing import Any
 
 from .api import BaseballAPIBudgetExceeded, BaseballAPIClient, BaseballAPIError
+from .bookmaker_policy import is_playable_bookmaker
 from .lifecycle import flatten_market_observations
 from .scheduler import build_scheduler_record, is_observation_due
 
-PLAYABLE_BOOKMAKER_TOKENS = (
-    "bet365",
-    "1xbet",
-)
 TARGET_MARKET_NAMES = frozenset(
     {
         "home/away",
@@ -119,9 +116,7 @@ def compact_odds(payload: list[dict[str, Any]]) -> dict[str, Any]:
     market_names: set[str] = set()
     for record in records:
         bookmaker_name = record["name"]
-        _is_playable_book = any(
-            token in _norm(bookmaker_name) for token in PLAYABLE_BOOKMAKER_TOKENS
-        )
+        _is_playable_book = is_playable_bookmaker(bookmaker_name)
         markets: list[dict[str, Any]] = []
         for market in record["markets"]:
             market_name = market["name"]
