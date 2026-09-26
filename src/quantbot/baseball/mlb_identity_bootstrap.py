@@ -7,7 +7,7 @@ official MLB pregame enrichment.
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, Protocol
 
 from .evidence import EvidenceError
@@ -19,6 +19,7 @@ from .mlb_identity import (
     link_fixture_to_mlb_game,
     propose_team_identity_mappings,
 )
+from .official_mlb import OfficialMLBError
 from .raw_archive import ArchiveReceipt
 
 
@@ -142,10 +143,14 @@ def collect_mlb_identity_bootstrap(
         )
         return summary
 
-    payload, receipt = client.schedule_identity_map_with_receipt(
-        target_day.isoformat(),
-        captured_at=now,
-    )
+    try:
+        payload, receipt = client.schedule_identity_map_with_receipt(
+            target_day.isoformat(),
+            captured_at=now,
+        )
+    except OfficialMLBError:
+        summary["status"] = "SCHEDULE_ERROR"
+        return summary
     summary["schedule_calls"] = 1
 
     by_api = {row.api_sports_team_id: row for row in existing_mappings}
