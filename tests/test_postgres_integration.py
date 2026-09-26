@@ -161,6 +161,12 @@ def test_migrations_and_repository_are_idempotent() -> None:
         assert health["reference_catalog_snapshots"] >= 0
         assert health["game_history_snapshots"] >= 0
         assert health["distinct_game_history_games"] >= 0
+        assert health["game_history_final_score_rows"] >= 0
+        assert health["game_history_hit_rows"] >= 0
+        assert health["game_history_error_rows"] >= 0
+        assert health["game_history_inning_rows"] >= 0
+        assert health["game_history_extra_inning_games"] >= 0
+        assert health["game_history_archived_rows"] >= 0
         assert health["official_mlb_pregame_snapshots"] >= 0
 
 
