@@ -16,6 +16,7 @@ from quantbot.baseball.moneyline_registration import (
     evaluate_preliminary_moneyline,
     verify_and_register_moneyline,
 )
+from quantbot.baseball.odds_poll_evidence import OddsPollAttempt
 from quantbot.baseball.postgres_repository import PostgreSQLEvidenceRepository
 from quantbot.baseball.raw_archive import ArchiveReceipt
 from quantbot.baseball.runtime_evidence import CollectionCycle
@@ -57,6 +58,27 @@ def test_migrations_and_repository_are_idempotent() -> None:
         assert repository.append_observation(record) is False
         assert repository.get_observation(record.observation_id) == record
         assert repository.stats().observations == before_stats.observations + 1
+
+        poll = OddsPollAttempt(
+            poll_attempt_id=str(uuid.uuid4()),
+            game_id="1",
+            provider="api-sports-baseball",
+            provider_game_id=1,
+            attempted_at="2026-09-20T17:00:00+00:00",
+            kickoff_at="2026-09-20T19:00:00+00:00",
+            response_rows=1,
+            raw_market_rows=2,
+            canonical_rows=1,
+            source_payload_ref="s3://raw/odds-poll.json",
+            source_payload_checksum="f" * 64,
+        )
+        assert repository.append_odds_poll_attempt(poll) is True
+        assert repository.append_odds_poll_attempt(poll) is False
+        assert (
+            repository.latest_odds_poll_times()["1"]
+            .isoformat()
+            .startswith("2026-09-20T17:00:00")
+        )
         assert (
             repository.latest_observation_times()["1"]
             .isoformat()
@@ -123,6 +145,8 @@ def test_migrations_and_repository_are_idempotent() -> None:
         )
         assert health["distinct_fixtures"] == before_health["distinct_fixtures"] + 1
         assert health["odds_observations"] == before_health["odds_observations"] + 1
+        assert health["odds_poll_attempts"] == before_health["odds_poll_attempts"] + 1
+        assert health["distinct_polled_games"] >= before_health["distinct_polled_games"]
         assert (
             health["distinct_quote_games"] == before_health["distinct_quote_games"] + 1
         )

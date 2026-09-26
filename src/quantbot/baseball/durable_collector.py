@@ -31,6 +31,7 @@ from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
+from .odds_poll_evidence import OddsPollAttempt, build_odds_poll_attempt
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .raw_archive import archive_from_env
 from .runtime_evidence import CollectionCycle
@@ -41,9 +42,11 @@ _ADVISORY_LOCK_KEY = 726478920260918
 
 
 class CollectorRepository(Protocol):
-    def latest_observation_times(self) -> dict[str, datetime]: ...
+    def latest_odds_poll_times(self) -> dict[str, datetime]: ...
 
     def append_observations(self, records: tuple[OddsObservation, ...]) -> int: ...
+
+    def append_odds_poll_attempt(self, record: OddsPollAttempt) -> bool: ...
 
     def append_fixture_observations(
         self,
@@ -134,7 +137,7 @@ def collect_with_dependencies(
                 games.append(game)
                 seen_game_ids.add(game_id)
 
-    last_seen = repository.latest_observation_times()
+    last_seen = repository.latest_odds_poll_times()
     due: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
     learning: list[tuple[float, dict[str, Any], dict[str, Any]]] = []
 
@@ -182,6 +185,7 @@ def collect_with_dependencies(
     raw_market_rows = 0
     canonical_rows = 0
     inserted = 0
+    poll_attempts_inserted = 0
     schema_market_names: set[str] = set()
     schema_candidate_values: dict[str, set[str]] = {}
     schema_odds_payload_rows = 0
@@ -259,7 +263,8 @@ def collect_with_dependencies(
                                 labels.add(label)
 
         compact = compact_odds(odds)
-        raw_market_rows += _market_row_count(compact)
+        raw_rows = _market_row_count(compact)
+        raw_market_rows += raw_rows
         home, away = _team_names(game)
         snapshot = {
             "captured_at": receipt.captured_at,
@@ -273,6 +278,16 @@ def collect_with_dependencies(
         records = canonical_moneyline_observations(snapshot, receipt)
         canonical_rows += len(records)
         inserted += repository.append_observations(records)
+        attempt = build_odds_poll_attempt(
+            game_id=game_id,
+            kickoff_at=kickoff,
+            receipt=receipt,
+            response_rows=len(odds),
+            raw_market_rows=raw_rows,
+            canonical_rows=len(records),
+        )
+        if repository.append_odds_poll_attempt(attempt):
+            poll_attempts_inserted += 1
 
     result: dict[str, int | str] = {
         "status": "collected",
@@ -288,6 +303,7 @@ def collect_with_dependencies(
         "raw_market_rows": raw_market_rows,
         "canonical_rows": canonical_rows,
         "observations_inserted": inserted,
+        "poll_attempts_inserted": poll_attempts_inserted,
         "api_requests": client.request_count,
         "api_remaining": client.remaining_budget,
         "errors": errors,
