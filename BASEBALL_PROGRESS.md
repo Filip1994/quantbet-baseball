@@ -1804,3 +1804,24 @@ Scheduled-collection activation assessment immediately after the canary:
 - reason codes: none.
 
 The next natural cron at 06:45 UTC returned `ALREADY_PASSED` for the same canary id and made no second canary ingestion run. Canary was then explicitly disarmed. Collection remains OFF and paper mode remains ON until the fixed 300 RSD stake migration and final downstream readiness checks are completed.
+
+
+## 82. Fixed 300 RSD paper stake deployed — 2026-09-26
+
+PR #35 passed Baseball tests and Railway runtime smoke and squash-merged to main as `8eb5dc638f95a43ac14d1d893a72e09d98bc0cab`.
+
+Production worker deployment `7ea4ea81-e3d6-4425-9ec9-c47ccb7b37d4` applied migration `008_paper_stake_rsd.sql` through the existing Railway predeploy migration command and reached SUCCESS.
+
+Migration 008 makes paper stake evidence canonical:
+
+- `registered_picks.paper_stake_minor = 30000`;
+- `registered_picks.currency = RSD`;
+- DB constraints reject arbitrary stake/currency values;
+- domain-level `RegisteredPick` independently enforces the same 300 RSD / RSD contract;
+- settlement projection exposes `paper_profit_minor`;
+- dashboard projection exposes `settled_stake_minor` and `realized_profit_minor`;
+- the production Baseball dashboard now reads DB-backed monetary P/L rather than deriving monetary stake only in the frontend.
+
+The first dashboard deploy raced ahead of the worker migration and correctly failed full-readiness on missing `settled_stake_minor`. After migration 008 was applied, dashboard redeploy `4ba844a2-0eec-461b-a210-086b8c544efe` reached SUCCESS with the same full-snapshot readiness gate. This is preserved as positive fail-closed migration-order evidence.
+
+Worker safety remains PAPER_MODE=true, canary=false and collection=false at this checkpoint.
