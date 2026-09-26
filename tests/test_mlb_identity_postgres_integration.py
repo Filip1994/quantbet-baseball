@@ -1,5 +1,5 @@
 import os
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import psycopg
@@ -98,7 +98,7 @@ def test_mlb_identity_repository_is_immutable_and_idempotent() -> None:
         fixtures = repository.latest_mlb_fixtures_around_date(
             date_iso="2026-09-20",
             observed_by=datetime(2026, 9, 20, 17, 0, tzinfo=UTC),
-            padding=__import__("datetime").timedelta(hours=12),
+            padding=timedelta(hours=12),
         )
         assert [item.provider_game_id for item in fixtures] == [186584]
 
