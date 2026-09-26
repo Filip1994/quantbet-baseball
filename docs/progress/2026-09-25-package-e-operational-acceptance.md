@@ -942,3 +942,37 @@ Code review of `src/quantbot/baseball/durable_collector.py` found a deterministi
 This explains the observed 54 odds calls in one cycle and is a real API-efficiency defect, not a tuning preference.
 
 Immediate engineering action: preserve collection activation, fix scheduled selection so non-due games cannot consume broad discovery capacity, add regression coverage and explicit efficiency telemetry, and validate the change before production merge. Do not lower the global budget/cap as a substitute for correcting scheduling semantics.
+
+
+## 2026-09-26 adaptive odds cadence repair merged and deployed
+
+Additional production evidence made the API-burn defect measurable before the repair deployed.
+
+Old-code scheduled cycle at `2026-09-26T07:31:42Z`:
+
+- cycle: `00305c67-5422-4206-9e21-484a0a4078d1`;
+- provider requests: 57 / 75;
+- games seen: 65;
+- pregame games: 55;
+- scheduler due events: **45**;
+- games selected for odds: **55**;
+- odds calls: **55**;
+- raw compact market rows: 2,757;
+- canonical rows / observations inserted: 190 / 190;
+- errors: 0.
+
+Therefore at least **10 broad odds requests in that single cycle were explicitly non-due** according to the project's own adaptive cadence. This directly confirms the due+learning fallback was consuming quota outside scheduler intent.
+
+Repair PR #38, `Honor adaptive cadence for scheduled odds polling`, changed broad selection to consume only `due` games. It also adds `not_due_events` and `due_events_unselected` telemetry and a regression test proving a recently observed game is not queried before its interval expires.
+
+Validation:
+
+- Baseball tests: PASS;
+- Railway runtime smoke: PASS;
+- PR #38 squash-merged to main as `a6dd7624040249b233453272f25029ef92446815`;
+- worker deployment `885575ba-0750-4b61-87fb-08cf5a096a57`: SUCCESS;
+- dashboard deployment `12008f77-e4ec-46ac-a05a-eaff68faab83`: SUCCESS;
+- collection was not disabled;
+- cron, request budget, bookmaker policy, paper mode and Football resources were not changed.
+
+Acceptance of the burn repair still requires a natural scheduled production cycle on `a6dd762...` proving `games_selected <= due_events` and exposing the new telemetry. No API-saving claim beyond the demonstrated old-code waste is considered complete until that live post-deploy evidence exists.
