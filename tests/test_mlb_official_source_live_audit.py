@@ -9,6 +9,7 @@ import json
 import urllib.parse
 import urllib.request
 import warnings
+from datetime import UTC, datetime, timedelta
 
 BASE = "https://statsapi.mlb.com/api"
 
@@ -133,4 +134,61 @@ def test_official_mlb_structured_source_audit() -> None:
     }
     warnings.warn(
         "MLB_SOURCE_AUDIT=" + json.dumps(summary, sort_keys=True), stacklevel=1
+    )
+
+
+def test_official_mlb_historical_timecode_replay_audit() -> None:
+    schedule = _get(
+        "/v1/schedule",
+        {
+            "sportId": "1",
+            "date": "2026-09-20",
+            "hydrate": "probablePitcher,team,venue",
+        },
+    )
+    games = [
+        game
+        for date in (schedule.get("dates") or [])
+        if isinstance(date, dict)
+        for game in (date.get("games") or [])
+        if isinstance(game, dict)
+    ]
+    assert games, "historical MLB schedule returned no games"
+
+    game = games[0]
+    game_pk = int(game["gamePk"])
+    game_date = datetime.fromisoformat(str(game["gameDate"]).replace("Z", "+00:00"))
+    requested_at = (game_date.astimezone(UTC) - timedelta(hours=2)).replace(microsecond=0)
+    timecode = requested_at.strftime("%Y%m%d_%H%M%S")
+
+    feed = _get(
+        f"/v1.1/game/{game_pk}/feed/live",
+        {"timecode": timecode},
+    )
+    game_data = feed.get("gameData") or {}
+    live_data = feed.get("liveData") or {}
+    boxscore = live_data.get("boxscore") or {}
+    teams = boxscore.get("teams") or {}
+    side_summary = {}
+    for side in ("away", "home"):
+        side_data = teams.get(side) or {}
+        side_summary[side] = {
+            "batting_order_count": len(side_data.get("battingOrder") or []),
+            "players_count": len(side_data.get("players") or {}),
+            "bullpen_count": len(side_data.get("bullpen") or []),
+            "pitchers_count": len(side_data.get("pitchers") or []),
+        }
+
+    summary = {
+        "game_pk": game_pk,
+        "scheduled_game_date": game.get("gameDate"),
+        "requested_timecode": timecode,
+        "metadata_timestamp": (feed.get("metaData") or {}).get("timeStamp"),
+        "status": game_data.get("status") or {},
+        "probable_pitcher_sides": sorted((game_data.get("probablePitchers") or {})),
+        "boxscore": side_summary,
+        "plays_count": len((live_data.get("plays") or {}).get("allPlays") or []),
+    }
+    warnings.warn(
+        "MLB_TIMECODE_AUDIT=" + json.dumps(summary, sort_keys=True), stacklevel=1
     )
