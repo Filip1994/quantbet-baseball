@@ -143,10 +143,12 @@ def test_standings_same_team_can_exist_in_multiple_provider_groups() -> None:
         "points": {"for": 800, "against": 720},
         "team": {"id": 22, "name": "Example Team"},
     }
-    rows = [[
-        {**base, "position": 1, "group": {"name": "American League"}},
-        {**base, "position": 2, "group": {"name": "AL East"}},
-    ]]
+    rows = [
+        [
+            {**base, "position": 1, "group": {"name": "American League"}},
+            {**base, "position": 2, "group": {"name": "AL East"}},
+        ]
+    ]
 
     records = canonical_standings(
         rows,
