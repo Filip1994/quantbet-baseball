@@ -154,6 +154,14 @@ def test_migrations_and_repository_are_idempotent() -> None:
         assert health["pick_events"] == before_health["pick_events"]
         assert health["collection_cycles"] == before_health["collection_cycles"] + 1
         assert health["runtime_cycles"] == before_health["runtime_cycles"] + 1
+        assert health["standing_snapshots"] >= 0
+        assert health["distinct_standing_teams"] >= 0
+        assert health["team_statistics_snapshots"] >= 0
+        assert health["distinct_team_statistics_teams"] >= 0
+        assert health["reference_catalog_snapshots"] >= 0
+        assert health["game_history_snapshots"] >= 0
+        assert health["distinct_game_history_games"] >= 0
+        assert health["official_mlb_pregame_snapshots"] >= 0
 
 
 class _FreshQuoteClient:

@@ -601,6 +601,40 @@ class PostgreSQLEvidenceRepository:
             cursor.execute("SELECT COUNT(*), MAX(finished_at) FROM runtime_cycles")
             runtime_count, latest_runtime = cursor.fetchone()
 
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT team_id), MAX(observed_at) "
+                "FROM api_sports_standing_snapshots"
+            )
+            standing_count, standing_teams, latest_standings = cursor.fetchone()
+
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT team_id), MAX(observed_at) "
+                "FROM api_sports_team_statistics_snapshots"
+            )
+            team_statistics_count, team_statistics_teams, latest_team_statistics = (
+                cursor.fetchone()
+            )
+
+            cursor.execute(
+                "SELECT COUNT(*), MAX(observed_at) "
+                "FROM api_sports_reference_catalog_snapshots"
+            )
+            catalog_count, latest_catalog = cursor.fetchone()
+
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT provider_game_id), MAX(observed_at) "
+                "FROM api_sports_game_history_snapshots"
+            )
+            game_history_count, game_history_games, latest_game_history = (
+                cursor.fetchone()
+            )
+
+            cursor.execute(
+                "SELECT COUNT(*), MAX(source_observed_at) "
+                "FROM official_mlb_pregame_snapshots"
+            )
+            official_mlb_count, latest_official_mlb = cursor.fetchone()
+
         return {
             "fixture_observations": int(fixture_count),
             "distinct_fixtures": int(fixture_games),
@@ -622,6 +656,19 @@ class PostgreSQLEvidenceRepository:
             "clv_available": int(clv_available_count),
             "collection_cycles": int(collection_count),
             "runtime_cycles": int(runtime_count),
+            "standing_snapshots": int(standing_count),
+            "distinct_standing_teams": int(standing_teams),
+            "latest_standings_observed_at": _iso_or_none(latest_standings),
+            "team_statistics_snapshots": int(team_statistics_count),
+            "distinct_team_statistics_teams": int(team_statistics_teams),
+            "latest_team_statistics_observed_at": _iso_or_none(latest_team_statistics),
+            "reference_catalog_snapshots": int(catalog_count),
+            "latest_catalog_observed_at": _iso_or_none(latest_catalog),
+            "game_history_snapshots": int(game_history_count),
+            "distinct_game_history_games": int(game_history_games),
+            "latest_game_history_observed_at": _iso_or_none(latest_game_history),
+            "official_mlb_pregame_snapshots": int(official_mlb_count),
+            "latest_official_mlb_observed_at": _iso_or_none(latest_official_mlb),
             "latest_fixture_observed_at": _iso_or_none(latest_fixture),
             "latest_odds_observed_at": _iso_or_none(latest_odds),
             "latest_collection_finished_at": _iso_or_none(latest_collection),
