@@ -170,7 +170,6 @@ def test_identity_bridge_rejects_non_mlb_fixture() -> None:
         )
 
 
-
 def test_schedule_diagnostic_proves_team_naming_mismatch() -> None:
     schedule = _schedule()
     schedule["dates"][0]["games"][0]["teams"]["away"]["team"]["name"] = (
