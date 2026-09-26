@@ -47,6 +47,12 @@ class FakeRepository:
                 "latest_catalog_observed_at": (now - timedelta(days=1)).isoformat(),
                 "game_history_snapshots": 480,
                 "distinct_game_history_games": 480,
+                "game_history_final_score_rows": 470,
+                "game_history_hit_rows": 460,
+                "game_history_error_rows": 455,
+                "game_history_inning_rows": 468,
+                "game_history_extra_inning_games": 21,
+                "game_history_archived_rows": 480,
                 "latest_game_history_observed_at": (
                     now - timedelta(hours=3)
                 ).isoformat(),
@@ -179,6 +185,10 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     assert "Primary evidence coverage" in research
     assert "Standings 30 teams" in research
     assert "team stats 18 teams" in research
+    assert (
+        "history 480 games (470 final-score, 468 inning-detail, 21 extra-inning)"
+        in research
+    )
     assert "Paper P/L" in research
     assert "DB-backed" in research
     assert "No registered paper picks yet." in history

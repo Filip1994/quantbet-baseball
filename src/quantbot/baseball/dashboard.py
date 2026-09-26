@@ -522,7 +522,10 @@ class BaseballDashboard:
         provider_summary = (
             f"Standings {health.get('distinct_standing_teams', 0)} teams · "
             f"team stats {health.get('distinct_team_statistics_teams', 0)} teams · "
-            f"history {health.get('distinct_game_history_games', 0)} games · "
+            f"history {health.get('distinct_game_history_games', 0)} games "
+            f"({health.get('game_history_final_score_rows', 0)} final-score, "
+            f"{health.get('game_history_inning_rows', 0)} inning-detail, "
+            f"{health.get('game_history_extra_inning_games', 0)} extra-inning) · "
             f"MLB enrichment {health.get('official_mlb_pregame_snapshots', 0)} snapshots"
         )
         cards = [
