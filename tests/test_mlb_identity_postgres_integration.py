@@ -13,6 +13,7 @@ from quantbot.baseball.mlb_identity import (
     propose_team_identity_mappings,
 )
 from quantbot.baseball.mlb_identity_repository import PostgreSQLMLBIdentityRepository
+from quantbot.baseball.postgres_repository import PostgreSQLEvidenceRepository
 from quantbot.baseball.raw_archive import ArchiveReceipt
 
 
@@ -90,12 +91,27 @@ def test_mlb_identity_repository_is_immutable_and_idempotent() -> None:
     )
 
     with psycopg.connect(database_url) as connection:
+        evidence = PostgreSQLEvidenceRepository(connection)
+        assert evidence.append_fixture_observations((_fixture(),)) == 1
+
         repository = PostgreSQLMLBIdentityRepository(connection)
+        fixtures = repository.latest_mlb_fixtures_around_date(
+            date_iso="2026-09-20",
+            observed_by=datetime(2026, 9, 20, 17, 0, tzinfo=UTC),
+            padding=__import__("datetime").timedelta(hours=12),
+        )
+        assert [item.provider_game_id for item in fixtures] == [186584]
+
         assert repository.append_team_mapping(mappings[0]) is True
         assert repository.append_team_mapping(mappings[1]) is True
         assert repository.append_team_mapping(mappings[0]) is False
         assert repository.append_game_link(link) is True
         assert repository.append_game_link(link) is False
+        stored_link = repository.game_link_for_provider_game(
+            mapping_version="integration-2026-v1",
+            provider_game_id=186584,
+        )
+        assert stored_link == link
 
         stored = repository.team_mappings("integration-2026-v1")
         row = connection.execute(
