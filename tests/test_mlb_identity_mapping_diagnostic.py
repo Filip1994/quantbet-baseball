@@ -2,8 +2,6 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from io import BytesIO
-from pathlib import Path
-from types import SimpleNamespace
 
 from quantbot.baseball.fixture_evidence import FixtureObservation
 from quantbot.baseball.mlb_identity_mapping_diagnostic import (
