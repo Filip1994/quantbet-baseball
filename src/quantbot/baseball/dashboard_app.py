@@ -95,7 +95,6 @@ def _safe_one(
     try:
         return _query_one(connection, sql, params)
     except psycopg.Error:
-        connection.rollback()
         return {}
 
 
@@ -107,7 +106,6 @@ def _safe_all(
     try:
         return _query_all(connection, sql, params)
     except psycopg.Error:
-        connection.rollback()
         return []
 
 
@@ -347,14 +345,13 @@ def build_dashboard_snapshot(database_url: str | None = None) -> dict[str, Any]:
 
     now = _utcnow()
     url = database_url or database_url_from_env()
-    with psycopg.connect(url, autocommit=False) as connection:
-        connection.execute("SET TRANSACTION READ ONLY")
-        connection.execute("SET LOCAL statement_timeout = '4000ms'")
+    with psycopg.connect(url, autocommit=True) as connection:
+        connection.execute("SET default_transaction_read_only = on")
+        connection.execute("SET statement_timeout = '4000ms'")
         system = _system_snapshot(connection, now=now)
         coverage = _coverage_snapshot(connection)
         performance = _performance_snapshot(connection)
         research = _research_rows(connection)
-        connection.rollback()
 
     return {
         "generated_at": now.isoformat(),
