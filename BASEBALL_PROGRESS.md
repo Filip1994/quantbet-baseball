@@ -1610,3 +1610,48 @@ Safety properties:
 PR #23 passed Baseball tests and Railway runtime smoke, then was squash-merged to main as `1dca14ebb89292a21a9af359e4d78bed6ceb1408`.
 
 Railway deployment `3f21aaa4-2574-408e-b5d3-b5f8c1cb9fdd` reached SUCCESS at approximately `2026-09-26T00:45:41Z`. Because deployment completion occurred after the 00:45 UTC cron boundary, the live provider request is pending the next natural `*/15` execution. No provider request is claimed yet.
+
+
+## 77. Live one-request /games audit completed — 2026-09-26
+
+The idempotent one-shot live API-Sports Baseball audit completed successfully on the first natural worker execution after deployment.
+
+Audit evidence:
+
+- audit id: `games-schema-live-20260926-1`;
+- endpoint/date: `/games?date=2026-09-26`;
+- provider HTTP requests: exactly `1`;
+- results: `35` games;
+- raw payload archived remotely with checksum `7c5d5476c673feeb1feec7314352ffc8d74cfc0f42b3ccff74d9bb0e931ef448`;
+- collection remained disabled;
+- canary remained disabled;
+- paper mode remained enabled.
+
+League counts in the single live response:
+
+- MLB (id 1): 16;
+- NPB (id 2): 5;
+- Asian Games (id 32): 4;
+- CPBL (id 29): 3;
+- KBO (id 5): 3;
+- Elitserien (id 27): 2;
+- Bundesliga (id 16): 1;
+- Division 1 (id 13): 1.
+
+Exact game-record schema observed in MLB and sampled non-MLB rows was the same:
+
+- top level: `country,date,id,league,scores,status,teams,time,timestamp,timezone,week`;
+- league: `id,logo,name,season,type`;
+- country: `code,flag,id,name`;
+- teams: `home,away`;
+- each team: `id,logo,name`;
+- status: `long,short`;
+- scores: `home,away`.
+
+No fields were present in this live `/games` response for injuries, probable/confirmed pitchers, lineups, player statistics, venue/stadium metadata, roof, umpire, or weather. This held for the MLB sample and sampled non-MLB leagues.
+
+A second natural cron run returned `ALREADY_DONE` with `provider_requests=0`, confirming the audit was idempotent and did not repeat the provider call.
+
+Audit control variables were then cleared without a deploy. Collection and canary remain disabled and paper mode remains true.
+
+Interpretation: `/games` is a schedule/status/result spine across leagues. Rich MLB research inputs must come from additional verified endpoints and external structured sources; this result says nothing about the richness of `teams/statistics`, `players/statistics`, `standings`, `odds`, or other provider surfaces.
