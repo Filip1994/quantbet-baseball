@@ -161,8 +161,9 @@ def test_mlb_identity_repository_is_immutable_and_idempotent() -> None:
     assert tuple(row) == (186584, 823570, 120, "integration-2026-v1")
 
 
-
-def test_identity_repository_excludes_fixture_removed_from_latest_complete_schedule() -> None:
+def test_identity_repository_excludes_fixture_removed_from_latest_complete_schedule() -> (
+    None
+):
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
