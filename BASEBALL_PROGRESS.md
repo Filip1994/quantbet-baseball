@@ -1898,3 +1898,51 @@ Validation:
 - cron, request budget, bookmaker policy, paper mode and Football resources were not changed.
 
 Acceptance of the burn repair still requires a natural scheduled production cycle on `a6dd762...` proving `games_selected <= due_events` and exposing the new telemetry. No API-saving claim beyond the demonstrated old-code waste is considered complete until that live post-deploy evidence exists.
+
+
+## 2026-09-26 post-repair production cycle and second API-burn defect
+
+The first natural scheduled collection observed after the adaptive due-only repair ran on main `7af3f59c318a9724c60a5af0b9d3a0b02ca26675` through worker deployment `b045c5e1-e0cb-4a7a-b1bc-f3d4edc708cf` (SUCCESS).
+
+Cycle `ee7e84d4-92d6-4017-b75d-e62035626444` at ~07:46 UTC:
+
+- execution mode: SCHEDULED;
+- API requests: 42 / 75;
+- games seen: 65;
+- pregame games: 55;
+- due events: 40;
+- not-due events: 15;
+- games selected: 40;
+- due events unselected: 0;
+- odds calls: 40;
+- raw market rows: 0;
+- canonical rows: 0;
+- observations inserted: 0;
+- errors: 0.
+
+This is production proof that PR #38 repaired the first scheduler bypass: `games_selected == due_events`, and 15 explicitly non-due games did not consume broad odds calls. Compared with the pre-fix cycle where 45 due became 55 selected, broad selection now honors the scheduler.
+
+However, the same cycle exposed a second burn defect: all 40 successful odds calls returned empty provider responses. The scheduler's prior timestamp is currently derived only from `odds_observations`. An empty but successful archived odds response creates no canonical quote row, therefore no latest observation timestamp. Such games can remain due on every 15-minute cron even though they were just checked.
+
+Required repair: persist a durable per-game odds poll-attempt fact for every successful provider odds response, including empty responses and the raw archive receipt/checksum. Adaptive scheduling must use the latest successful poll attempt, not only the latest parsed quote observation. Provider errors must remain distinguishable from successful empty responses.
+
+### Dashboard API-efficiency telemetry
+
+PR #40, `Show scheduled collection efficiency on dashboard`, passed Baseball tests and was squash-merged as `7af3f59c318a9724c60a5af0b9d3a0b02ca26675`.
+
+Dashboard deployment `8e2dc6bc-3c54-4efb-b786-3e4446a2184e` is SUCCESS. The System view now exposes persisted latest-cycle requests/cap, due games, selected games, not-due games, odds calls and canonical observations per provider request. The dashboard remains read-only and makes no provider calls.
+
+### Official MLB structured-source live audit
+
+Draft PR #39 is audit-only and must not be merged. Its bounded public no-auth MLB Stats API audit passed on commit `f9ab46d3d674001db7a32072a2b5151e3716a146`: 135 tests passed, 6 skipped.
+
+Verified live on 2026-09-26:
+
+- `/api/v1/schedule?sportId=1&date=2026-09-26&hydrate=probablePitcher,team,venue` returned 13 MLB games and structured probable-pitcher/team/venue data;
+- first sampled game `gamePk=822678` exposed Mets probable starter Jonah Tong (MLB id 804636), Nationals probable starter Connelly Early (MLB id 813349), and Nationals Park (venue id 3309);
+- `/api/v1.1/game/822678/feed/live` exposed `gameData.probablePitchers`, `gameData.players`, venue/location/time-zone/field metadata, and boxscore team structures including battingOrder, bullpen, pitchers and players;
+- the sampled early-pregame feed had an empty `gameData.weather` object, which is treated as absent evidence, never as zero values;
+- active roster query returned 28 rows with person/position/status identity fields;
+- transactions query for 2026-09-24 through 2026-09-26 returned 67 rows with date/effectiveDate/person/team/type/description fields.
+
+Lineup-capable schema is verified, but confirmed-lineup availability is not yet proven for an actual populated pregame snapshot. Expected and confirmed lineup states remain separate by contract. Historical `timecode` replay is the next bounded audit before point-in-time ingestion is approved.
