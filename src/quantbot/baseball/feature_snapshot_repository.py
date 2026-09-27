@@ -132,8 +132,7 @@ class PostgreSQLFeatureSnapshotRepository:
                 self._connection.commit()
                 return True
             cursor.execute(
-                "SELECT canonical_record FROM feature_snapshots "
-                "WHERE snapshot_id = %s",
+                "SELECT canonical_record FROM feature_snapshots WHERE snapshot_id = %s",
                 (snapshot.snapshot_id,),
             )
             row = cursor.fetchone()
@@ -149,8 +148,7 @@ class PostgreSQLFeatureSnapshotRepository:
     def get(self, snapshot_id: str) -> FeatureSnapshot | None:
         with self._connection.cursor() as cursor:
             cursor.execute(
-                "SELECT canonical_record FROM feature_snapshots "
-                "WHERE snapshot_id = %s",
+                "SELECT canonical_record FROM feature_snapshots WHERE snapshot_id = %s",
                 (snapshot_id,),
             )
             row = cursor.fetchone()
