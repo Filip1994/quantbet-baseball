@@ -13,9 +13,9 @@ from quantbot.baseball.official_mlb_components import build_pregame_components
 from quantbot.baseball.raw_archive import ArchiveReceipt
 
 
-def _payload(*, timestamp: str, home_pitcher_id: int):
+def _payload(*, timestamp: str, home_pitcher_id: int, game_pk: int = 823570):
     return {
-        "gamePk": 823570,
+        "gamePk": game_pk,
         "metaData": {"timeStamp": timestamp},
         "gameData": {
             "datetime": {"dateTime": "2026-09-20T17:10:00Z"},
@@ -65,15 +65,27 @@ def _payload(*, timestamp: str, home_pitcher_id: int):
     }
 
 
-def _rows(*, timestamp: str, checksum: str, home_pitcher_id: int):
-    payload = _payload(timestamp=timestamp, home_pitcher_id=home_pitcher_id)
+def _rows(
+    *,
+    timestamp: str,
+    checksum: str,
+    home_pitcher_id: int,
+    game_pk: int = 823570,
+    retrieved_at: datetime | None = None,
+):
+    payload = _payload(
+        timestamp=timestamp,
+        home_pitcher_id=home_pitcher_id,
+        game_pk=game_pk,
+    )
     observed = datetime.strptime(timestamp, "%Y%m%d_%H%M%S").replace(tzinfo=UTC)
+    captured = observed if retrieved_at is None else retrieved_at
     return build_pregame_components(
         payload,
         ArchiveReceipt(
             ref=f"s3://raw/mlb-feed-{checksum[:4]}.json",
             checksum=checksum,
-            captured_at=observed.isoformat(),
+            captured_at=captured.isoformat(),
         ),
     )
 
@@ -132,6 +144,52 @@ def test_component_repository_is_atomic_idempotent_and_point_in_time() -> None:
         ("BULLPEN", "HOME"),
         ("VENUE", "GAME"),
     }
+
+
+def test_component_repository_excludes_snapshots_retrieved_after_cutoff() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+    apply_migrations(Path("."), database_url)
+
+    historical = _rows(
+        timestamp="20260920_151258",
+        checksum="c" * 64,
+        home_pitcher_id=777001,
+        game_pk=823571,
+        retrieved_at=datetime(2026, 9, 20, 16, 0, tzinfo=UTC),
+    )
+
+    with psycopg.connect(database_url) as connection:
+        repository = PostgreSQLOfficialMLBComponentRepository(connection)
+        assert repository.append_components(historical) == 7
+
+        before_retrieval = repository.latest_component(
+            mlb_game_pk=823571,
+            component_type="STARTER",
+            side="HOME",
+            as_of=datetime(2026, 9, 20, 15, 30, tzinfo=UTC),
+        )
+        before_retrieval_set = repository.latest_components_for_game(
+            mlb_game_pk=823571,
+            as_of=datetime(2026, 9, 20, 15, 30, tzinfo=UTC),
+        )
+        after_retrieval = repository.latest_component(
+            mlb_game_pk=823571,
+            component_type="STARTER",
+            side="HOME",
+            as_of=datetime(2026, 9, 20, 16, 5, tzinfo=UTC),
+        )
+        after_retrieval_set = repository.latest_components_for_game(
+            mlb_game_pk=823571,
+            as_of=datetime(2026, 9, 20, 16, 5, tzinfo=UTC),
+        )
+
+    assert before_retrieval is None
+    assert before_retrieval_set == ()
+    assert after_retrieval is not None
+    assert after_retrieval.data["pitcher_id"] == 777001
+    assert len(after_retrieval_set) == 7
 
 
 def test_component_repository_rejects_naive_as_of() -> None:
