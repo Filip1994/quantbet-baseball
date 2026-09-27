@@ -81,7 +81,9 @@ def _snapshot(
     )
 
 
-def test_feature_snapshot_repository_is_immutable_idempotent_and_point_in_time() -> None:
+def test_feature_snapshot_repository_is_immutable_idempotent_and_point_in_time() -> (
+    None
+):
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
