@@ -144,8 +144,7 @@ def run_enrichment_canary_with_dependencies(
             result["components_total"] = len(existing)
             result["point_in_time_eligible"] = int(
                 all(
-                    _timestamp(row.source_observed_at) < first_pitch
-                    for row in existing
+                    _timestamp(row.source_observed_at) < first_pitch for row in existing
                 )
             )
             return result
@@ -193,9 +192,8 @@ def run_enrichment_canary_with_dependencies(
         mlb_game_pk=link.mlb_game_pk,
         requested_timecode=requested_timecode,
     )
-    eligible = (
-        _is_complete_component_set(readback)
-        and all(_timestamp(row.source_observed_at) < first_pitch for row in readback)
+    eligible = _is_complete_component_set(readback) and all(
+        _timestamp(row.source_observed_at) < first_pitch for row in readback
     )
     result.update(
         {
@@ -207,8 +205,7 @@ def run_enrichment_canary_with_dependencies(
                 readback[0].source_observed_at if readback else None
             ),
             "component_states": {
-                f"{row.component_type}:{row.side}": row.state
-                for row in readback
+                f"{row.component_type}:{row.side}": row.state for row in readback
             },
             "reason_codes": [] if eligible else ["READBACK_INCOMPLETE"],
         }
