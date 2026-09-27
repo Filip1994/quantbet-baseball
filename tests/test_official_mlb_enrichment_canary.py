@@ -74,8 +74,7 @@ class FakeClient:
                 ref="s3://raw/official-mlb/feed.json",
                 checksum="a" * 64,
                 captured_at=(
-                    captured_at
-                    or datetime(2026, 9, 27, 12, 0, tzinfo=UTC)
+                    captured_at or datetime(2026, 9, 27, 12, 0, tzinfo=UTC)
                 ).isoformat(),
             ),
         )
