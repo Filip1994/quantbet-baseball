@@ -11,6 +11,8 @@ on:
       - "src/quantbot/baseball/decision_repository.py"
       - "src/quantbot/baseball/durable_collector.py"
       - "src/quantbot/baseball/fixture_evidence.py"
+      - "src/quantbot/baseball/feature_snapshot.py"
+      - "src/quantbot/baseball/feature_snapshot_repository.py"
       - "src/quantbot/baseball/mlb_identity.py"
       - "src/quantbot/baseball/mlb_identity_bootstrap.py"
       - "src/quantbot/baseball/mlb_identity_mapping_completion.py"
@@ -53,6 +55,8 @@ on:
       - "tests/test_settlement_postgres_integration.py"
       - "tests/test_postgres_integration.py"
       - "tests/test_game_history_postgres_integration.py"
+      - "tests/test_feature_snapshot.py"
+      - "tests/test_feature_snapshot_postgres_integration.py"
       - "tests/test_provider_data.py"
       - "tests/test_provider_data_postgres_integration.py"
       - "tests/test_slow_provider_collection.py"
@@ -74,6 +78,8 @@ on:
       - "src/quantbot/baseball/decision_repository.py"
       - "src/quantbot/baseball/durable_collector.py"
       - "src/quantbot/baseball/fixture_evidence.py"
+      - "src/quantbot/baseball/feature_snapshot.py"
+      - "src/quantbot/baseball/feature_snapshot_repository.py"
       - "src/quantbot/baseball/mlb_identity.py"
       - "src/quantbot/baseball/mlb_identity_bootstrap.py"
       - "src/quantbot/baseball/mlb_identity_mapping_completion.py"
@@ -116,6 +122,8 @@ on:
       - "tests/test_settlement_postgres_integration.py"
       - "tests/test_postgres_integration.py"
       - "tests/test_game_history_postgres_integration.py"
+      - "tests/test_feature_snapshot.py"
+      - "tests/test_feature_snapshot_postgres_integration.py"
       - "tests/test_provider_data.py"
       - "tests/test_provider_data_postgres_integration.py"
       - "tests/test_slow_provider_collection.py"
@@ -166,6 +174,8 @@ jobs:
           src/quantbot/baseball/decision_repository.py
           src/quantbot/baseball/durable_collector.py
           src/quantbot/baseball/fixture_evidence.py
+          src/quantbot/baseball/feature_snapshot.py
+          src/quantbot/baseball/feature_snapshot_repository.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/moneyline_monitoring.py
@@ -206,6 +216,8 @@ jobs:
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
           tests/test_game_history_postgres_integration.py
+          tests/test_feature_snapshot.py
+          tests/test_feature_snapshot_postgres_integration.py
           tests/test_provider_data.py
           tests/test_provider_data_postgres_integration.py
           tests/test_slow_provider_collection.py
@@ -235,6 +247,8 @@ jobs:
           src/quantbot/baseball/decision_repository.py
           src/quantbot/baseball/durable_collector.py
           src/quantbot/baseball/fixture_evidence.py
+          src/quantbot/baseball/feature_snapshot.py
+          src/quantbot/baseball/feature_snapshot_repository.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/moneyline_monitoring.py
@@ -275,6 +289,8 @@ jobs:
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
           tests/test_game_history_postgres_integration.py
+          tests/test_feature_snapshot.py
+          tests/test_feature_snapshot_postgres_integration.py
           tests/test_provider_data.py
           tests/test_provider_data_postgres_integration.py
           tests/test_slow_provider_collection.py
@@ -312,6 +328,8 @@ jobs:
           tests/test_settlement_postgres_integration.py
           tests/test_postgres_integration.py
           tests/test_game_history_postgres_integration.py
+          tests/test_feature_snapshot.py
+          tests/test_feature_snapshot_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_diagnostic.py
           tests/test_mlb_identity_postgres_integration.py
