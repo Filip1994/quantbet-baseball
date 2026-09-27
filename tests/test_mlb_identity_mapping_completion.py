@@ -231,6 +231,21 @@ def test_mapping_completion_accepts_unique_exact_pair_after_start_time_change() 
     assert result["schedule_time_shift_provider_game_ids"] == [187589]
     assert result["team_mappings_inserted"] == 2
     assert result["team_mappings_total"] == 2
+    assert client.calls == 1
+
+    second = complete_mlb_team_mappings(
+        client,
+        repository,
+        date_iso="2026-09-27",
+        mapping_version="mlb-2026-v1",
+        now=datetime(2026, 9, 26, 23, 31, tzinfo=UTC),
+        expected_team_count=2,
+    )
+
+    assert second["status"] == "ALREADY_DONE"
+    assert second["schedule_calls"] == 0
+    assert second["ready_for_enrichment"] == 1
+    assert client.calls == 1
 
 
 def test_mapping_completion_rejects_ambiguous_exact_pair_after_time_change() -> None:
