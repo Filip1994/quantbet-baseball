@@ -44,6 +44,10 @@ from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
 from .odds_poll_evidence import OddsPollAttempt, build_odds_poll_attempt
 from .official_mlb import OfficialMLBStatsClient
+from .official_mlb_component_repository import (
+    PostgreSQLOfficialMLBComponentRepository,
+)
+from .official_mlb_live_enrichment import collect_live_pregame_components
 from .postgres_repository import PostgreSQLEvidenceRepository
 from .provider_data_repository import PostgreSQLProviderDataRepository
 from .raw_archive import archive_from_env
@@ -597,6 +601,23 @@ def collect_durable_once(
                 os.getenv("BASEBALL_MLB_GAME_LINKING_DATE", "").strip()
                 or cycle_now.date().isoformat()
             )
+            mlb_live_enrichment_enabled = os.getenv(
+                "BASEBALL_ENABLE_MLB_LIVE_ENRICHMENT", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            mlb_enrichment_horizon_minutes = int(
+                os.getenv("BASEBALL_MLB_ENRICHMENT_HORIZON_MINUTES", "150")
+            )
+            max_mlb_enrichment_requests = int(
+                os.getenv("BASEBALL_MAX_MLB_ENRICHMENT_REQUESTS", "4")
+            )
+            if mlb_enrichment_horizon_minutes < 1:
+                raise ValueError(
+                    "BASEBALL_MLB_ENRICHMENT_HORIZON_MINUTES must be positive"
+                )
+            if max_mlb_enrichment_requests < 1:
+                raise ValueError(
+                    "BASEBALL_MAX_MLB_ENRICHMENT_REQUESTS must be positive"
+                )
             mlb_mapping_completion_id = os.getenv(
                 "BASEBALL_MLB_MAPPING_COMPLETION_ID",
                 "",
@@ -689,6 +710,35 @@ def collect_durable_once(
             elif mlb_game_linking_enabled and identity_mutation_armed:
                 mlb_game_linking["status"] = "BLOCKED_IDENTITY_MUTATION_CONFLICT"
 
+            mlb_live_enrichment = {
+                "status": "DISABLED",
+                "linked_games_total": 0,
+                "due_games": 0,
+                "already_captured": 0,
+                "partial_existing": 0,
+                "provider_calls": 0,
+                "games_completed": 0,
+                "components_inserted": 0,
+                "due_games_uncollected": 0,
+                "failures": 0,
+                "ready_for_feature_snapshot": 0,
+            }
+            if execution_mode == "SCHEDULED" and mlb_live_enrichment_enabled:
+                identity_repository = PostgreSQLMLBIdentityRepository(connection)
+                component_repository = PostgreSQLOfficialMLBComponentRepository(
+                    connection
+                )
+                identity_client = OfficialMLBStatsClient(raw_archive=archive)
+                mlb_live_enrichment = collect_live_pregame_components(
+                    identity_client,
+                    identity_repository,
+                    component_repository,
+                    mapping_version=mlb_identity_version,
+                    now=cycle_now,
+                    horizon_minutes=mlb_enrichment_horizon_minutes,
+                    max_calls=max_mlb_enrichment_requests,
+                )
+
             summary["mlb_mapping_completion_id"] = mlb_mapping_completion_id
             summary["mlb_mapping_completion_armed"] = int(
                 bool(mlb_mapping_completion_id)
@@ -747,6 +797,39 @@ def collect_durable_once(
             )
             summary["mlb_game_linking_ready_for_enrichment"] = int(
                 mlb_game_linking["ready_for_enrichment"]
+            )
+
+            summary["mlb_live_enrichment_enabled"] = int(mlb_live_enrichment_enabled)
+            summary["mlb_live_enrichment_status"] = str(mlb_live_enrichment["status"])
+            summary["mlb_live_enrichment_linked_games_total"] = int(
+                mlb_live_enrichment["linked_games_total"]
+            )
+            summary["mlb_live_enrichment_due_games"] = int(
+                mlb_live_enrichment["due_games"]
+            )
+            summary["mlb_live_enrichment_already_captured"] = int(
+                mlb_live_enrichment["already_captured"]
+            )
+            summary["mlb_live_enrichment_partial_existing"] = int(
+                mlb_live_enrichment["partial_existing"]
+            )
+            summary["mlb_live_enrichment_provider_calls"] = int(
+                mlb_live_enrichment["provider_calls"]
+            )
+            summary["mlb_live_enrichment_games_completed"] = int(
+                mlb_live_enrichment["games_completed"]
+            )
+            summary["mlb_live_enrichment_components_inserted"] = int(
+                mlb_live_enrichment["components_inserted"]
+            )
+            summary["mlb_live_enrichment_due_games_uncollected"] = int(
+                mlb_live_enrichment["due_games_uncollected"]
+            )
+            summary["mlb_live_enrichment_failures"] = int(
+                mlb_live_enrichment["failures"]
+            )
+            summary["mlb_live_enrichment_ready_for_feature_snapshot"] = int(
+                mlb_live_enrichment["ready_for_feature_snapshot"]
             )
 
             summary["mlb_identity_enabled"] = int(mlb_identity_enabled)
