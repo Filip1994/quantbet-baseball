@@ -37,7 +37,9 @@ def _standing(*, observed_at: str, win_pct: float) -> StandingSnapshot:
 
 def _team_stats(*, observed_at: str, win_pct: float) -> TeamStatisticsSnapshot:
     return TeamStatisticsSnapshot(
-        snapshot_id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"pit-team-stats-{observed_at}")),
+        snapshot_id=str(
+            uuid.uuid5(uuid.NAMESPACE_URL, f"pit-team-stats-{observed_at}")
+        ),
         provider="api-sports-baseball",
         league_id=1,
         season=2026,
@@ -87,8 +89,18 @@ def test_provider_repository_reads_team_strength_as_of_cutoff() -> None:
 
     with psycopg.connect(database_url) as connection:
         repository = PostgreSQLProviderDataRepository(connection)
-        assert repository.append_standings((_standing(observed_at=early_time, win_pct=0.55),)) == 1
-        assert repository.append_standings((_standing(observed_at=late_time, win_pct=0.62),)) == 1
+        assert (
+            repository.append_standings(
+                (_standing(observed_at=early_time, win_pct=0.55),)
+            )
+            == 1
+        )
+        assert (
+            repository.append_standings(
+                (_standing(observed_at=late_time, win_pct=0.62),)
+            )
+            == 1
+        )
         assert repository.append_team_statistics(
             _team_stats(observed_at=early_time, win_pct=0.55)
         )
