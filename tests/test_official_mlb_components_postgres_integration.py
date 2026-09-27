@@ -123,10 +123,7 @@ def test_component_repository_is_atomic_idempotent_and_point_in_time() -> None:
     assert after_late is not None
     assert after_late.data["pitcher_id"] == 999001
     assert len(latest) == 7
-    assert {
-        (item.component_type, item.side)
-        for item in latest
-    } == {
+    assert {(item.component_type, item.side) for item in latest} == {
         ("STARTER", "AWAY"),
         ("STARTER", "HOME"),
         ("LINEUP", "AWAY"),
