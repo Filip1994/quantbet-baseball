@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from .postgres_repository import ConnectionLike, EvidenceConflictError
@@ -28,6 +28,20 @@ def _canonical_text(value: Any) -> str:
         sort_keys=True,
         separators=(",", ":"),
     )
+
+
+def _as_of(value: datetime) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("as_of must be timezone-aware")
+    return value.astimezone(UTC)
+
+
+def _record(value: Any, record_type):
+    if isinstance(value, str):
+        value = json.loads(value)
+    if not isinstance(value, dict):
+        raise EvidenceConflictError("provider-data canonical record is invalid")
+    return record_type(**value)
 
 
 class PostgreSQLProviderDataRepository:
@@ -250,6 +264,62 @@ class PostgreSQLProviderDataRepository:
             values=values,
             canonical=canonical,
         )
+
+    def latest_standing(
+        self,
+        *,
+        league_id: int,
+        season: int,
+        team_id: int,
+        as_of: datetime,
+    ) -> StandingSnapshot | None:
+        cutoff = _as_of(as_of)
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT canonical_record
+                FROM api_sports_standing_snapshots
+                WHERE league_id = %s
+                  AND season = %s
+                  AND team_id = %s
+                  AND observed_at <= %s
+                ORDER BY observed_at DESC, snapshot_id DESC
+                LIMIT 1
+                """,
+                (league_id, season, team_id, cutoff),
+            )
+            row = cursor.fetchone()
+        if row is None:
+            return None
+        return _record(row[0], StandingSnapshot)
+
+    def latest_team_statistics(
+        self,
+        *,
+        league_id: int,
+        season: int,
+        team_id: int,
+        as_of: datetime,
+    ) -> TeamStatisticsSnapshot | None:
+        cutoff = _as_of(as_of)
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT canonical_record
+                FROM api_sports_team_statistics_snapshots
+                WHERE league_id = %s
+                  AND season = %s
+                  AND team_id = %s
+                  AND observed_at <= %s
+                ORDER BY observed_at DESC, snapshot_id DESC
+                LIMIT 1
+                """,
+                (league_id, season, team_id, cutoff),
+            )
+            row = cursor.fetchone()
+        if row is None:
+            return None
+        return _record(row[0], TeamStatisticsSnapshot)
 
     def latest_standings_observed_at(
         self,
