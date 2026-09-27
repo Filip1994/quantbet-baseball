@@ -701,6 +701,17 @@ class PostgreSQLEvidenceRepository:
             official_mlb_count, latest_official_mlb = cursor.fetchone()
 
             cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT mlb_game_pk), "
+                "MAX(source_observed_at) "
+                "FROM official_mlb_pregame_components"
+            )
+            (
+                official_mlb_component_count,
+                official_mlb_component_games,
+                latest_official_mlb_component,
+            ) = cursor.fetchone()
+
+            cursor.execute(
                 "SELECT COUNT(*), COUNT(DISTINCT mapping_version), MAX(verified_at) "
                 "FROM official_mlb_team_identity_mappings"
             )
@@ -755,6 +766,13 @@ class PostgreSQLEvidenceRepository:
             "latest_game_history_observed_at": _iso_or_none(latest_game_history),
             "official_mlb_pregame_snapshots": int(official_mlb_count),
             "latest_official_mlb_observed_at": _iso_or_none(latest_official_mlb),
+            "official_mlb_pregame_components": int(official_mlb_component_count),
+            "distinct_official_mlb_component_games": int(
+                official_mlb_component_games
+            ),
+            "latest_official_mlb_component_observed_at": _iso_or_none(
+                latest_official_mlb_component
+            ),
             "mlb_identity_team_mappings": int(mlb_identity_team_mappings),
             "mlb_identity_mapping_versions": int(mlb_identity_mapping_versions),
             "latest_mlb_identity_mapping_at": _iso_or_none(
