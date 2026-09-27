@@ -329,10 +329,7 @@ def run_once(root: Path | None = None) -> dict[str, object]:
                 "provider_calls": 0,
                 "reason_codes": ["GENERIC_CANARY_CONFLICT"],
             }
-        elif (
-            mlb_identity_diagnostic_id
-            or mlb_mapping_completion_diagnostic_id
-        ):
+        elif mlb_identity_diagnostic_id or mlb_mapping_completion_diagnostic_id:
             enrichment_canary = {
                 "status": "BLOCKED",
                 "provider_calls": 0,
