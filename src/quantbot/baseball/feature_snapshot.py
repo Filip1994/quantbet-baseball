@@ -57,13 +57,17 @@ def _feature_scalar(value: Any, field: str) -> Any:
 class FeatureSource:
     source_name: str
     observed_at: str
+    retrieved_at: str
     source_payload_ref: str
     source_payload_checksum: str
     field_names: tuple[str, ...]
 
     def __post_init__(self) -> None:
         _nonempty(self.source_name, "source_name")
-        _timestamp(self.observed_at, "observed_at")
+        observed = _timestamp(self.observed_at, "observed_at")
+        retrieved = _timestamp(self.retrieved_at, "retrieved_at")
+        if retrieved < observed:
+            raise EvidenceError("retrieved_at cannot precede observed_at")
         _nonempty(self.source_payload_ref, "source_payload_ref")
         _checksum(self.source_payload_checksum)
         if not self.field_names:
@@ -102,8 +106,8 @@ class FeatureSnapshot:
 
         source_names: set[str] = set()
         for source in self.sources:
-            observed = _timestamp(source.observed_at, "source.observed_at")
-            if observed > cutoff:
+            retrieved = _timestamp(source.retrieved_at, "source.retrieved_at")
+            if retrieved > cutoff:
                 raise EvidenceError("feature source exceeds source_data_cutoff_at")
             identity = (
                 source.source_name,
@@ -159,7 +163,7 @@ def build_feature_snapshot(
     if not sources:
         raise EvidenceError("feature snapshot must contain at least one source")
     cutoff = max(
-        (_timestamp(source.observed_at, "source.observed_at") for source in sources),
+        (_timestamp(source.retrieved_at, "source.retrieved_at") for source in sources),
     )
     identity = {
         "game_id": game_id,
