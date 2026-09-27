@@ -33,6 +33,8 @@ on:
       - "src/quantbot/baseball/slow_provider_collection.py"
       - "src/quantbot/baseball/official_mlb.py"
       - "src/quantbot/baseball/official_mlb_repository.py"
+      - "src/quantbot/baseball/official_mlb_components.py"
+      - "src/quantbot/baseball/official_mlb_component_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
       - "migrations/**"
@@ -58,6 +60,8 @@ on:
       - "tests/test_provider_surface_audit.py"
       - "tests/test_official_mlb.py"
       - "tests/test_official_mlb_postgres_integration.py"
+      - "tests/test_official_mlb_components.py"
+      - "tests/test_official_mlb_components_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
       - ".github/workflows/railway-runtime-smoke.yml"
@@ -93,6 +97,8 @@ on:
       - "src/quantbot/baseball/slow_provider_collection.py"
       - "src/quantbot/baseball/official_mlb.py"
       - "src/quantbot/baseball/official_mlb_repository.py"
+      - "src/quantbot/baseball/official_mlb_components.py"
+      - "src/quantbot/baseball/official_mlb_component_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
       - "migrations/**"
@@ -118,6 +124,8 @@ on:
       - "tests/test_provider_surface_audit.py"
       - "tests/test_official_mlb.py"
       - "tests/test_official_mlb_postgres_integration.py"
+      - "tests/test_official_mlb_components.py"
+      - "tests/test_official_mlb_components_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
       - ".github/workflows/railway-runtime-smoke.yml"
@@ -176,6 +184,8 @@ jobs:
           src/quantbot/baseball/slow_provider_collection.py
           src/quantbot/baseball/official_mlb.py
           src/quantbot/baseball/official_mlb_repository.py
+          src/quantbot/baseball/official_mlb_components.py
+          src/quantbot/baseball/official_mlb_component_repository.py
           src/quantbot/baseball/mlb_identity.py
           src/quantbot/baseball/mlb_identity_diagnostic.py
           src/quantbot/baseball/mlb_identity_repository.py
@@ -203,6 +213,8 @@ jobs:
           tests/test_provider_surface_audit.py
           tests/test_official_mlb.py
           tests/test_official_mlb_postgres_integration.py
+          tests/test_official_mlb_components.py
+          tests/test_official_mlb_components_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_diagnostic.py
           tests/test_mlb_identity_postgres_integration.py
@@ -238,6 +250,8 @@ jobs:
           src/quantbot/baseball/slow_provider_collection.py
           src/quantbot/baseball/official_mlb.py
           src/quantbot/baseball/official_mlb_repository.py
+          src/quantbot/baseball/official_mlb_components.py
+          src/quantbot/baseball/official_mlb_component_repository.py
           src/quantbot/baseball/mlb_identity.py
           src/quantbot/baseball/mlb_identity_diagnostic.py
           src/quantbot/baseball/mlb_identity_repository.py
@@ -265,6 +279,8 @@ jobs:
           tests/test_provider_surface_audit.py
           tests/test_official_mlb.py
           tests/test_official_mlb_postgres_integration.py
+          tests/test_official_mlb_components.py
+          tests/test_official_mlb_components_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_diagnostic.py
           tests/test_mlb_identity_postgres_integration.py
