@@ -31,7 +31,9 @@ def _record(value: Any) -> OfficialMLBPregameComponent:
     if isinstance(value, str):
         value = json.loads(value)
     if not isinstance(value, dict):
-        raise EvidenceConflictError(\n            "official MLB component canonical record is invalid"\n        )
+        raise EvidenceConflictError(
+            "official MLB component canonical record is invalid"
+        )
     return OfficialMLBPregameComponent(**value)
 
 
