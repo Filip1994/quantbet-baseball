@@ -35,6 +35,12 @@ def _record(value: Any) -> OfficialMLBPregameComponent:
     return OfficialMLBPregameComponent(**value)
 
 
+def _as_of(value: datetime) -> datetime:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("as_of must be timezone-aware")
+    return value.astimezone(UTC)
+
+
 class PostgreSQLOfficialMLBComponentRepository:
     def __init__(self, connection: ConnectionLike) -> None:
         self._connection = connection
@@ -129,7 +135,7 @@ class PostgreSQLOfficialMLBComponentRepository:
         side: str,
         as_of: datetime,
     ) -> OfficialMLBPregameComponent | None:
-        cutoff = as_of.astimezone(UTC)
+        cutoff = _as_of(as_of)
         with self._connection.cursor() as cursor:
             cursor.execute(
                 """
@@ -155,7 +161,7 @@ class PostgreSQLOfficialMLBComponentRepository:
         mlb_game_pk: int,
         as_of: datetime,
     ) -> tuple[OfficialMLBPregameComponent, ...]:
-        cutoff = as_of.astimezone(UTC)
+        cutoff = _as_of(as_of)
         with self._connection.cursor() as cursor:
             cursor.execute(
                 """
