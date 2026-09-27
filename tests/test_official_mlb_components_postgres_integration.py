@@ -145,5 +145,5 @@ def test_component_repository_rejects_naive_as_of() -> None:
         with pytest.raises(ValueError, match="timezone-aware"):
             repository.latest_components_for_game(
                 mlb_game_pk=823570,
-                as_of=datetime(2026, 9, 20, 15, 30),
+                as_of=datetime(2026, 9, 20, 15, 30),  # noqa: DTZ001 - intentional
             )
