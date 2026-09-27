@@ -34,6 +34,7 @@ from .fixture_evidence import (
 from .game_history_collection import collect_game_history
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
+from .mlb_game_linking import collect_mlb_game_links
 from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
 from .mlb_identity_mapping_completion import complete_mlb_team_mappings
 from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
@@ -589,6 +590,13 @@ def collect_durable_once(
                 "BASEBALL_MLB_IDENTITY_MAPPING_VERSION",
                 f"mlb-{cycle_now.year}-v1",
             ).strip()
+            mlb_game_linking_enabled = os.getenv(
+                "BASEBALL_ENABLE_MLB_GAME_LINKING", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            mlb_game_linking_date = (
+                os.getenv("BASEBALL_MLB_GAME_LINKING_DATE", "").strip()
+                or cycle_now.date().isoformat()
+            )
             mlb_mapping_completion_id = os.getenv(
                 "BASEBALL_MLB_MAPPING_COMPLETION_ID",
                 "",
@@ -650,6 +658,37 @@ def collect_durable_once(
             elif mlb_mapping_completion_id and mlb_identity_enabled:
                 mlb_mapping_completion["status"] = "BLOCKED_BOOTSTRAP_CONFLICT"
 
+            mlb_game_linking = {
+                "status": "DISABLED",
+                "schedule_calls": 0,
+                "fixtures_seen": 0,
+                "fixtures_already_linked": 0,
+                "team_mappings_total": int(mlb_identity["team_mappings_total"]),
+                "game_links_inserted": 0,
+                "game_links_total_for_target": 0,
+                "link_failures": 0,
+                "ready_for_enrichment": 0,
+            }
+            identity_mutation_armed = mlb_identity_enabled or bool(
+                mlb_mapping_completion_id
+            )
+            if (
+                execution_mode == "SCHEDULED"
+                and mlb_game_linking_enabled
+                and not identity_mutation_armed
+            ):
+                identity_repository = PostgreSQLMLBIdentityRepository(connection)
+                identity_client = OfficialMLBStatsClient(raw_archive=archive)
+                mlb_game_linking = collect_mlb_game_links(
+                    identity_client,
+                    identity_repository,
+                    date_iso=mlb_game_linking_date,
+                    mapping_version=mlb_identity_version,
+                    now=cycle_now,
+                )
+            elif mlb_game_linking_enabled and identity_mutation_armed:
+                mlb_game_linking["status"] = "BLOCKED_IDENTITY_MUTATION_CONFLICT"
+
             summary["mlb_mapping_completion_id"] = mlb_mapping_completion_id
             summary["mlb_mapping_completion_armed"] = int(
                 bool(mlb_mapping_completion_id)
@@ -680,6 +719,34 @@ def collect_durable_once(
             )
             summary["mlb_mapping_completion_ready_for_enrichment"] = int(
                 mlb_mapping_completion["ready_for_enrichment"]
+            )
+
+            summary["mlb_game_linking_enabled"] = int(mlb_game_linking_enabled)
+            summary["mlb_game_linking_date"] = mlb_game_linking_date
+            summary["mlb_game_linking_status"] = str(mlb_game_linking["status"])
+            summary["mlb_game_linking_schedule_calls"] = int(
+                mlb_game_linking["schedule_calls"]
+            )
+            summary["mlb_game_linking_fixtures_seen"] = int(
+                mlb_game_linking["fixtures_seen"]
+            )
+            summary["mlb_game_linking_fixtures_already_linked"] = int(
+                mlb_game_linking["fixtures_already_linked"]
+            )
+            summary["mlb_game_linking_team_mappings_total"] = int(
+                mlb_game_linking["team_mappings_total"]
+            )
+            summary["mlb_game_linking_game_links_inserted"] = int(
+                mlb_game_linking["game_links_inserted"]
+            )
+            summary["mlb_game_linking_game_links_total_for_target"] = int(
+                mlb_game_linking["game_links_total_for_target"]
+            )
+            summary["mlb_game_linking_link_failures"] = int(
+                mlb_game_linking["link_failures"]
+            )
+            summary["mlb_game_linking_ready_for_enrichment"] = int(
+                mlb_game_linking["ready_for_enrichment"]
             )
 
             summary["mlb_identity_enabled"] = int(mlb_identity_enabled)
