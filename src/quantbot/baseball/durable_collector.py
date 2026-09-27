@@ -630,6 +630,7 @@ def collect_durable_once(
                 "team_mappings_inserted": 0,
                 "team_mappings_total": int(mlb_identity["team_mappings_total"]),
                 "mapping_failures": 0,
+                "schedule_time_shift_matches": 0,
                 "ready_for_enrichment": 0,
             }
             if (
@@ -673,6 +674,9 @@ def collect_durable_once(
             )
             summary["mlb_mapping_completion_mapping_failures"] = int(
                 mlb_mapping_completion["mapping_failures"]
+            )
+            summary["mlb_mapping_completion_schedule_time_shift_matches"] = int(
+                mlb_mapping_completion["schedule_time_shift_matches"]
             )
             summary["mlb_mapping_completion_ready_for_enrichment"] = int(
                 mlb_mapping_completion["ready_for_enrichment"]
