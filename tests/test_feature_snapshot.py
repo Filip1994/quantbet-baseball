@@ -14,11 +14,13 @@ def _source(
     *,
     name: str = "api-sports-games",
     observed_at: str = "2030-07-04T16:00:00+00:00",
+    retrieved_at: str | None = None,
     ref: str = "s3://raw/source.json",
 ) -> FeatureSource:
     return FeatureSource(
         source_name=name,
         observed_at=observed_at,
+        retrieved_at=observed_at if retrieved_at is None else retrieved_at,
         source_payload_ref=ref,
         source_payload_checksum="a" * 64,
         field_names=("home_team_id", "away_team_id"),
@@ -51,11 +53,12 @@ def test_builds_deterministic_point_in_time_snapshot() -> None:
     assert json.loads(canonical_feature_snapshot_json(first))["game_id"] == "123"
 
 
-def test_latest_source_timestamp_becomes_cutoff() -> None:
+def test_latest_source_availability_becomes_cutoff() -> None:
     early = _source()
     late = _source(
         name="open-meteo",
-        observed_at="2030-07-04T16:03:00+00:00",
+        observed_at="2030-07-04T16:01:00+00:00",
+        retrieved_at="2030-07-04T16:03:00+00:00",
         ref="s3://raw/weather.json",
     )
 
@@ -69,6 +72,34 @@ def test_latest_source_timestamp_becomes_cutoff() -> None:
     )
 
     assert snapshot.source_data_cutoff_at == "2030-07-04T16:03:00+00:00"
+
+
+def test_historical_source_timestamp_does_not_backdate_known_at_cutoff() -> None:
+    replayed = _source(
+        name="official-mlb-stats-api",
+        observed_at="2030-07-04T14:00:00+00:00",
+        retrieved_at="2030-07-04T16:04:00+00:00",
+        ref="s3://raw/mlb-replay.json",
+    )
+
+    snapshot = build_feature_snapshot(
+        game_id="123",
+        feature_version="research-v1",
+        generated_at="2030-07-04T16:05:00+00:00",
+        kickoff_at="2030-07-04T19:20:00+00:00",
+        features={"home_starter_known": True},
+        sources=(replayed,),
+    )
+
+    assert snapshot.source_data_cutoff_at == "2030-07-04T16:04:00+00:00"
+
+
+def test_feature_source_rejects_retrieval_before_observation() -> None:
+    with pytest.raises(EvidenceError, match="retrieved_at cannot precede observed_at"):
+        _source(
+            observed_at="2030-07-04T16:00:00+00:00",
+            retrieved_at="2030-07-04T15:59:00+00:00",
+        )
 
 
 def test_null_feature_requires_reason() -> None:
