@@ -425,8 +425,8 @@ class BaseballDashboard:
             ),
             (
                 "MLB enrich",
-                health.get("official_mlb_pregame_snapshots", 0),
-                health.get("latest_official_mlb_observed_at"),
+                health.get("official_mlb_pregame_components", 0),
+                health.get("latest_official_mlb_component_observed_at"),
             ),
         ]
         provider_html = "".join(
