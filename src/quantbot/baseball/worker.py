@@ -169,6 +169,10 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "BASEBALL_MLB_MAPPING_COMPLETION_DATE",
         started_at.date().isoformat(),
     ).strip()
+    mlb_enrichment_canary_id = os.getenv(
+        "BASEBALL_MLB_ENRICHMENT_CANARY_ID",
+        "",
+    ).strip()
 
     result: dict[str, object] = {
         "status": "ready",
@@ -182,6 +186,7 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         "mlb_mapping_completion_diagnostic_armed": bool(
             mlb_mapping_completion_diagnostic_id
         ),
+        "mlb_enrichment_canary_armed": bool(mlb_enrichment_canary_id),
     }
 
     # Fail closed if both paths are armed. A canary must never coexist with
@@ -309,6 +314,42 @@ def run_once(root: Path | None = None) -> dict[str, object]:
             )
         mapping_diagnostic["diagnostic_id"] = mlb_mapping_completion_diagnostic_id
         result["mlb_mapping_completion_diagnostic"] = mapping_diagnostic
+
+    if mlb_enrichment_canary_id:
+        database_url = os.getenv("DATABASE_URL", "").strip()
+        if not database_url:
+            enrichment_canary: dict[str, object] = {
+                "status": "BLOCKED",
+                "provider_calls": 0,
+                "reason_codes": ["DATABASE_URL_MISSING"],
+            }
+        elif canary_enabled:
+            enrichment_canary = {
+                "status": "BLOCKED",
+                "provider_calls": 0,
+                "reason_codes": ["GENERIC_CANARY_CONFLICT"],
+            }
+        elif mlb_identity_diagnostic_id or mlb_mapping_completion_diagnostic_id:
+            enrichment_canary = {
+                "status": "BLOCKED",
+                "provider_calls": 0,
+                "reason_codes": ["IDENTITY_DIAGNOSTIC_CONFLICT"],
+            }
+        else:
+            from .official_mlb_enrichment_canary import (
+                run_official_mlb_enrichment_canary,
+            )
+
+            enrichment_canary = run_official_mlb_enrichment_canary(
+                database_url,
+                mapping_version=mlb_identity_mapping_version,
+                now=datetime.now(UTC),
+                root=project_root,
+            )
+        enrichment_canary["canary_id"] = mlb_enrichment_canary_id
+        result["mlb_enrichment_canary"] = enrichment_canary
+        if enrichment_canary.get("status") in {"FAILED", "BLOCKED"}:
+            result["status"] = "enrichment-canary-failed"
 
     health = _record_runtime(
         result,

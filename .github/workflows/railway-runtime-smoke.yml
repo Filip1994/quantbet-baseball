@@ -32,6 +32,7 @@ on:
       - "src/quantbot/baseball/provider_data_repository.py"
       - "src/quantbot/baseball/slow_provider_collection.py"
       - "src/quantbot/baseball/official_mlb.py"
+      - "src/quantbot/baseball/official_mlb_enrichment_canary.py"
       - "src/quantbot/baseball/official_mlb_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
@@ -57,6 +58,7 @@ on:
       - "tests/test_api_object_response.py"
       - "tests/test_provider_surface_audit.py"
       - "tests/test_official_mlb.py"
+      - "tests/test_official_mlb_enrichment_canary.py"
       - "tests/test_official_mlb_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
@@ -92,6 +94,7 @@ on:
       - "src/quantbot/baseball/provider_data_repository.py"
       - "src/quantbot/baseball/slow_provider_collection.py"
       - "src/quantbot/baseball/official_mlb.py"
+      - "src/quantbot/baseball/official_mlb_enrichment_canary.py"
       - "src/quantbot/baseball/official_mlb_repository.py"
       - "src/quantbot/baseball/raw_archive.py"
       - "src/quantbot/baseball/worker.py"
@@ -117,6 +120,7 @@ on:
       - "tests/test_api_object_response.py"
       - "tests/test_provider_surface_audit.py"
       - "tests/test_official_mlb.py"
+      - "tests/test_official_mlb_enrichment_canary.py"
       - "tests/test_official_mlb_postgres_integration.py"
       - "tests/test_raw_archive.py"
       - "tests/test_runtime_foundation.py"
@@ -177,6 +181,7 @@ jobs:
           src/quantbot/baseball/official_mlb.py
           src/quantbot/baseball/official_mlb_components.py
           src/quantbot/baseball/official_mlb_component_repository.py
+          src/quantbot/baseball/official_mlb_enrichment_canary.py
           src/quantbot/baseball/official_mlb_repository.py
           src/quantbot/baseball/mlb_identity.py
           src/quantbot/baseball/mlb_identity_diagnostic.py
@@ -206,6 +211,7 @@ jobs:
           tests/test_official_mlb.py
           tests/test_official_mlb_components.py
           tests/test_official_mlb_components_postgres_integration.py
+          tests/test_official_mlb_enrichment_canary.py
           tests/test_official_mlb_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_diagnostic.py
@@ -243,6 +249,7 @@ jobs:
           src/quantbot/baseball/official_mlb.py
           src/quantbot/baseball/official_mlb_components.py
           src/quantbot/baseball/official_mlb_component_repository.py
+          src/quantbot/baseball/official_mlb_enrichment_canary.py
           src/quantbot/baseball/official_mlb_repository.py
           src/quantbot/baseball/mlb_identity.py
           src/quantbot/baseball/mlb_identity_diagnostic.py
@@ -272,6 +279,7 @@ jobs:
           tests/test_official_mlb.py
           tests/test_official_mlb_components.py
           tests/test_official_mlb_components_postgres_integration.py
+          tests/test_official_mlb_enrichment_canary.py
           tests/test_official_mlb_postgres_integration.py
           tests/test_mlb_identity.py
           tests/test_mlb_identity_diagnostic.py

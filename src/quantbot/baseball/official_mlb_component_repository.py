@@ -129,6 +129,26 @@ class PostgreSQLOfficialMLBComponentRepository:
         self._connection.commit()
         return inserted
 
+    def components_for_requested_timecode(
+        self,
+        *,
+        mlb_game_pk: int,
+        requested_timecode: str,
+    ) -> tuple[OfficialMLBPregameComponent, ...]:
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT canonical_record
+                FROM official_mlb_pregame_components
+                WHERE mlb_game_pk = %s
+                  AND requested_timecode = %s
+                ORDER BY component_type, side, source_observed_at, component_id
+                """,
+                (mlb_game_pk, requested_timecode),
+            )
+            rows = cursor.fetchall()
+        return tuple(_record(row[0]) for row in rows)
+
     def latest_component(
         self,
         *,

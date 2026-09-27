@@ -2,7 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from quantbot.baseball import db, durable_collector, mlb_identity_diagnostic, worker
+from quantbot.baseball import (
+    db,
+    durable_collector,
+    mlb_identity_diagnostic,
+    official_mlb_enrichment_canary,
+    worker,
+)
 
 
 def test_migration_files_are_sorted(tmp_path: Path) -> None:
@@ -88,6 +94,71 @@ def test_worker_runs_durable_collector_only_when_enabled(
         "status": "collected",
         "observations_inserted": 2,
     }
+
+
+def test_worker_runs_bounded_mlb_enrichment_canary(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("BASEBALL_ENABLE_COLLECTION", "true")
+    monkeypatch.setenv("DATABASE_URL", "postgresql://example")
+    monkeypatch.setenv(
+        "BASEBALL_MLB_ENRICHMENT_CANARY_ID",
+        "mlb-enrich-canary-1",
+    )
+    monkeypatch.setenv(
+        "BASEBALL_MLB_IDENTITY_MAPPING_VERSION",
+        "mlb-2026-v1",
+    )
+    monkeypatch.setattr(worker, "apply_migrations", lambda root: ())
+    monkeypatch.setattr(worker, "_record_runtime", lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        durable_collector,
+        "collect_durable_once",
+        lambda root: {"status": "collected", "api_requests": 0},
+    )
+
+    captured = {}
+
+    def fake_canary(database_url, *, mapping_version, now, root):
+        captured.update(
+            {
+                "database_url": database_url,
+                "mapping_version": mapping_version,
+                "now": now,
+                "root": root,
+            }
+        )
+        return {
+            "status": "COMPLETE",
+            "provider_calls": 1,
+            "components_inserted": 7,
+            "components_total": 7,
+            "point_in_time_eligible": 1,
+        }
+
+    monkeypatch.setattr(
+        official_mlb_enrichment_canary,
+        "run_official_mlb_enrichment_canary",
+        fake_canary,
+    )
+
+    result = worker.run_once(tmp_path)
+
+    assert result["mode"] == "collection"
+    assert result["mlb_enrichment_canary_armed"] is True
+    assert result["mlb_enrichment_canary"] == {
+        "status": "COMPLETE",
+        "provider_calls": 1,
+        "components_inserted": 7,
+        "components_total": 7,
+        "point_in_time_eligible": 1,
+        "canary_id": "mlb-enrich-canary-1",
+    }
+    assert captured["database_url"] == "postgresql://example"
+    assert captured["mapping_version"] == "mlb-2026-v1"
+    assert captured["now"].tzinfo is not None
+    assert captured["root"] == tmp_path
 
 
 def test_worker_can_run_identity_diagnostic_alongside_collection(
