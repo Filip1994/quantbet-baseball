@@ -43,7 +43,17 @@ def _record(value: Any) -> FeatureSnapshot:
     sources = payload.get("sources")
     if not isinstance(sources, list):
         raise EvidenceConflictError("feature snapshot sources are invalid")
-    payload["sources"] = tuple(FeatureSource(**source) for source in sources)
+    normalized_sources: list[FeatureSource] = []
+    for source in sources:
+        if not isinstance(source, dict):
+            raise EvidenceConflictError("feature snapshot source is invalid")
+        source_payload = dict(source)
+        field_names = source_payload.get("field_names")
+        if not isinstance(field_names, list):
+            raise EvidenceConflictError("feature snapshot field_names are invalid")
+        source_payload["field_names"] = tuple(field_names)
+        normalized_sources.append(FeatureSource(**source_payload))
+    payload["sources"] = tuple(normalized_sources)
     return FeatureSnapshot(**payload)
 
 
