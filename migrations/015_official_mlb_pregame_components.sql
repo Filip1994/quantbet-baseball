@@ -89,13 +89,8 @@ CREATE TABLE IF NOT EXISTS official_mlb_lineup_evidence (
         OR
         (lineup_state = 'POPULATED' AND cardinality(batting_order_ids) >= 9)
     ),
-    CONSTRAINT official_mlb_lineup_player_ids_positive CHECK (
-        NOT EXISTS (
-            SELECT 1
-            FROM unnest(batting_order_ids) AS player_id
-            WHERE player_id <= 0
-        )
-    ),
+    CONSTRAINT official_mlb_lineup_player_ids_positive
+        CHECK (0 < ALL(batting_order_ids)),
     CONSTRAINT official_mlb_lineup_source_before_pitch
         CHECK (source_observed_at < scheduled_first_pitch),
     CONSTRAINT official_mlb_lineup_retrieval_valid
