@@ -767,9 +767,7 @@ class PostgreSQLEvidenceRepository:
             "official_mlb_pregame_snapshots": int(official_mlb_count),
             "latest_official_mlb_observed_at": _iso_or_none(latest_official_mlb),
             "official_mlb_pregame_components": int(official_mlb_component_count),
-            "distinct_official_mlb_component_games": int(
-                official_mlb_component_games
-            ),
+            "distinct_official_mlb_component_games": int(official_mlb_component_games),
             "latest_official_mlb_component_observed_at": _iso_or_none(
                 latest_official_mlb_component
             ),
