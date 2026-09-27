@@ -167,10 +167,14 @@ class PostgreSQLOfficialMLBComponentRepository:
                   AND component_type = %s
                   AND side = %s
                   AND source_observed_at <= %s
-                ORDER BY source_observed_at DESC, component_id DESC
+                  AND retrieved_at <= %s
+                ORDER BY
+                    source_observed_at DESC,
+                    retrieved_at DESC,
+                    component_id DESC
                 LIMIT 1
                 """,
-                (mlb_game_pk, component_type, side, cutoff),
+                (mlb_game_pk, component_type, side, cutoff, cutoff),
             )
             row = cursor.fetchone()
         if row is None:
@@ -192,13 +196,15 @@ class PostgreSQLOfficialMLBComponentRepository:
                 FROM official_mlb_pregame_components
                 WHERE mlb_game_pk = %s
                   AND source_observed_at <= %s
+                  AND retrieved_at <= %s
                 ORDER BY
                     component_type,
                     side,
                     source_observed_at DESC,
+                    retrieved_at DESC,
                     component_id DESC
                 """,
-                (mlb_game_pk, cutoff),
+                (mlb_game_pk, cutoff, cutoff),
             )
             rows = cursor.fetchall()
         result = tuple(_record(row[0]) for row in rows)
