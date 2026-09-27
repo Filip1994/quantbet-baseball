@@ -368,6 +368,27 @@ class PostgreSQLMLBIdentityRepository:
             )
         )
 
+    def game_links(
+        self,
+        mapping_version: str,
+    ) -> tuple[MLBGameIdentityLink, ...]:
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT canonical_record FROM official_mlb_game_identity_links "
+                "WHERE mapping_version = %s "
+                "ORDER BY official_mlb_first_pitch, api_sports_provider_game_id",
+                (mapping_version,),
+            )
+            rows = cursor.fetchall()
+        result: list[MLBGameIdentityLink] = []
+        for row in rows:
+            value = row[0]
+            if isinstance(value, str):
+                value = json.loads(value)
+            if isinstance(value, dict):
+                result.append(MLBGameIdentityLink(**value))
+        return tuple(result)
+
     def game_link_for_provider_game(
         self,
         *,
