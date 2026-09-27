@@ -207,8 +207,7 @@ def test_mapping_completion_accepts_unique_exact_pair_after_start_time_change() 
                     ref="s3://raw/official-mlb/schedule-shifted.json",
                     checksum="d" * 64,
                     captured_at=(
-                        captured_at
-                        or datetime(2026, 9, 26, 23, 30, tzinfo=UTC)
+                        captured_at or datetime(2026, 9, 26, 23, 30, tzinfo=UTC)
                     ).isoformat(),
                 ),
             )
@@ -294,8 +293,7 @@ def test_mapping_completion_rejects_ambiguous_exact_pair_after_time_change() -> 
                     ref="s3://raw/official-mlb/schedule-ambiguous.json",
                     checksum="f" * 64,
                     captured_at=(
-                        captured_at
-                        or datetime(2026, 9, 26, 23, 30, tzinfo=UTC)
+                        captured_at or datetime(2026, 9, 26, 23, 30, tzinfo=UTC)
                     ).isoformat(),
                 ),
             )
