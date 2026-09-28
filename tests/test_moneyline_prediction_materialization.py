@@ -105,6 +105,13 @@ def test_prediction_canary_is_bounded_and_restart_safe() -> None:
         horizon_minutes=360,
         max_predictions=1,
     )
+    third = materialize_due_baseline_predictions(
+        features,
+        decisions,
+        now=now,
+        horizon_minutes=360,
+        max_predictions=1,
+    )
 
     assert first["status"] == "CAPACITY_LIMITED"
     assert first["predictions_considered"] == 1
@@ -117,4 +124,10 @@ def test_prediction_canary_is_bounded_and_restart_safe() -> None:
     assert second["already_predicted"] == 1
     assert second["predictions_considered"] == 1
     assert second["predictions_inserted"] == 1
+    assert len(decisions.by_feature) == 2
+
+    assert third["status"] == "COMPLETE"
+    assert third["already_predicted"] == 2
+    assert third["predictions_considered"] == 0
+    assert third["predictions_inserted"] == 0
     assert len(decisions.by_feature) == 2
