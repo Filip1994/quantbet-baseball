@@ -400,6 +400,31 @@ class PostgreSQLEvidenceRepository:
             raise
         return inserted
 
+    def latest_fixture_observation(
+        self,
+        *,
+        game_id: str,
+        as_of: datetime,
+    ) -> FixtureObservation | None:
+        if as_of.tzinfo is None or as_of.utcoffset() is None:
+            raise ValueError("as_of must be timezone-aware")
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT canonical_record
+                FROM fixture_observations
+                WHERE game_id = %s
+                  AND observed_at <= %s
+                ORDER BY observed_at DESC, fixture_observation_id DESC
+                LIMIT 1
+                """,
+                (game_id, as_of),
+            )
+            row = cursor.fetchone()
+        if row is None:
+            return None
+        return FixtureObservation(**_canonical_object(row[0]))
+
     def append_fixture_schedule_snapshot(
         self,
         record: FixtureScheduleSnapshot,
