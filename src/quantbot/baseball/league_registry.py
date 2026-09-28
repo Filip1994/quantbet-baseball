@@ -16,14 +16,14 @@ CORE_LEAGUES: tuple[BaseballLeague, ...] = (
     BaseballLeague("MLB", 1, ("MLB", "Major League Baseball")),
     BaseballLeague("NPB", 2, ("NPB", "Nippon Professional Baseball")),
     BaseballLeague("LIDOM", 11, ("LIDOM",)),
-    BaseballLeague("LMB", 21, ("LMB", "Liga Mexicana de Beisbol", "Liga Mexicana de Béisbol")),
+    BaseballLeague(
+        "LMB", 21, ("LMB", "Liga Mexicana de Beisbol", "Liga Mexicana de Béisbol")
+    ),
 )
 
 _BY_ID = {league.league_id: league for league in CORE_LEAGUES}
 _BY_NAME = {
-    name.strip().casefold(): league
-    for league in CORE_LEAGUES
-    for name in league.names
+    name.strip().casefold(): league for league in CORE_LEAGUES for name in league.names
 }
 
 
