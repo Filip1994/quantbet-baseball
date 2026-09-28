@@ -10,9 +10,10 @@ contribute to that target's team-strength rates.
 from __future__ import annotations
 
 import math
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
-from typing import Iterable, Protocol
+from typing import Protocol
 
 from .evidence import EvidenceError
 from .game_history import GameHistorySnapshot
