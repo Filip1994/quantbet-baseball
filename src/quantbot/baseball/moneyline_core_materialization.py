@@ -8,7 +8,7 @@ from typing import Protocol
 from .evidence import EvidenceError
 from .feature_snapshot import FeatureSnapshot
 from .fixture_evidence import FixtureObservation
-from .league_registry import league_names_for_ids, league_for_name
+from .league_registry import league_for_name, league_names_for_ids
 from .moneyline_features import (
     CORE_FEATURE_VERSION,
     FixtureRepository,
