@@ -111,9 +111,7 @@ def materialize_due_baseline_predictions(
                 predicted_at=current.isoformat(),
                 home_probability=projection.home_probability,
                 away_probability=projection.away_probability,
-                uncertainty_metric=uncertainty_proxy(
-                    projection.minimum_context_games
-                ),
+                uncertainty_metric=uncertainty_proxy(projection.minimum_context_games),
             )
         except (EvidenceError, ValueError, TypeError):
             result["projection_failures"] = int(result["projection_failures"]) + 1
