@@ -138,9 +138,7 @@ def materialize_due_moneyline_evaluations(
                     max_quote_age_seconds=max_quote_age_seconds,
                 )
             except EvidenceError:
-                result["evaluation_failures"] = (
-                    int(result["evaluation_failures"]) + 1
-                )
+                result["evaluation_failures"] = int(result["evaluation_failures"]) + 1
                 continue
 
             for evaluation in evaluations:
