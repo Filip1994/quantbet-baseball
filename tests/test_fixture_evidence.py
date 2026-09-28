@@ -15,7 +15,7 @@ def game():
         "id": 10,
         "date": "2030-09-18T19:00:00+00:00",
         "status": {"short": "NS"},
-        "league": {"name": "MLB"},
+        "league": {"id": 1, "name": "MLB"},
         "teams": {
             "home": {"id": 101, "name": "Home Club"},
             "away": {"id": 202, "name": "Away Club"},
@@ -29,6 +29,7 @@ def test_maps_provider_game_to_canonical_fixture_observation() -> None:
     assert row is not None
     assert row.game_id == "10"
     assert row.provider_game_id == 10
+    assert row.league_id == 1
     assert row.home_team_id == 101
     assert row.away_team_id == 202
     assert row.kickoff_at == "2030-09-18T19:00:00+00:00"
