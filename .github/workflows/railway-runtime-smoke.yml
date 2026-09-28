@@ -21,6 +21,7 @@ on:
       - "src/quantbot/baseball/mlb_identity_repository.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
+      - "src/quantbot/baseball/moneyline_features.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
       - "src/quantbot/baseball/moneyline_settlement.py"
       - "src/quantbot/baseball/monitoring_lifecycle.py"
@@ -46,6 +47,8 @@ on:
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
+      - "tests/test_moneyline_features.py"
+      - "tests/test_moneyline_features_postgres_integration.py"
       - "tests/test_moneyline_settlement.py"
       - "tests/test_monitoring_lifecycle.py"
       - "tests/test_monitoring_postgres_integration.py"
@@ -88,6 +91,7 @@ on:
       - "src/quantbot/baseball/mlb_identity_repository.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
+      - "src/quantbot/baseball/moneyline_features.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
       - "src/quantbot/baseball/moneyline_settlement.py"
       - "src/quantbot/baseball/monitoring_lifecycle.py"
@@ -113,6 +117,8 @@ on:
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
+      - "tests/test_moneyline_features.py"
+      - "tests/test_moneyline_features_postgres_integration.py"
       - "tests/test_moneyline_settlement.py"
       - "tests/test_monitoring_lifecycle.py"
       - "tests/test_monitoring_postgres_integration.py"
@@ -178,6 +184,7 @@ jobs:
           src/quantbot/baseball/feature_snapshot_repository.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
+          src/quantbot/baseball/moneyline_features.py
           src/quantbot/baseball/moneyline_monitoring.py
           src/quantbot/baseball/moneyline_settlement.py
           src/quantbot/baseball/monitoring_lifecycle.py
@@ -207,6 +214,8 @@ jobs:
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
+          tests/test_moneyline_features.py
+          tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
           tests/test_monitoring_postgres_integration.py
@@ -251,6 +260,7 @@ jobs:
           src/quantbot/baseball/feature_snapshot_repository.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
+          src/quantbot/baseball/moneyline_features.py
           src/quantbot/baseball/moneyline_monitoring.py
           src/quantbot/baseball/moneyline_settlement.py
           src/quantbot/baseball/monitoring_lifecycle.py
@@ -280,6 +290,8 @@ jobs:
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
+          tests/test_moneyline_features.py
+          tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
           tests/test_monitoring_postgres_integration.py
@@ -319,6 +331,8 @@ jobs:
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_moneyline_monitoring.py
+          tests/test_moneyline_features.py
+          tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
           tests/test_monitoring_postgres_integration.py
