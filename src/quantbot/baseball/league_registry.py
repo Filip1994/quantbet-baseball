@@ -44,7 +44,7 @@ def league_for_name(name: str) -> BaseballLeague:
         raise ValueError(f"unsupported baseball league: {name}") from exc
 
 
-def parse_league_ids(value: str, *, default: tuple[int, ...] = (1, 2)) -> tuple[int, ...]:
+def parse_league_ids(value: str, *, default: tuple[int, ...] = (1,)) -> tuple[int, ...]:
     raw = str(value or "").strip()
     if not raw:
         return default
