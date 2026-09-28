@@ -226,7 +226,10 @@ def build_moneyline_v1_feature_snapshot(
         ("home", home_team_statistics),
         ("away", away_team_statistics),
     ):
-        if _timestamp(stats.observed_at, f"{side}_team_statistics.observed_at") > generated:
+        if (
+            _timestamp(stats.observed_at, f"{side}_team_statistics.observed_at")
+            > generated
+        ):
             raise EvidenceError(f"{side} team statistics were not known by cutoff")
 
     by_key = _require_component_set(components)
@@ -325,13 +328,9 @@ def build_moneyline_v1_feature_snapshot(
         "away_bullpen_members",
     )
     features["home_bullpen_state"] = home_bullpen.state
-    features["home_bullpen_members"] = _list_size(
-        home_bullpen.data.get("pitcher_ids")
-    )
+    features["home_bullpen_members"] = _list_size(home_bullpen.data.get("pitcher_ids"))
     features["away_bullpen_state"] = away_bullpen.state
-    features["away_bullpen_members"] = _list_size(
-        away_bullpen.data.get("pitcher_ids")
-    )
+    features["away_bullpen_members"] = _list_size(away_bullpen.data.get("pitcher_ids"))
 
     venue_fields = (
         "venue_id",
