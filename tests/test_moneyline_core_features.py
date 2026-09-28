@@ -32,7 +32,9 @@ def _fixture() -> FixtureObservation:
     )
 
 
-def _stats(team_id: int, name: str, *, home: bool, checksum: str) -> TeamStatisticsSnapshot:
+def _stats(
+    team_id: int, name: str, *, home: bool, checksum: str
+) -> TeamStatisticsSnapshot:
     split_win = 0.62 if home else 0.48
     split_rf = 4.9 if home else 4.2
     split_ra = 3.8 if home else 4.5
