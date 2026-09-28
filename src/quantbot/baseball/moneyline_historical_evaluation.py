@@ -12,7 +12,7 @@ from __future__ import annotations
 import math
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
-from typing import Iterable
+from typing import Iterable, Protocol
 
 from .evidence import EvidenceError
 from .game_history import GameHistorySnapshot
@@ -302,6 +302,15 @@ class HistoricalMoneylineEvaluation:
         return asdict(self)
 
 
+class HistoricalEvaluationRepository(Protocol):
+    def latest_snapshots_for_season(
+        self,
+        *,
+        league_id: int,
+        season: int,
+    ) -> tuple[GameHistorySnapshot, ...]: ...
+
+
 def evaluate_historical_moneyline_baseline(
     snapshots: Iterable[GameHistorySnapshot],
     *,
@@ -354,3 +363,26 @@ def evaluate_historical_moneyline_baseline(
         min_context_games=min_context_games,
     )
     return evaluation, tuple(examples)
+
+
+def evaluate_historical_moneyline_from_repository(
+    repository: HistoricalEvaluationRepository,
+    *,
+    league_id: int,
+    season: int,
+    shrinkage_games: float = 30.0,
+    min_overall_games: int = 10,
+    min_context_games: int = 5,
+) -> tuple[HistoricalMoneylineEvaluation, tuple[HistoricalMoneylineExample, ...]]:
+    """Load one season's canonical research reconstruction and evaluate it."""
+
+    snapshots = repository.latest_snapshots_for_season(
+        league_id=league_id,
+        season=season,
+    )
+    return evaluate_historical_moneyline_baseline(
+        snapshots,
+        shrinkage_games=shrinkage_games,
+        min_overall_games=min_overall_games,
+        min_context_games=min_context_games,
+    )
