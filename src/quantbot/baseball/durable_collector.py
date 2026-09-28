@@ -518,8 +518,24 @@ def collect_durable_once(
                 "catalogs_inserted": 0,
                 "errors": 0,
             }
-            slow_provider_league_ids = parse_league_ids(
+            configured_slow_provider_league_ids = parse_league_ids(
                 os.getenv("BASEBALL_SLOW_PROVIDER_LEAGUES", "1")
+            )
+            dynamic_playable_leagues_enabled = os.getenv(
+                "BASEBALL_ENABLE_DYNAMIC_PLAYABLE_LEAGUES", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            dynamic_playable_league_ids = (
+                repository.playable_league_ids_for_pregame(
+                    as_of=cycle_now,
+                    horizon_minutes=36 * 60,
+                )
+                if dynamic_playable_leagues_enabled
+                else ()
+            )
+            slow_provider_league_ids = tuple(
+                dict.fromkeys(
+                    (*dynamic_playable_league_ids, *configured_slow_provider_league_ids)
+                )
             )
             if (
                 execution_mode == "SCHEDULED"
@@ -594,6 +610,12 @@ def collect_durable_once(
                 )
 
             summary["slow_provider_enabled"] = int(slow_provider_enabled)
+            summary["dynamic_playable_leagues_enabled"] = int(
+                dynamic_playable_leagues_enabled
+            )
+            summary["dynamic_playable_league_ids"] = ",".join(
+                str(value) for value in dynamic_playable_league_ids
+            )
             summary["slow_provider_league_ids"] = ",".join(
                 str(value) for value in slow_provider_league_ids
             )
@@ -872,8 +894,8 @@ def collect_durable_once(
                     repository,
                     provider_repository,
                     feature_repository,
-                    league_ids=moneyline_core_league_ids,
                     now=cycle_now,
+                    league_ids=None if dynamic_playable_leagues_enabled else moneyline_core_league_ids,
                     horizon_minutes=moneyline_core_horizon_minutes,
                     max_games=max_moneyline_feature_games,
                 )
