@@ -59,7 +59,7 @@ class FakeClient:
                         "home": {"id": 101, "name": "Home Club"},
                         "away": {"id": 202, "name": "Away Club"},
                     },
-                    "league": {"name": "MLB"},
+                    "league": {"id": 1, "name": "MLB"},
                     "status": {"short": "NS"},
                 },
                 {
@@ -69,7 +69,7 @@ class FakeClient:
                         "home": {"id": 303, "name": "Started Home"},
                         "away": {"id": 404, "name": "Started Away"},
                     },
-                    "league": {"name": "MLB"},
+                    "league": {"id": 1, "name": "MLB"},
                     "status": {"short": "FT"},
                 },
             ]

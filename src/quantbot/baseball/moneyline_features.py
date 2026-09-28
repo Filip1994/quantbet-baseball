@@ -14,7 +14,6 @@ from typing import Protocol
 from .evidence import EvidenceError
 from .feature_snapshot import FeatureSnapshot, FeatureSource, build_feature_snapshot
 from .fixture_evidence import FixtureObservation
-from .league_registry import league_for_name
 from .mlb_identity import MLBGameIdentityLink
 from .official_mlb_components import OfficialMLBPregameComponent
 from .provider_data import TeamStatisticsSnapshot
@@ -140,11 +139,9 @@ def build_moneyline_core_v1_feature_snapshot(
     if generated >= kickoff:
         raise EvidenceError("feature snapshot must be assembled before first pitch")
 
-    resolved_league_id = (
-        league_for_name(fixture.league).league_id
-        if league_id is None
-        else int(league_id)
-    )
+    resolved_league_id = fixture.league_id if league_id is None else int(league_id)
+    if resolved_league_id is None:
+        raise EvidenceError("fixture league_id is unavailable at cutoff")
     for side, stats, team_id in (
         ("home", home_team_statistics, fixture.home_team_id),
         ("away", away_team_statistics, fixture.away_team_id),
@@ -554,11 +551,9 @@ def assemble_moneyline_core_v1_feature_snapshot(
     if fixture is None:
         raise EvidenceError("no fixture evidence is available by cutoff")
 
-    resolved_league_id = (
-        league_for_name(fixture.league).league_id
-        if league_id is None
-        else int(league_id)
-    )
+    resolved_league_id = fixture.league_id if league_id is None else int(league_id)
+    if resolved_league_id is None:
+        raise EvidenceError("fixture league_id is unavailable at cutoff")
     target_season = season or _timestamp(fixture.kickoff_at, "fixture.kickoff_at").year
     home_stats = provider_repository.latest_team_statistics(
         league_id=resolved_league_id,

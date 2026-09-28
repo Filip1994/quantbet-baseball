@@ -430,39 +430,47 @@ class PostgreSQLEvidenceRepository:
         *,
         as_of: datetime,
         horizon_minutes: int,
-        league_names: tuple[str, ...],
     ) -> tuple[FixtureObservation, ...]:
-        """Return latest PIT fixture evidence for supported pregame games."""
+        """Return PIT fixtures with a complete playable-bookmaker moneyline pair."""
 
         if as_of.tzinfo is None or as_of.utcoffset() is None:
             raise ValueError("as_of must be timezone-aware")
         if horizon_minutes < 1:
             raise ValueError("horizon_minutes must be positive")
-        if not league_names:
-            return ()
         cutoff = as_of.astimezone(UTC)
         horizon = cutoff + timedelta(minutes=horizon_minutes)
-        normalized = tuple(
-            name.strip().casefold() for name in league_names if name.strip()
-        )
         query = """
-            SELECT canonical_record
-            FROM (
+            WITH latest AS (
                 SELECT DISTINCT ON (provider_game_id)
                     provider_game_id,
+                    game_id,
                     canonical_record,
                     kickoff_at
                 FROM fixture_observations
                 WHERE observed_at <= %s
                   AND kickoff_at > %s
                   AND kickoff_at <= %s
-                  AND lower(league) = ANY(%s)
+                  AND canonical_record->>'league_id' IS NOT NULL
                 ORDER BY provider_game_id, observed_at DESC, fixture_observation_id DESC
-            ) AS latest
-            ORDER BY kickoff_at, provider_game_id
+            )
+            SELECT latest.canonical_record
+            FROM latest
+            WHERE EXISTS (
+                SELECT 1
+                FROM odds_observations AS oo
+                WHERE oo.game_id = latest.game_id
+                  AND oo.observed_at <= %s
+                  AND oo.market_family = 'moneyline'
+                  AND oo.market_status = 'open'
+                  AND lower(oo.bookmaker) IN ('1xbet', 'bet365')
+                  AND oo.selection IN ('home', 'away')
+                GROUP BY lower(oo.bookmaker), oo.observed_at
+                HAVING COUNT(DISTINCT oo.selection) = 2
+            )
+            ORDER BY latest.kickoff_at, latest.provider_game_id
         """
         with self._connection.cursor() as cursor:
-            cursor.execute(query, (cutoff, cutoff, horizon, list(normalized)))
+            cursor.execute(query, (cutoff, cutoff, horizon, cutoff))
             rows = cursor.fetchall()
         result: list[FixtureObservation] = []
         for row in rows:
@@ -472,6 +480,25 @@ class PostgreSQLEvidenceRepository:
             if isinstance(value, dict):
                 result.append(FixtureObservation(**value))
         return tuple(result)
+
+    def playable_league_ids_for_pregame(
+        self,
+        *,
+        as_of: datetime,
+        horizon_minutes: int = 2160,
+    ) -> tuple[int, ...]:
+        """Discover league IDs from current fixtures that have 1xBet/Bet365 ML pairs."""
+
+        fixtures = self.latest_due_core_fixtures(
+            as_of=as_of,
+            horizon_minutes=horizon_minutes,
+        )
+        league_ids = {
+            int(fixture.league_id)
+            for fixture in fixtures
+            if fixture.league_id is not None
+        }
+        return tuple(sorted(league_ids))
 
     def append_fixture_schedule_snapshot(
         self,

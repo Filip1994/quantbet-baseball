@@ -8,7 +8,6 @@ from typing import Protocol
 from .evidence import EvidenceError
 from .feature_snapshot import FeatureSnapshot
 from .fixture_evidence import FixtureObservation
-from .league_registry import league_for_name, league_names_for_ids
 from .moneyline_features import (
     CORE_FEATURE_VERSION,
     FixtureRepository,
@@ -23,7 +22,6 @@ class CoreFixtureRepository(FixtureRepository, Protocol):
         *,
         as_of: datetime,
         horizon_minutes: int,
-        league_names: tuple[str, ...],
     ) -> tuple[FixtureObservation, ...]: ...
 
 
@@ -50,8 +48,8 @@ def materialize_due_moneyline_core_v1_features(
     provider_repository: ProviderDataRepository,
     feature_repository: CoreFeatureRepository,
     *,
-    league_ids: tuple[int, ...],
     now: datetime,
+    league_ids: tuple[int, ...] | None = None,
     horizon_minutes: int = 150,
     max_games: int = 30,
     season: int | None = None,
@@ -62,20 +60,22 @@ def materialize_due_moneyline_core_v1_features(
         raise ValueError("horizon_minutes must be positive")
     if max_games < 1:
         raise ValueError("max_games must be positive")
-    if not league_ids:
-        raise ValueError("league_ids must be non-empty")
+    if league_ids is not None and not league_ids:
+        raise ValueError("league_ids cannot be empty when provided")
 
     current = _utc(now)
-    names = league_names_for_ids(league_ids)
     due = fixture_repository.latest_due_core_fixtures(
         as_of=current,
         horizon_minutes=horizon_minutes,
-        league_names=names,
     )
 
     result: dict[str, int | str] = {
         "status": "NO_DUE_GAMES",
-        "league_ids": ",".join(str(value) for value in league_ids),
+        "league_ids": (
+            "dynamic"
+            if league_ids is None
+            else ",".join(str(value) for value in league_ids)
+        ),
         "due_games": len(due),
         "already_materialized": 0,
         "games_considered": 0,
@@ -103,12 +103,11 @@ def materialize_due_moneyline_core_v1_features(
     selected = pending[:max_games]
     result["games_considered"] = len(selected)
     for fixture in selected:
-        try:
-            league_id = league_for_name(fixture.league).league_id
-        except ValueError:
+        league_id = fixture.league_id
+        if league_id is None:
             result["unsupported_league"] = int(result["unsupported_league"]) + 1
             continue
-        if league_id not in league_ids:
+        if league_ids is not None and league_id not in league_ids:
             result["unsupported_league"] = int(result["unsupported_league"]) + 1
             continue
         try:

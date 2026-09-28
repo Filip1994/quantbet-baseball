@@ -80,11 +80,13 @@ def _team(game: dict[str, Any], side: str) -> tuple[int, str]:
     )
 
 
-def _league_name(game: dict[str, Any]) -> str:
+def _league(game: dict[str, Any]) -> tuple[int | None, str]:
     value = game.get("league") or _nested_game(game).get("league")
     if isinstance(value, dict):
-        value = value.get("name")
-    return _text(value, "league")
+        raw_id = value.get("id")
+        league_id = None if raw_id in (None, "") else _positive_int(raw_id, "league_id")
+        return league_id, _text(value.get("name"), "league")
+    return None, _text(value, "league")
 
 
 def _provider_status(game: dict[str, Any]) -> str:
@@ -111,6 +113,7 @@ class FixtureObservation:
     source_payload_ref: str
     source_payload_checksum: str
     schema_version: str
+    league_id: int | None = None
 
     def __post_init__(self) -> None:
         for name in (
@@ -129,6 +132,8 @@ class FixtureObservation:
         if self.provider != _PROVIDER:
             raise EvidenceError("provider is unsupported")
         provider_game_id = _positive_int(self.provider_game_id, "provider_game_id")
+        if self.league_id is not None:
+            _positive_int(self.league_id, "league_id")
         home_team_id = _positive_int(self.home_team_id, "home_team_id")
         away_team_id = _positive_int(self.away_team_id, "away_team_id")
         if home_team_id == away_team_id:
@@ -294,7 +299,7 @@ def canonical_fixture_observation(
         _timestamp(receipt.captured_at, "observed_at")
         home_team_id, home_team_name = _team(game, "home")
         away_team_id, away_team_name = _team(game, "away")
-        league = _league_name(game)
+        league_id, league = _league(game)
         status = _provider_status(game)
     except EvidenceError:
         return None
@@ -304,6 +309,7 @@ def canonical_fixture_observation(
         "provider": _PROVIDER,
         "provider_game_id": provider_game_id,
         "league": league,
+        "league_id": league_id,
         "home_team_id": home_team_id,
         "home_team_name": home_team_name,
         "away_team_id": away_team_id,
@@ -337,7 +343,8 @@ def canonical_fixture_observation(
             observed_at=receipt.captured_at,
             source_payload_ref=receipt.ref,
             source_payload_checksum=receipt.checksum,
-            schema_version="1.0",
+            schema_version="1.1",
+            league_id=league_id,
         )
     except EvidenceError:
         return None
