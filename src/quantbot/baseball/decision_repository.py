@@ -195,7 +195,7 @@ class PostgreSQLMoneylineDecisionRepository:
                 SELECT COUNT(*)
                 FROM value_evaluations
                 WHERE prediction_id = %s
-                  AND bookmaker = %s
+                  AND lower(bookmaker) = lower(%s)
                   AND home_observation_id = %s
                   AND away_observation_id = %s
                   AND stage = %s
@@ -509,7 +509,7 @@ class PostgreSQLMoneylineDecisionRepository:
             cursor.execute(
                 "SELECT canonical_record FROM odds_observations "
                 "WHERE game_id = %s AND market_family = 'moneyline' "
-                "AND bookmaker = %s AND market_status = 'open' "
+                "AND lower(bookmaker) = lower(%s) AND market_status = 'open' "
                 "AND observed_at <= %s "
                 "ORDER BY observed_at DESC, observation_id DESC LIMIT %s",
                 (game_id, bookmaker, as_of, limit),
