@@ -25,6 +25,7 @@ on:
       - "src/quantbot/baseball/moneyline_feature_materialization.py"
       - "src/quantbot/baseball/moneyline_baseline.py"
       - "src/quantbot/baseball/moneyline_historical_evaluation.py"
+      - "src/quantbot/baseball/moneyline_historical_report.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
       - "src/quantbot/baseball/moneyline_settlement.py"
       - "src/quantbot/baseball/monitoring_lifecycle.py"
@@ -54,6 +55,7 @@ on:
       - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_baseline.py"
       - "tests/test_moneyline_historical_evaluation.py"
+      - "tests/test_moneyline_historical_report.py"
       - "tests/test_moneyline_features_postgres_integration.py"
       - "tests/test_moneyline_settlement.py"
       - "tests/test_monitoring_lifecycle.py"
@@ -101,6 +103,7 @@ on:
       - "src/quantbot/baseball/moneyline_feature_materialization.py"
       - "src/quantbot/baseball/moneyline_baseline.py"
       - "src/quantbot/baseball/moneyline_historical_evaluation.py"
+      - "src/quantbot/baseball/moneyline_historical_report.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
       - "src/quantbot/baseball/moneyline_settlement.py"
       - "src/quantbot/baseball/monitoring_lifecycle.py"
@@ -130,6 +133,7 @@ on:
       - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_baseline.py"
       - "tests/test_moneyline_historical_evaluation.py"
+      - "tests/test_moneyline_historical_report.py"
       - "tests/test_moneyline_features_postgres_integration.py"
       - "tests/test_moneyline_settlement.py"
       - "tests/test_monitoring_lifecycle.py"
@@ -200,6 +204,7 @@ jobs:
           src/quantbot/baseball/moneyline_feature_materialization.py
           src/quantbot/baseball/moneyline_baseline.py
           src/quantbot/baseball/moneyline_historical_evaluation.py
+          src/quantbot/baseball/moneyline_historical_report.py
           src/quantbot/baseball/moneyline_monitoring.py
           src/quantbot/baseball/moneyline_settlement.py
           src/quantbot/baseball/monitoring_lifecycle.py
@@ -233,6 +238,7 @@ jobs:
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
           tests/test_moneyline_historical_evaluation.py
+          tests/test_moneyline_historical_report.py
           tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
@@ -282,6 +288,7 @@ jobs:
           src/quantbot/baseball/moneyline_feature_materialization.py
           src/quantbot/baseball/moneyline_baseline.py
           src/quantbot/baseball/moneyline_historical_evaluation.py
+          src/quantbot/baseball/moneyline_historical_report.py
           src/quantbot/baseball/moneyline_monitoring.py
           src/quantbot/baseball/moneyline_settlement.py
           src/quantbot/baseball/monitoring_lifecycle.py
@@ -315,6 +322,7 @@ jobs:
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
           tests/test_moneyline_historical_evaluation.py
+          tests/test_moneyline_historical_report.py
           tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
@@ -359,6 +367,7 @@ jobs:
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
           tests/test_moneyline_historical_evaluation.py
+          tests/test_moneyline_historical_report.py
           tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
