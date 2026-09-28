@@ -32,12 +32,14 @@ from .fixture_evidence import (
     canonical_fixture_observation,
 )
 from .game_history_collection import collect_game_history
+from .feature_snapshot_repository import PostgreSQLFeatureSnapshotRepository
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
 from .mlb_game_linking import collect_mlb_game_links
 from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
 from .mlb_identity_mapping_completion import complete_mlb_team_mappings
 from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
+from .moneyline_feature_materialization import materialize_due_moneyline_v1_features
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
@@ -610,6 +612,12 @@ def collect_durable_once(
             max_mlb_enrichment_requests = int(
                 os.getenv("BASEBALL_MAX_MLB_ENRICHMENT_REQUESTS", "4")
             )
+            moneyline_v1_features_enabled = os.getenv(
+                "BASEBALL_ENABLE_MONEYLINE_V1_FEATURES", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            max_moneyline_feature_games = int(
+                os.getenv("BASEBALL_MAX_MONEYLINE_FEATURE_GAMES", "30")
+            )
             if mlb_enrichment_horizon_minutes < 1:
                 raise ValueError(
                     "BASEBALL_MLB_ENRICHMENT_HORIZON_MINUTES must be positive"
@@ -617,6 +625,10 @@ def collect_durable_once(
             if max_mlb_enrichment_requests < 1:
                 raise ValueError(
                     "BASEBALL_MAX_MLB_ENRICHMENT_REQUESTS must be positive"
+                )
+            if max_moneyline_feature_games < 1:
+                raise ValueError(
+                    "BASEBALL_MAX_MONEYLINE_FEATURE_GAMES must be positive"
                 )
             mlb_mapping_completion_id = os.getenv(
                 "BASEBALL_MLB_MAPPING_COMPLETION_ID",
@@ -739,6 +751,38 @@ def collect_durable_once(
                     max_calls=max_mlb_enrichment_requests,
                 )
 
+            moneyline_v1_features = {
+                "status": "DISABLED",
+                "linked_games_total": 0,
+                "due_games": 0,
+                "already_materialized": 0,
+                "games_considered": 0,
+                "snapshots_inserted": 0,
+                "evidence_blocked": 0,
+                "due_games_unprocessed": 0,
+                "provider_calls": 0,
+            }
+            if execution_mode == "SCHEDULED" and moneyline_v1_features_enabled:
+                identity_repository = PostgreSQLMLBIdentityRepository(connection)
+                provider_repository = PostgreSQLProviderDataRepository(connection)
+                component_repository = PostgreSQLOfficialMLBComponentRepository(
+                    connection
+                )
+                feature_repository = PostgreSQLFeatureSnapshotRepository(connection)
+                moneyline_v1_features = materialize_due_moneyline_v1_features(
+                    repository,
+                    identity_repository,
+                    provider_repository,
+                    component_repository,
+                    feature_repository,
+                    mapping_version=mlb_identity_version,
+                    now=cycle_now,
+                    horizon_minutes=mlb_enrichment_horizon_minutes,
+                    max_games=max_moneyline_feature_games,
+                    league_id=1,
+                    season=cycle_now.year,
+                )
+
             summary["mlb_mapping_completion_id"] = mlb_mapping_completion_id
             summary["mlb_mapping_completion_armed"] = int(
                 bool(mlb_mapping_completion_id)
@@ -830,6 +874,37 @@ def collect_durable_once(
             )
             summary["mlb_live_enrichment_ready_for_feature_snapshot"] = int(
                 mlb_live_enrichment["ready_for_feature_snapshot"]
+            )
+
+            summary["moneyline_v1_features_enabled"] = int(
+                moneyline_v1_features_enabled
+            )
+            summary["moneyline_v1_features_status"] = str(
+                moneyline_v1_features["status"]
+            )
+            summary["moneyline_v1_features_linked_games_total"] = int(
+                moneyline_v1_features["linked_games_total"]
+            )
+            summary["moneyline_v1_features_due_games"] = int(
+                moneyline_v1_features["due_games"]
+            )
+            summary["moneyline_v1_features_already_materialized"] = int(
+                moneyline_v1_features["already_materialized"]
+            )
+            summary["moneyline_v1_features_games_considered"] = int(
+                moneyline_v1_features["games_considered"]
+            )
+            summary["moneyline_v1_features_snapshots_inserted"] = int(
+                moneyline_v1_features["snapshots_inserted"]
+            )
+            summary["moneyline_v1_features_evidence_blocked"] = int(
+                moneyline_v1_features["evidence_blocked"]
+            )
+            summary["moneyline_v1_features_due_games_unprocessed"] = int(
+                moneyline_v1_features["due_games_unprocessed"]
+            )
+            summary["moneyline_v1_features_provider_calls"] = int(
+                moneyline_v1_features["provider_calls"]
             )
 
             summary["mlb_identity_enabled"] = int(mlb_identity_enabled)
