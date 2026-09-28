@@ -86,7 +86,11 @@ def _pregame_context_status(features: dict[str, Any]) -> str:
         features.get("home_bullpen_state") == "PRESENT"
         and features.get("away_bullpen_state") == "PRESENT"
     )
-    return "FULL_PREGAME_CONTEXT" if starters and lineups and bullpens else "LIMITED_CONTEXT"
+    return (
+        "FULL_PREGAME_CONTEXT"
+        if starters and lineups and bullpens
+        else "LIMITED_CONTEXT"
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -128,9 +132,7 @@ def project_team_strength_moneyline(
     """
 
     if snapshot.feature_version != FEATURE_VERSION:
-        raise EvidenceError(
-            f"baseline requires feature_version={FEATURE_VERSION}"
-        )
+        raise EvidenceError(f"baseline requires feature_version={FEATURE_VERSION}")
     if not math.isfinite(shrinkage_games) or shrinkage_games <= 0:
         raise ValueError("shrinkage_games must be positive and finite")
 
