@@ -442,7 +442,9 @@ class PostgreSQLEvidenceRepository:
             return ()
         cutoff = as_of.astimezone(UTC)
         horizon = cutoff + timedelta(minutes=horizon_minutes)
-        normalized = tuple(name.strip().casefold() for name in league_names if name.strip())
+        normalized = tuple(
+            name.strip().casefold() for name in league_names if name.strip()
+        )
         query = """
             SELECT canonical_record
             FROM (
