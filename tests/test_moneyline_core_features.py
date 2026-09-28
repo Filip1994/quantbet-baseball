@@ -28,7 +28,8 @@ def _fixture() -> FixtureObservation:
         observed_at="2030-07-04T15:50:00+00:00",
         source_payload_ref="s3://raw/npb-games.json",
         source_payload_checksum="f" * 64,
-        schema_version="1.0",
+        schema_version="1.1",
+        league_id=2,
     )
 
 
@@ -101,8 +102,7 @@ class _FixtureRepo:
     def __init__(self):
         self.fixture = _fixture()
 
-    def latest_due_core_fixtures(self, *, as_of, horizon_minutes, league_names):
-        assert "NPB" in league_names
+    def latest_due_core_fixtures(self, *, as_of, horizon_minutes):
         return (self.fixture,)
 
     def latest_fixture_observation(self, *, game_id, as_of):
@@ -168,3 +168,38 @@ def test_core_materialization_is_restart_safe() -> None:
     assert second["status"] == "COMPLETE"
     assert second["already_materialized"] == 1
     assert second["snapshots_inserted"] == 0
+
+
+def test_core_accepts_unregistered_provider_league_id() -> None:
+    fixture = _fixture()
+    fixture = FixtureObservation(
+        fixture_observation_id=fixture.fixture_observation_id,
+        game_id=fixture.game_id,
+        provider=fixture.provider,
+        provider_game_id=fixture.provider_game_id,
+        league="Arbitrary Supported League",
+        home_team_id=fixture.home_team_id,
+        home_team_name=fixture.home_team_name,
+        away_team_id=fixture.away_team_id,
+        away_team_name=fixture.away_team_name,
+        kickoff_at=fixture.kickoff_at,
+        provider_status=fixture.provider_status,
+        observed_at=fixture.observed_at,
+        source_payload_ref=fixture.source_payload_ref,
+        source_payload_checksum=fixture.source_payload_checksum,
+        schema_version="1.1",
+        league_id=77,
+    )
+    home = _stats(10, "Yomiuri Giants", home=True, checksum="a")
+    away = _stats(20, "Yakult Swallows", home=False, checksum="b")
+    home = TeamStatisticsSnapshot(**{**home.to_dict(), "league_id": 77})
+    away = TeamStatisticsSnapshot(**{**away.to_dict(), "league_id": 77})
+
+    snapshot = build_moneyline_core_v1_feature_snapshot(
+        fixture=fixture,
+        home_team_statistics=home,
+        away_team_statistics=away,
+        generated_at=datetime(2030, 7, 4, 16, 0, tzinfo=UTC),
+    )
+
+    assert snapshot.feature_version == CORE_FEATURE_VERSION
