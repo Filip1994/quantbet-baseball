@@ -151,7 +151,10 @@ def build_moneyline_core_v1_feature_snapshot(
             raise EvidenceError(f"{side} team statistics identity mismatch")
         if stats.league_id != resolved_league_id:
             raise EvidenceError(f"{side} team statistics league mismatch")
-        if _timestamp(stats.observed_at, f"{side}_team_statistics.observed_at") > generated:
+        if (
+            _timestamp(stats.observed_at, f"{side}_team_statistics.observed_at")
+            > generated
+        ):
             raise EvidenceError(f"{side} team statistics were not known by cutoff")
 
     if home_team_statistics.season != away_team_statistics.season:
