@@ -140,9 +140,7 @@ def materialize_due_moneyline_v1_features(
         except EvidenceError:
             result["evidence_blocked"] = int(result["evidence_blocked"]) + 1
             continue
-        result["snapshots_inserted"] = int(result["snapshots_inserted"]) + int(
-            inserted
-        )
+        result["snapshots_inserted"] = int(result["snapshots_inserted"]) + int(inserted)
 
     unprocessed = max(0, len(pending) - len(selected))
     result["due_games_unprocessed"] = unprocessed
