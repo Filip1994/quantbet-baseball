@@ -789,7 +789,9 @@ def collect_durable_once(
 
             moneyline_core_features = {
                 "status": "DISABLED",
-                "league_ids": ",".join(\n                    str(value) for value in moneyline_core_league_ids\n                ),
+                "league_ids": ",".join(
+                    str(value) for value in moneyline_core_league_ids
+                ),
                 "due_games": 0,
                 "already_materialized": 0,
                 "games_considered": 0,
