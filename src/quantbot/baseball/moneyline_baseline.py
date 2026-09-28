@@ -267,8 +267,8 @@ def project_team_strength_moneyline(
 
     if snapshot.feature_version not in {FEATURE_VERSION, CORE_FEATURE_VERSION}:
         raise EvidenceError(
-            "baseline requires feature_version in "
-            f"{{{FEATURE_VERSION}, {CORE_FEATURE_VERSION}}}"
+            "baseline requires feature_version="
+            f"{FEATURE_VERSION} or {CORE_FEATURE_VERSION}"
         )
 
     features = dict(snapshot.features)
