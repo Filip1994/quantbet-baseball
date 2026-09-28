@@ -532,10 +532,10 @@ def collect_durable_once(
                 if dynamic_playable_leagues_enabled
                 else ()
             )
-            slow_provider_league_ids = tuple(
-                dict.fromkeys(
-                    (*dynamic_playable_league_ids, *configured_slow_provider_league_ids)
-                )
+            slow_provider_league_ids = (
+                dynamic_playable_league_ids
+                if dynamic_playable_leagues_enabled
+                else configured_slow_provider_league_ids
             )
             if (
                 execution_mode == "SCHEDULED"
