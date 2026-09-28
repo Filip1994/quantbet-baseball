@@ -71,7 +71,9 @@ def _snapshot(*, full_context: bool = True, feature_version: str = "moneyline-v1
     )
 
 
-def test_team_strength_baseline_shrinks_splits_and_returns_two_way_probability() -> None:
+def test_team_strength_baseline_shrinks_splits_and_returns_two_way_probability() -> (
+    None
+):
     projection = project_team_strength_moneyline(_snapshot(), shrinkage_games=30.0)
 
     home_weight = 40 / 70
@@ -140,7 +142,9 @@ def test_baseline_rejects_nonpositive_run_rate() -> None:
         null_reasons=snapshot.null_reasons,
     )
 
-    with pytest.raises(EvidenceError, match="home_context_runs_per_game must be positive"):
+    with pytest.raises(
+        EvidenceError, match="home_context_runs_per_game must be positive"
+    ):
         project_team_strength_moneyline(broken)
 
 
