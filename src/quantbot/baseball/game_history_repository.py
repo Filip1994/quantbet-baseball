@@ -191,6 +191,48 @@ class PostgreSQLGameHistoryRepository:
             )
         )
 
+    def latest_snapshots_for_season(
+        self,
+        *,
+        league_id: int,
+        season: int,
+    ) -> tuple[GameHistorySnapshot, ...]:
+        """Return the latest archived snapshot per game for research reconstruction.
+
+        This method intentionally has no observed_by cutoff. It is for explicit
+        EVENT_TIME_RECONSTRUCTION research only and must not be used to claim
+        what the production system knew before a historical first pitch.
+        """
+
+        query = """
+            SELECT DISTINCT ON (provider_game_id)
+                canonical_record
+            FROM api_sports_game_history_snapshots
+            WHERE league_id = %s
+              AND season = %s
+            ORDER BY provider_game_id, observed_at DESC, snapshot_id DESC
+        """
+        with self._connection.cursor() as cursor:
+            cursor.execute(query, (league_id, season))
+            rows = cursor.fetchall()
+
+        records: list[GameHistorySnapshot] = []
+        for row in rows:
+            value = row[0]
+            if isinstance(value, str):
+                value = json.loads(value)
+            if isinstance(value, dict):
+                records.append(GameHistorySnapshot(**value))
+        return tuple(
+            sorted(
+                records,
+                key=lambda item: (
+                    item.scheduled_first_pitch,
+                    item.provider_game_id,
+                ),
+            )
+        )
+
     def counts(self) -> dict[str, int]:
         with self._connection.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM api_sports_game_history_snapshots")

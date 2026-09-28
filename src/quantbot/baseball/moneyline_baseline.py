@@ -62,6 +62,30 @@ def _sample_games(features: dict[str, Any], name: str) -> int:
     return int(number)
 
 
+def _positive_rate(value: float, field: str) -> float:
+    if isinstance(value, bool):
+        raise EvidenceError(f"{field} must be numeric")
+    try:
+        number = float(value)
+    except (TypeError, ValueError) as exc:
+        raise EvidenceError(f"{field} must be numeric") from exc
+    if not math.isfinite(number) or number <= 0.0:
+        raise EvidenceError(f"{field} must be positive and finite")
+    return number
+
+
+def _context_games(value: int, field: str) -> int:
+    if isinstance(value, bool):
+        raise EvidenceError(f"{field} must be a non-negative integer")
+    try:
+        number = int(value)
+    except (TypeError, ValueError) as exc:
+        raise EvidenceError(f"{field} must be a non-negative integer") from exc
+    if number != value or number < 0:
+        raise EvidenceError(f"{field} must be a non-negative integer")
+    return number
+
+
 def _shrunk_rate(
     *,
     contextual: float,
@@ -90,6 +114,114 @@ def _pregame_context_status(features: dict[str, Any]) -> str:
         "FULL_PREGAME_CONTEXT"
         if starters and lineups and bullpens
         else "LIMITED_CONTEXT"
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class TeamStrengthRates:
+    home_overall_runs_per_game: float
+    home_context_runs_per_game: float
+    home_overall_runs_allowed_per_game: float
+    home_context_runs_allowed_per_game: float
+    home_context_sample_games: int
+    away_overall_runs_per_game: float
+    away_context_runs_per_game: float
+    away_overall_runs_allowed_per_game: float
+    away_context_runs_allowed_per_game: float
+    away_context_sample_games: int
+
+    def __post_init__(self) -> None:
+        for field in (
+            "home_overall_runs_per_game",
+            "home_context_runs_per_game",
+            "home_overall_runs_allowed_per_game",
+            "home_context_runs_allowed_per_game",
+            "away_overall_runs_per_game",
+            "away_context_runs_per_game",
+            "away_overall_runs_allowed_per_game",
+            "away_context_runs_allowed_per_game",
+        ):
+            _positive_rate(getattr(self, field), field)
+        for field in (
+            "home_context_sample_games",
+            "away_context_sample_games",
+        ):
+            _context_games(getattr(self, field), field)
+
+
+@dataclass(frozen=True, slots=True)
+class TeamStrengthProbabilityCore:
+    home_expected_runs: float
+    away_expected_runs: float
+    home_probability: float
+    away_probability: float
+    home_offense_rate: float
+    away_offense_rate: float
+    home_defense_rate: float
+    away_defense_rate: float
+    minimum_context_games: int
+    shrinkage_games: float
+
+
+def calculate_team_strength_probability(
+    rates: TeamStrengthRates,
+    *,
+    shrinkage_games: float = 30.0,
+) -> TeamStrengthProbabilityCore:
+    """Apply the canonical team-strength baseline math to validated rates."""
+
+    if not math.isfinite(shrinkage_games) or shrinkage_games <= 0:
+        raise ValueError("shrinkage_games must be positive and finite")
+
+    home_offense = _shrunk_rate(
+        contextual=rates.home_context_runs_per_game,
+        overall=rates.home_overall_runs_per_game,
+        contextual_games=rates.home_context_sample_games,
+        shrinkage_games=shrinkage_games,
+    )
+    home_defense = _shrunk_rate(
+        contextual=rates.home_context_runs_allowed_per_game,
+        overall=rates.home_overall_runs_allowed_per_game,
+        contextual_games=rates.home_context_sample_games,
+        shrinkage_games=shrinkage_games,
+    )
+    away_offense = _shrunk_rate(
+        contextual=rates.away_context_runs_per_game,
+        overall=rates.away_overall_runs_per_game,
+        contextual_games=rates.away_context_sample_games,
+        shrinkage_games=shrinkage_games,
+    )
+    away_defense = _shrunk_rate(
+        contextual=rates.away_context_runs_allowed_per_game,
+        overall=rates.away_overall_runs_allowed_per_game,
+        contextual_games=rates.away_context_sample_games,
+        shrinkage_games=shrinkage_games,
+    )
+
+    home_expected_runs = math.sqrt(home_offense * away_defense)
+    away_expected_runs = math.sqrt(away_offense * home_defense)
+    probabilities = poisson_moneyline_probabilities(
+        home_expected_runs,
+        away_expected_runs,
+    )
+    if probabilities is None:
+        raise EvidenceError("baseline moneyline probabilities could not be calculated")
+    home_probability, away_probability = probabilities
+
+    return TeamStrengthProbabilityCore(
+        home_expected_runs=home_expected_runs,
+        away_expected_runs=away_expected_runs,
+        home_probability=home_probability,
+        away_probability=away_probability,
+        home_offense_rate=home_offense,
+        away_offense_rate=away_offense,
+        home_defense_rate=home_defense,
+        away_defense_rate=away_defense,
+        minimum_context_games=min(
+            rates.home_context_sample_games,
+            rates.away_context_sample_games,
+        ),
+        shrinkage_games=shrinkage_games,
     )
 
 
@@ -133,8 +265,6 @@ def project_team_strength_moneyline(
 
     if snapshot.feature_version != FEATURE_VERSION:
         raise EvidenceError(f"baseline requires feature_version={FEATURE_VERSION}")
-    if not math.isfinite(shrinkage_games) or shrinkage_games <= 0:
-        raise ValueError("shrinkage_games must be positive and finite")
 
     features = dict(snapshot.features)
     for name in _REQUIRED_RATE_FEATURES:
@@ -142,59 +272,60 @@ def project_team_strength_moneyline(
     for name in _REQUIRED_SAMPLE_FEATURES:
         _sample_games(features, name)
 
-    home_games = _sample_games(features, "home_context_sample_games")
-    away_games = _sample_games(features, "away_context_sample_games")
-
-    home_offense = _shrunk_rate(
-        contextual=_number(features, "home_context_runs_per_game", positive=True),
-        overall=_number(features, "home_overall_runs_per_game", positive=True),
-        contextual_games=home_games,
-        shrinkage_games=shrinkage_games,
-    )
-    home_defense = _shrunk_rate(
-        contextual=_number(
+    rates = TeamStrengthRates(
+        home_overall_runs_per_game=_number(
             features,
-            "home_context_runs_allowed_per_game",
+            "home_overall_runs_per_game",
             positive=True,
         ),
-        overall=_number(
+        home_context_runs_per_game=_number(
+            features,
+            "home_context_runs_per_game",
+            positive=True,
+        ),
+        home_overall_runs_allowed_per_game=_number(
             features,
             "home_overall_runs_allowed_per_game",
             positive=True,
         ),
-        contextual_games=home_games,
-        shrinkage_games=shrinkage_games,
-    )
-    away_offense = _shrunk_rate(
-        contextual=_number(features, "away_context_runs_per_game", positive=True),
-        overall=_number(features, "away_overall_runs_per_game", positive=True),
-        contextual_games=away_games,
-        shrinkage_games=shrinkage_games,
-    )
-    away_defense = _shrunk_rate(
-        contextual=_number(
+        home_context_runs_allowed_per_game=_number(
             features,
-            "away_context_runs_allowed_per_game",
+            "home_context_runs_allowed_per_game",
             positive=True,
         ),
-        overall=_number(
+        home_context_sample_games=_sample_games(
+            features,
+            "home_context_sample_games",
+        ),
+        away_overall_runs_per_game=_number(
+            features,
+            "away_overall_runs_per_game",
+            positive=True,
+        ),
+        away_context_runs_per_game=_number(
+            features,
+            "away_context_runs_per_game",
+            positive=True,
+        ),
+        away_overall_runs_allowed_per_game=_number(
             features,
             "away_overall_runs_allowed_per_game",
             positive=True,
         ),
-        contextual_games=away_games,
+        away_context_runs_allowed_per_game=_number(
+            features,
+            "away_context_runs_allowed_per_game",
+            positive=True,
+        ),
+        away_context_sample_games=_sample_games(
+            features,
+            "away_context_sample_games",
+        ),
+    )
+    core = calculate_team_strength_probability(
+        rates,
         shrinkage_games=shrinkage_games,
     )
-
-    home_expected_runs = math.sqrt(home_offense * away_defense)
-    away_expected_runs = math.sqrt(away_offense * home_defense)
-    probabilities = poisson_moneyline_probabilities(
-        home_expected_runs,
-        away_expected_runs,
-    )
-    if probabilities is None:
-        raise EvidenceError("baseline moneyline probabilities could not be calculated")
-    home_probability, away_probability = probabilities
 
     identity = {
         "game_id": snapshot.game_id,
@@ -217,16 +348,16 @@ def project_team_strength_moneyline(
         feature_version=snapshot.feature_version,
         model_version=MODEL_VERSION,
         projected_at=snapshot.generated_at,
-        home_expected_runs=home_expected_runs,
-        away_expected_runs=away_expected_runs,
-        home_probability=home_probability,
-        away_probability=away_probability,
-        home_offense_rate=home_offense,
-        away_offense_rate=away_offense,
-        home_defense_rate=home_defense,
-        away_defense_rate=away_defense,
-        minimum_context_games=min(home_games, away_games),
-        shrinkage_games=shrinkage_games,
+        home_expected_runs=core.home_expected_runs,
+        away_expected_runs=core.away_expected_runs,
+        home_probability=core.home_probability,
+        away_probability=core.away_probability,
+        home_offense_rate=core.home_offense_rate,
+        away_offense_rate=core.away_offense_rate,
+        home_defense_rate=core.home_defense_rate,
+        away_defense_rate=core.away_defense_rate,
+        minimum_context_games=core.minimum_context_games,
+        shrinkage_games=core.shrinkage_games,
         context_status=_pregame_context_status(features),
     )
 

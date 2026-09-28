@@ -140,3 +140,89 @@ def test_health_counts_only_non_null_extra_inning_values() -> None:
                     (regular.snapshot_id, extra.snapshot_id),
                 )
             connection.commit()
+
+
+def test_season_reconstruction_read_uses_latest_archived_snapshot_per_game() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+
+    apply_migrations(Path("."), database_url)
+    old = GameHistorySnapshot(
+        snapshot_id=str(uuid.uuid4()),
+        provider="api-sports-baseball",
+        provider_game_id=990000101,
+        observed_at="2026-09-26T10:00:00+00:00",
+        scheduled_first_pitch="2026-09-20T18:00:00+00:00",
+        provider_timezone="UTC",
+        status_long="Finished",
+        status_short="FT",
+        league_id=1,
+        season=2026,
+        home_team_id=903,
+        home_team_name="Research Home",
+        away_team_id=904,
+        away_team_name="Research Away",
+        home_score=2,
+        away_score=1,
+        home_hits=None,
+        away_hits=None,
+        home_errors=None,
+        away_errors=None,
+        home_innings={},
+        away_innings={},
+        source_payload_ref="s3://raw/research-old.json",
+        source_payload_checksum="c" * 64,
+    )
+    corrected = GameHistorySnapshot(
+        snapshot_id=str(uuid.uuid4()),
+        provider=old.provider,
+        provider_game_id=old.provider_game_id,
+        observed_at="2026-09-27T10:00:00+00:00",
+        scheduled_first_pitch=old.scheduled_first_pitch,
+        provider_timezone=old.provider_timezone,
+        status_long=old.status_long,
+        status_short=old.status_short,
+        league_id=old.league_id,
+        season=old.season,
+        home_team_id=old.home_team_id,
+        home_team_name=old.home_team_name,
+        away_team_id=old.away_team_id,
+        away_team_name=old.away_team_name,
+        home_score=7,
+        away_score=3,
+        home_hits=None,
+        away_hits=None,
+        home_errors=None,
+        away_errors=None,
+        home_innings={},
+        away_innings={},
+        source_payload_ref="s3://raw/research-corrected.json",
+        source_payload_checksum="d" * 64,
+    )
+
+    with psycopg.connect(database_url) as connection:
+        repository = PostgreSQLGameHistoryRepository(connection)
+        try:
+            assert repository.append_snapshot(old) is True
+            assert repository.append_snapshot(corrected) is True
+            season_rows = repository.latest_snapshots_for_season(
+                league_id=1,
+                season=2026,
+            )
+            matching = [
+                row
+                for row in season_rows
+                if row.provider_game_id == old.provider_game_id
+            ]
+            assert len(matching) == 1
+            assert matching[0].snapshot_id == corrected.snapshot_id
+            assert matching[0].home_score == 7
+        finally:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM api_sports_game_history_snapshots "
+                    "WHERE snapshot_id IN (%s, %s)",
+                    (old.snapshot_id, corrected.snapshot_id),
+                )
+            connection.commit()
