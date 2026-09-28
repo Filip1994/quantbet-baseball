@@ -850,10 +850,7 @@ def collect_durable_once(
                 "due_features_unprocessed": 0,
                 "provider_calls": 0,
             }
-            if (
-                execution_mode == "SCHEDULED"
-                and moneyline_baseline_predictions_enabled
-            ):
+            if execution_mode == "SCHEDULED" and moneyline_baseline_predictions_enabled:
                 feature_repository = PostgreSQLFeatureSnapshotRepository(connection)
                 decision_repository = PostgreSQLMoneylineDecisionRepository(connection)
                 moneyline_baseline_predictions = materialize_due_baseline_predictions(
