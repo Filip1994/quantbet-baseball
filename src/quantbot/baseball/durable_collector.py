@@ -524,6 +524,7 @@ def collect_durable_once(
             dynamic_playable_leagues_enabled = os.getenv(
                 "BASEBALL_ENABLE_DYNAMIC_PLAYABLE_LEAGUES", "false"
             ).strip().lower() in {"1", "true", "yes", "on"}
+            # In dynamic mode, bookmaker-backed league evidence drives enrichment.
             dynamic_playable_league_ids = (
                 repository.playable_league_ids_for_pregame(
                     as_of=cycle_now,
