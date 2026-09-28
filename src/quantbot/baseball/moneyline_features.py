@@ -14,11 +14,13 @@ from typing import Protocol
 from .evidence import EvidenceError
 from .feature_snapshot import FeatureSnapshot, FeatureSource, build_feature_snapshot
 from .fixture_evidence import FixtureObservation
+from .league_registry import league_for_name
 from .mlb_identity import MLBGameIdentityLink
 from .official_mlb_components import OfficialMLBPregameComponent
 from .provider_data import TeamStatisticsSnapshot
 
 FEATURE_VERSION = "moneyline-v1"
+CORE_FEATURE_VERSION = "moneyline-core-v1"
 MLB_API_SPORTS_LEAGUE_ID = 1
 
 _EXPECTED_COMPONENT_KEYS = {
@@ -121,6 +123,81 @@ def _team_features(
         for name, value in values.items():
             features[f"{prefix}_{scope}_{name}"] = value
     return features, tuple(sorted(features))
+
+
+def build_moneyline_core_v1_feature_snapshot(
+    *,
+    fixture: FixtureObservation,
+    home_team_statistics: TeamStatisticsSnapshot,
+    away_team_statistics: TeamStatisticsSnapshot,
+    generated_at: datetime,
+    league_id: int | None = None,
+) -> FeatureSnapshot:
+    """Build a league-agnostic team-strength snapshot without MLB-only evidence."""
+
+    generated = _utc(generated_at, "generated_at")
+    kickoff = _timestamp(fixture.kickoff_at, "fixture.kickoff_at")
+    if generated >= kickoff:
+        raise EvidenceError("feature snapshot must be assembled before first pitch")
+
+    resolved_league_id = (
+        league_for_name(fixture.league).league_id if league_id is None else int(league_id)
+    )
+    for side, stats, team_id in (
+        ("home", home_team_statistics, fixture.home_team_id),
+        ("away", away_team_statistics, fixture.away_team_id),
+    ):
+        if stats.team_id != team_id:
+            raise EvidenceError(f"{side} team statistics identity mismatch")
+        if stats.league_id != resolved_league_id:
+            raise EvidenceError(f"{side} team statistics league mismatch")
+        if _timestamp(stats.observed_at, f"{side}_team_statistics.observed_at") > generated:
+            raise EvidenceError(f"{side} team statistics were not known by cutoff")
+
+    if home_team_statistics.season != away_team_statistics.season:
+        raise EvidenceError("team statistics season mismatch")
+
+    features: dict[str, object] = {}
+    home_features, home_fields = _team_features(
+        home_team_statistics,
+        prefix="home",
+        context_side="home",
+    )
+    away_features, away_fields = _team_features(
+        away_team_statistics,
+        prefix="away",
+        context_side="away",
+    )
+    features.update(home_features)
+    features.update(away_features)
+
+    sources = (
+        FeatureSource(
+            source_name="api-sports-baseball:team-statistics:home",
+            observed_at=home_team_statistics.observed_at,
+            retrieved_at=home_team_statistics.observed_at,
+            source_payload_ref=home_team_statistics.source_payload_ref,
+            source_payload_checksum=home_team_statistics.source_payload_checksum,
+            field_names=home_fields,
+        ),
+        FeatureSource(
+            source_name="api-sports-baseball:team-statistics:away",
+            observed_at=away_team_statistics.observed_at,
+            retrieved_at=away_team_statistics.observed_at,
+            source_payload_ref=away_team_statistics.source_payload_ref,
+            source_payload_checksum=away_team_statistics.source_payload_checksum,
+            field_names=away_fields,
+        ),
+    )
+    return build_feature_snapshot(
+        game_id=fixture.game_id,
+        feature_version=CORE_FEATURE_VERSION,
+        generated_at=generated.isoformat(),
+        kickoff_at=kickoff.isoformat(),
+        features=features,
+        sources=sources,
+        null_reasons={},
+    )
 
 
 def _list_size(value: object) -> int:
@@ -451,6 +528,74 @@ def assemble_moneyline_v1_feature_snapshot(
         components=components,
         generated_at=cutoff,
     )
+
+
+def assemble_moneyline_core_v1_feature_snapshot(
+    fixture_repository: FixtureRepository,
+    provider_repository: ProviderDataRepository,
+    *,
+    provider_game_id: int,
+    as_of: datetime,
+    league_id: int | None = None,
+    season: int | None = None,
+) -> FeatureSnapshot:
+    """Resolve PIT team-strength evidence for any explicitly supported league."""
+
+    cutoff = _utc(as_of, "as_of")
+    fixture = fixture_repository.latest_fixture_observation(
+        game_id=str(provider_game_id),
+        as_of=cutoff,
+    )
+    if fixture is None:
+        raise EvidenceError("no fixture evidence is available by cutoff")
+
+    resolved_league_id = (
+        league_for_name(fixture.league).league_id if league_id is None else int(league_id)
+    )
+    target_season = season or _timestamp(fixture.kickoff_at, "fixture.kickoff_at").year
+    home_stats = provider_repository.latest_team_statistics(
+        league_id=resolved_league_id,
+        season=target_season,
+        team_id=fixture.home_team_id,
+        as_of=cutoff,
+    )
+    away_stats = provider_repository.latest_team_statistics(
+        league_id=resolved_league_id,
+        season=target_season,
+        team_id=fixture.away_team_id,
+        as_of=cutoff,
+    )
+    if home_stats is None or away_stats is None:
+        raise EvidenceError("complete team statistics are unavailable by cutoff")
+
+    return build_moneyline_core_v1_feature_snapshot(
+        fixture=fixture,
+        home_team_statistics=home_stats,
+        away_team_statistics=away_stats,
+        generated_at=cutoff,
+        league_id=resolved_league_id,
+    )
+
+
+def assemble_and_persist_moneyline_core_v1_feature_snapshot(
+    fixture_repository: FixtureRepository,
+    provider_repository: ProviderDataRepository,
+    feature_repository: FeatureSnapshotRepository,
+    *,
+    provider_game_id: int,
+    as_of: datetime,
+    league_id: int | None = None,
+    season: int | None = None,
+) -> tuple[FeatureSnapshot, bool]:
+    snapshot = assemble_moneyline_core_v1_feature_snapshot(
+        fixture_repository,
+        provider_repository,
+        provider_game_id=provider_game_id,
+        as_of=as_of,
+        league_id=league_id,
+        season=season,
+    )
+    return snapshot, feature_repository.append(snapshot)
 
 
 def assemble_and_persist_moneyline_v1_feature_snapshot(
