@@ -186,6 +186,47 @@ class PostgreSQLFeatureSnapshotRepository:
             return None
         return _record(row[0])
 
+    def due_for_prediction(
+        self,
+        *,
+        feature_versions: tuple[str, ...],
+        as_of: datetime,
+        horizon_minutes: int,
+        limit: int,
+    ) -> tuple[FeatureSnapshot, ...]:
+        if not feature_versions:
+            return ()
+        if horizon_minutes < 1:
+            raise ValueError("horizon_minutes must be positive")
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        cutoff = _as_of(as_of)
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT canonical_record
+                FROM feature_snapshots
+                WHERE feature_version = ANY(%s)
+                  AND generated_at <= %s
+                  AND source_data_cutoff_at <= %s
+                  AND kickoff_at > %s
+                  AND kickoff_at <= %s + (%s * INTERVAL '1 minute')
+                ORDER BY kickoff_at, generated_at DESC, snapshot_id DESC
+                LIMIT %s
+                """,
+                (
+                    list(feature_versions),
+                    cutoff,
+                    cutoff,
+                    cutoff,
+                    cutoff,
+                    horizon_minutes,
+                    limit,
+                ),
+            )
+            rows = cursor.fetchall()
+        return tuple(_record(row[0]) for row in rows)
+
     def latest_for_game(
         self,
         *,
