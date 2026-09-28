@@ -127,6 +127,16 @@ def test_feature_snapshot_repository_is_immutable_idempotent_and_point_in_time()
             game_id=_GAME_ID,
             as_of=datetime(2030, 7, 4, 16, 30, tzinfo=UTC),
         )
+        versioned = repository.latest_for_game_version(
+            game_id=_GAME_ID,
+            feature_version="moneyline-pit-v1",
+            as_of=datetime(2030, 7, 4, 16, 30, tzinfo=UTC),
+        )
+        missing_version = repository.latest_for_game_version(
+            game_id=_GAME_ID,
+            feature_version="does-not-exist",
+            as_of=datetime(2030, 7, 4, 16, 30, tzinfo=UTC),
+        )
 
         conflicting = replace(
             early,
@@ -139,6 +149,8 @@ def test_feature_snapshot_repository_is_immutable_idempotent_and_point_in_time()
     assert before_any is None
     assert between == early
     assert after_late == late
+    assert versioned == late
+    assert missing_version is None
 
 
 def test_feature_snapshot_repository_rejects_naive_as_of() -> None:
