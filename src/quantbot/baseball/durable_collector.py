@@ -24,6 +24,7 @@ from .collector import (
 )
 from .config import BaseballSettings
 from .db import database_url_from_env
+from .decision_repository import PostgreSQLMoneylineDecisionRepository
 from .evidence import OddsObservation
 from .feature_snapshot_repository import PostgreSQLFeatureSnapshotRepository
 from .fixture_evidence import (
@@ -43,6 +44,7 @@ from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
 from .moneyline_core_materialization import materialize_due_moneyline_core_v1_features
 from .moneyline_feature_materialization import materialize_due_moneyline_v1_features
 from .moneyline_monitoring import monitor_due_moneyline_picks
+from .moneyline_prediction_materialization import materialize_due_baseline_predictions
 from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
@@ -651,6 +653,15 @@ def collect_durable_once(
             moneyline_core_horizon_minutes = int(
                 os.getenv("BASEBALL_MONEYLINE_CORE_HORIZON_MINUTES", "360")
             )
+            moneyline_baseline_predictions_enabled = os.getenv(
+                "BASEBALL_ENABLE_MONEYLINE_BASELINE_PREDICTIONS", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            moneyline_prediction_horizon_minutes = int(
+                os.getenv("BASEBALL_MONEYLINE_PREDICTION_HORIZON_MINUTES", "360")
+            )
+            max_moneyline_baseline_predictions = int(
+                os.getenv("BASEBALL_MAX_MONEYLINE_BASELINE_PREDICTIONS", "1")
+            )
             moneyline_v1_features_enabled = os.getenv(
                 "BASEBALL_ENABLE_MONEYLINE_V1_FEATURES", "false"
             ).strip().lower() in {"1", "true", "yes", "on"}
@@ -664,6 +675,14 @@ def collect_durable_once(
             if moneyline_core_horizon_minutes < 1:
                 raise ValueError(
                     "BASEBALL_MONEYLINE_CORE_HORIZON_MINUTES must be positive"
+                )
+            if moneyline_prediction_horizon_minutes < 1:
+                raise ValueError(
+                    "BASEBALL_MONEYLINE_PREDICTION_HORIZON_MINUTES must be positive"
+                )
+            if max_moneyline_baseline_predictions < 1:
+                raise ValueError(
+                    "BASEBALL_MAX_MONEYLINE_BASELINE_PREDICTIONS must be positive"
                 )
             if max_mlb_enrichment_requests < 1:
                 raise ValueError(
@@ -819,6 +838,30 @@ def collect_durable_once(
                     now=cycle_now,
                     horizon_minutes=moneyline_core_horizon_minutes,
                     max_games=max_moneyline_feature_games,
+                )
+
+            moneyline_baseline_predictions = {
+                "status": "DISABLED",
+                "features_seen": 0,
+                "already_predicted": 0,
+                "predictions_considered": 0,
+                "predictions_inserted": 0,
+                "projection_failures": 0,
+                "due_features_unprocessed": 0,
+                "provider_calls": 0,
+            }
+            if (
+                execution_mode == "SCHEDULED"
+                and moneyline_baseline_predictions_enabled
+            ):
+                feature_repository = PostgreSQLFeatureSnapshotRepository(connection)
+                decision_repository = PostgreSQLMoneylineDecisionRepository(connection)
+                moneyline_baseline_predictions = materialize_due_baseline_predictions(
+                    feature_repository,
+                    decision_repository,
+                    now=cycle_now,
+                    horizon_minutes=moneyline_prediction_horizon_minutes,
+                    max_predictions=max_moneyline_baseline_predictions,
                 )
 
             moneyline_v1_features = {
@@ -981,6 +1024,37 @@ def collect_durable_once(
             )
             summary["moneyline_core_features_provider_calls"] = int(
                 moneyline_core_features["provider_calls"]
+            )
+
+            summary["moneyline_baseline_predictions_enabled"] = int(
+                moneyline_baseline_predictions_enabled
+            )
+            summary["moneyline_baseline_prediction_horizon_minutes"] = (
+                moneyline_prediction_horizon_minutes
+            )
+            summary["moneyline_baseline_predictions_status"] = str(
+                moneyline_baseline_predictions["status"]
+            )
+            summary["moneyline_baseline_predictions_features_seen"] = int(
+                moneyline_baseline_predictions["features_seen"]
+            )
+            summary["moneyline_baseline_predictions_already_predicted"] = int(
+                moneyline_baseline_predictions["already_predicted"]
+            )
+            summary["moneyline_baseline_predictions_considered"] = int(
+                moneyline_baseline_predictions["predictions_considered"]
+            )
+            summary["moneyline_baseline_predictions_inserted"] = int(
+                moneyline_baseline_predictions["predictions_inserted"]
+            )
+            summary["moneyline_baseline_predictions_projection_failures"] = int(
+                moneyline_baseline_predictions["projection_failures"]
+            )
+            summary["moneyline_baseline_predictions_due_features_unprocessed"] = int(
+                moneyline_baseline_predictions["due_features_unprocessed"]
+            )
+            summary["moneyline_baseline_predictions_provider_calls"] = int(
+                moneyline_baseline_predictions["provider_calls"]
             )
 
             summary["moneyline_v1_features_enabled"] = int(
