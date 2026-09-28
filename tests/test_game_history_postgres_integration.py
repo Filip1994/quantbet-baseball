@@ -141,8 +141,6 @@ def test_health_counts_only_non_null_extra_inning_values() -> None:
                 )
             connection.commit()
 
-
-
 def test_season_reconstruction_read_uses_latest_archived_snapshot_per_game() -> None:
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
