@@ -275,10 +275,7 @@ def test_optional_venue_field_uses_explicit_null_reason() -> None:
     )
 
     assert snapshot.features["venue_roof_type"] is None
-    assert (
-        snapshot.null_reasons["venue_roof_type"]
-        == "OFFICIAL_MLB_ROOF_TYPE_MISSING"
-    )
+    assert snapshot.null_reasons["venue_roof_type"] == "OFFICIAL_MLB_ROOF_TYPE_MISSING"
 
 
 def test_missing_mlb_component_fails_closed() -> None:
