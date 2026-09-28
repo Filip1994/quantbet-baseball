@@ -895,7 +895,9 @@ def collect_durable_once(
                     provider_repository,
                     feature_repository,
                     now=cycle_now,
-                    league_ids=None if dynamic_playable_leagues_enabled else moneyline_core_league_ids,
+                    league_ids=None
+                    if dynamic_playable_leagues_enabled
+                    else moneyline_core_league_ids,
                     horizon_minutes=moneyline_core_horizon_minutes,
                     max_games=max_moneyline_feature_games,
                 )
