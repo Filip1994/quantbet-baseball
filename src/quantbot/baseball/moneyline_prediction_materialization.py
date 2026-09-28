@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 
 from .decision_lifecycle import ModelPrediction, build_model_prediction
+from .evidence import EvidenceError
 from .feature_snapshot import FeatureSnapshot
 from .moneyline_baseline import MODEL_VERSION, project_team_strength_moneyline
 from .moneyline_features import CORE_FEATURE_VERSION, FEATURE_VERSION
@@ -114,7 +115,7 @@ def materialize_due_baseline_predictions(
                     projection.minimum_context_games
                 ),
             )
-        except (ValueError, TypeError):
+        except (EvidenceError, ValueError, TypeError):
             result["projection_failures"] = int(result["projection_failures"]) + 1
             continue
         inserted = decision_repository.append_prediction(prediction)
