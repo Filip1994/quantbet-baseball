@@ -648,6 +648,9 @@ def collect_durable_once(
             moneyline_core_league_ids = parse_league_ids(
                 os.getenv("BASEBALL_MONEYLINE_CORE_LEAGUES", "1,2")
             )
+            moneyline_core_horizon_minutes = int(
+                os.getenv("BASEBALL_MONEYLINE_CORE_HORIZON_MINUTES", "360")
+            )
             moneyline_v1_features_enabled = os.getenv(
                 "BASEBALL_ENABLE_MONEYLINE_V1_FEATURES", "false"
             ).strip().lower() in {"1", "true", "yes", "on"}
@@ -657,6 +660,10 @@ def collect_durable_once(
             if mlb_enrichment_horizon_minutes < 1:
                 raise ValueError(
                     "BASEBALL_MLB_ENRICHMENT_HORIZON_MINUTES must be positive"
+                )
+            if moneyline_core_horizon_minutes < 1:
+                raise ValueError(
+                    "BASEBALL_MONEYLINE_CORE_HORIZON_MINUTES must be positive"
                 )
             if max_mlb_enrichment_requests < 1:
                 raise ValueError(
@@ -810,7 +817,7 @@ def collect_durable_once(
                     feature_repository,
                     league_ids=moneyline_core_league_ids,
                     now=cycle_now,
-                    horizon_minutes=mlb_enrichment_horizon_minutes,
+                    horizon_minutes=moneyline_core_horizon_minutes,
                     max_games=max_moneyline_feature_games,
                 )
 
@@ -941,6 +948,9 @@ def collect_durable_once(
 
             summary["moneyline_core_features_enabled"] = int(
                 moneyline_core_features_enabled
+            )
+            summary["moneyline_core_features_horizon_minutes"] = (
+                moneyline_core_horizon_minutes
             )
             summary["moneyline_core_features_league_ids"] = str(
                 moneyline_core_features["league_ids"]
