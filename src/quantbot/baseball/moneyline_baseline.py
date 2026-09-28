@@ -15,7 +15,7 @@ from typing import Any
 
 from .evidence import EvidenceError
 from .feature_snapshot import FeatureSnapshot
-from .moneyline_features import FEATURE_VERSION
+from .moneyline_features import CORE_FEATURE_VERSION, FEATURE_VERSION
 from .run_model import poisson_moneyline_probabilities
 
 MODEL_VERSION = "team-strength-poisson-baseline-v1"
@@ -97,7 +97,9 @@ def _shrunk_rate(
     return weight * contextual + (1.0 - weight) * overall
 
 
-def _pregame_context_status(features: dict[str, Any]) -> str:
+def _pregame_context_status(features: dict[str, Any], *, feature_version: str) -> str:
+    if feature_version == CORE_FEATURE_VERSION:
+        return "CORE_TEAM_STRENGTH_ONLY"
     starters = (
         features.get("home_starter_identified") is True
         and features.get("away_starter_identified") is True
@@ -263,8 +265,11 @@ def project_team_strength_moneyline(
     quality but deliberately does not alter probability in this baseline.
     """
 
-    if snapshot.feature_version != FEATURE_VERSION:
-        raise EvidenceError(f"baseline requires feature_version={FEATURE_VERSION}")
+    if snapshot.feature_version not in {FEATURE_VERSION, CORE_FEATURE_VERSION}:
+        raise EvidenceError(
+            "baseline requires feature_version in "
+            f"{{{FEATURE_VERSION}, {CORE_FEATURE_VERSION}}}"
+        )
 
     features = dict(snapshot.features)
     for name in _REQUIRED_RATE_FEATURES:
@@ -358,7 +363,10 @@ def project_team_strength_moneyline(
         away_defense_rate=core.away_defense_rate,
         minimum_context_games=core.minimum_context_games,
         shrinkage_games=core.shrinkage_games,
-        context_status=_pregame_context_status(features),
+        context_status=_pregame_context_status(
+            features,
+            feature_version=snapshot.feature_version,
+        ),
     )
 
 
