@@ -31,8 +31,8 @@ from .fixture_evidence import (
     build_fixture_schedule_snapshot,
     canonical_fixture_observation,
 )
-from .game_history_collection import collect_game_history
 from .feature_snapshot_repository import PostgreSQLFeatureSnapshotRepository
+from .game_history_collection import collect_game_history
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
 from .mlb_game_linking import collect_mlb_game_links
