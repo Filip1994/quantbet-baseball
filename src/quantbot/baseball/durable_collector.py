@@ -45,6 +45,7 @@ from .moneyline_core_materialization import materialize_due_moneyline_core_v1_fe
 from .moneyline_feature_materialization import materialize_due_moneyline_v1_features
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_prediction_materialization import materialize_due_baseline_predictions
+from .moneyline_value_evaluation import materialize_due_moneyline_evaluations
 from .moneyline_settlement import settle_due_moneyline_picks
 from .monitoring_lifecycle import OddsLifecyclePolicy
 from .monitoring_repository import PostgreSQLMoneylineMonitoringRepository
@@ -662,6 +663,27 @@ def collect_durable_once(
             max_moneyline_baseline_predictions = int(
                 os.getenv("BASEBALL_MAX_MONEYLINE_BASELINE_PREDICTIONS", "1")
             )
+            moneyline_value_evaluation_enabled = os.getenv(
+                "BASEBALL_ENABLE_MONEYLINE_VALUE_EVALUATION", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            moneyline_evaluation_horizon_minutes = int(
+                os.getenv("BASEBALL_MONEYLINE_EVALUATION_HORIZON_MINUTES", "360")
+            )
+            max_moneyline_evaluation_games = int(
+                os.getenv("BASEBALL_MAX_MONEYLINE_EVALUATION_GAMES", "1")
+            )
+            moneyline_min_edge = float(
+                os.getenv("BASEBALL_MONEYLINE_MIN_EDGE", "0.02")
+            )
+            moneyline_min_expected_value = float(
+                os.getenv("BASEBALL_MONEYLINE_MIN_EXPECTED_VALUE", "0.0")
+            )
+            moneyline_max_uncertainty = float(
+                os.getenv("BASEBALL_MONEYLINE_MAX_UNCERTAINTY", "0.05")
+            )
+            moneyline_max_quote_age_seconds = float(
+                os.getenv("BASEBALL_MONEYLINE_MAX_QUOTE_AGE_SECONDS", "900")
+            )
             moneyline_v1_features_enabled = os.getenv(
                 "BASEBALL_ENABLE_MONEYLINE_V1_FEATURES", "false"
             ).strip().lower() in {"1", "true", "yes", "on"}
@@ -683,6 +705,24 @@ def collect_durable_once(
             if max_moneyline_baseline_predictions < 1:
                 raise ValueError(
                     "BASEBALL_MAX_MONEYLINE_BASELINE_PREDICTIONS must be positive"
+                )
+            if moneyline_evaluation_horizon_minutes < 1:
+                raise ValueError(
+                    "BASEBALL_MONEYLINE_EVALUATION_HORIZON_MINUTES must be positive"
+                )
+            if max_moneyline_evaluation_games < 1:
+                raise ValueError(
+                    "BASEBALL_MAX_MONEYLINE_EVALUATION_GAMES must be positive"
+                )
+            if moneyline_min_edge < 0:
+                raise ValueError("BASEBALL_MONEYLINE_MIN_EDGE must be non-negative")
+            if moneyline_max_uncertainty < 0:
+                raise ValueError(
+                    "BASEBALL_MONEYLINE_MAX_UNCERTAINTY must be non-negative"
+                )
+            if moneyline_max_quote_age_seconds < 0:
+                raise ValueError(
+                    "BASEBALL_MONEYLINE_MAX_QUOTE_AGE_SECONDS must be non-negative"
                 )
             if max_mlb_enrichment_requests < 1:
                 raise ValueError(
@@ -859,6 +899,32 @@ def collect_durable_once(
                     now=cycle_now,
                     horizon_minutes=moneyline_prediction_horizon_minutes,
                     max_predictions=max_moneyline_baseline_predictions,
+                )
+
+            moneyline_value_evaluation = {
+                "status": "DISABLED",
+                "predictions_seen": 0,
+                "games_considered": 0,
+                "bookmaker_pairs_seen": 0,
+                "bookmaker_pairs_already_evaluated": 0,
+                "bookmaker_pairs_missing": 0,
+                "evaluations_inserted": 0,
+                "candidate_evaluations": 0,
+                "pass_evaluations": 0,
+                "evaluation_failures": 0,
+                "provider_calls": 0,
+            }
+            if execution_mode == "SCHEDULED" and moneyline_value_evaluation_enabled:
+                decision_repository = PostgreSQLMoneylineDecisionRepository(connection)
+                moneyline_value_evaluation = materialize_due_moneyline_evaluations(
+                    decision_repository,
+                    now=cycle_now,
+                    horizon_minutes=moneyline_evaluation_horizon_minutes,
+                    max_games=max_moneyline_evaluation_games,
+                    min_edge=moneyline_min_edge,
+                    min_expected_value=moneyline_min_expected_value,
+                    max_uncertainty=moneyline_max_uncertainty,
+                    max_quote_age_seconds=moneyline_max_quote_age_seconds,
                 )
 
             moneyline_v1_features = {
@@ -1052,6 +1118,46 @@ def collect_durable_once(
             )
             summary["moneyline_baseline_predictions_provider_calls"] = int(
                 moneyline_baseline_predictions["provider_calls"]
+            )
+
+            summary["moneyline_value_evaluation_enabled"] = int(
+                moneyline_value_evaluation_enabled
+            )
+            summary["moneyline_value_evaluation_horizon_minutes"] = (
+                moneyline_evaluation_horizon_minutes
+            )
+            summary["moneyline_value_evaluation_status"] = str(
+                moneyline_value_evaluation["status"]
+            )
+            summary["moneyline_value_evaluation_predictions_seen"] = int(
+                moneyline_value_evaluation["predictions_seen"]
+            )
+            summary["moneyline_value_evaluation_games_considered"] = int(
+                moneyline_value_evaluation["games_considered"]
+            )
+            summary["moneyline_value_evaluation_bookmaker_pairs_seen"] = int(
+                moneyline_value_evaluation["bookmaker_pairs_seen"]
+            )
+            summary["moneyline_value_evaluation_pairs_already_evaluated"] = int(
+                moneyline_value_evaluation["bookmaker_pairs_already_evaluated"]
+            )
+            summary["moneyline_value_evaluation_pairs_missing"] = int(
+                moneyline_value_evaluation["bookmaker_pairs_missing"]
+            )
+            summary["moneyline_value_evaluations_inserted"] = int(
+                moneyline_value_evaluation["evaluations_inserted"]
+            )
+            summary["moneyline_value_candidate_evaluations"] = int(
+                moneyline_value_evaluation["candidate_evaluations"]
+            )
+            summary["moneyline_value_pass_evaluations"] = int(
+                moneyline_value_evaluation["pass_evaluations"]
+            )
+            summary["moneyline_value_evaluation_failures"] = int(
+                moneyline_value_evaluation["evaluation_failures"]
+            )
+            summary["moneyline_value_evaluation_provider_calls"] = int(
+                moneyline_value_evaluation["provider_calls"]
             )
 
             summary["moneyline_v1_features_enabled"] = int(
