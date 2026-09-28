@@ -672,9 +672,7 @@ def collect_durable_once(
             max_moneyline_evaluation_games = int(
                 os.getenv("BASEBALL_MAX_MONEYLINE_EVALUATION_GAMES", "1")
             )
-            moneyline_min_edge = float(
-                os.getenv("BASEBALL_MONEYLINE_MIN_EDGE", "0.02")
-            )
+            moneyline_min_edge = float(os.getenv("BASEBALL_MONEYLINE_MIN_EDGE", "0.02"))
             moneyline_min_expected_value = float(
                 os.getenv("BASEBALL_MONEYLINE_MIN_EXPECTED_VALUE", "0.0")
             )
