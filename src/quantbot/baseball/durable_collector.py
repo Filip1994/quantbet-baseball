@@ -516,7 +516,7 @@ def collect_durable_once(
                 "errors": 0,
             }
             slow_provider_league_ids = parse_league_ids(
-                os.getenv("BASEBALL_SLOW_PROVIDER_LEAGUES", "1,2")
+                os.getenv("BASEBALL_SLOW_PROVIDER_LEAGUES", "1")
             )
             if (
                 execution_mode == "SCHEDULED"
