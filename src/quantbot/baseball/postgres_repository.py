@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Iterable
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Protocol, Self
 
 from .evidence import OddsObservation, PickEvent, canonical_json
@@ -424,6 +424,54 @@ class PostgreSQLEvidenceRepository:
         if row is None:
             return None
         return FixtureObservation(**_canonical_object(row[0]))
+
+    def latest_due_core_fixtures(
+        self,
+        *,
+        as_of: datetime,
+        horizon_minutes: int,
+        league_names: tuple[str, ...],
+    ) -> tuple[FixtureObservation, ...]:
+        """Return latest PIT fixture evidence for supported pregame games."""
+
+        if as_of.tzinfo is None or as_of.utcoffset() is None:
+            raise ValueError("as_of must be timezone-aware")
+        if horizon_minutes < 1:
+            raise ValueError("horizon_minutes must be positive")
+        if not league_names:
+            return ()
+        cutoff = as_of.astimezone(UTC)
+        horizon = cutoff + timedelta(minutes=horizon_minutes)
+        normalized = tuple(
+            name.strip().casefold() for name in league_names if name.strip()
+        )
+        query = """
+            SELECT canonical_record
+            FROM (
+                SELECT DISTINCT ON (provider_game_id)
+                    provider_game_id,
+                    canonical_record,
+                    kickoff_at
+                FROM fixture_observations
+                WHERE observed_at <= %s
+                  AND kickoff_at > %s
+                  AND kickoff_at <= %s
+                  AND lower(league) = ANY(%s)
+                ORDER BY provider_game_id, observed_at DESC, fixture_observation_id DESC
+            ) AS latest
+            ORDER BY kickoff_at, provider_game_id
+        """
+        with self._connection.cursor() as cursor:
+            cursor.execute(query, (cutoff, cutoff, horizon, list(normalized)))
+            rows = cursor.fetchall()
+        result: list[FixtureObservation] = []
+        for row in rows:
+            value = row[0]
+            if isinstance(value, str):
+                value = json.loads(value)
+            if isinstance(value, dict):
+                result.append(FixtureObservation(**value))
+        return tuple(result)
 
     def append_fixture_schedule_snapshot(
         self,

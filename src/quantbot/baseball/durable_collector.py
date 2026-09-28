@@ -35,10 +35,12 @@ from .fixture_evidence import (
 from .game_history_collection import collect_game_history
 from .game_history_repository import PostgreSQLGameHistoryRepository
 from .ingestion import canonical_moneyline_observations
+from .league_registry import parse_league_ids
 from .mlb_game_linking import collect_mlb_game_links
 from .mlb_identity_bootstrap import collect_mlb_identity_bootstrap
 from .mlb_identity_mapping_completion import complete_mlb_team_mappings
 from .mlb_identity_repository import PostgreSQLMLBIdentityRepository
+from .moneyline_core_materialization import materialize_due_moneyline_core_v1_features
 from .moneyline_feature_materialization import materialize_due_moneyline_v1_features
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_settlement import settle_due_moneyline_picks
@@ -513,6 +515,9 @@ def collect_durable_once(
                 "catalogs_inserted": 0,
                 "errors": 0,
             }
+            slow_provider_league_ids = parse_league_ids(
+                os.getenv("BASEBALL_SLOW_PROVIDER_LEAGUES", "1")
+            )
             if (
                 execution_mode == "SCHEDULED"
                 and slow_provider_enabled
@@ -520,17 +525,39 @@ def collect_durable_once(
                 and max_slow_provider_requests > 0
             ):
                 slow_repository = PostgreSQLProviderDataRepository(connection)
-                slow_provider = collect_slow_provider_data(
-                    client,
-                    slow_repository,
-                    now=cycle_now,
-                    max_requests=min(
-                        max_slow_provider_requests,
-                        client.remaining_budget,
-                    ),
-                    league_id=1,
-                    season=cycle_now.year,
-                )
+                for slow_league_id in slow_provider_league_ids:
+                    remaining_slow_budget = max(
+                        0,
+                        max_slow_provider_requests - int(slow_provider["requests"]),
+                    )
+                    if remaining_slow_budget == 0 or client.remaining_budget == 0:
+                        break
+                    league_result = collect_slow_provider_data(
+                        client,
+                        slow_repository,
+                        now=cycle_now,
+                        max_requests=min(
+                            remaining_slow_budget,
+                            client.remaining_budget,
+                        ),
+                        league_id=slow_league_id,
+                        season=cycle_now.year,
+                    )
+                    for key in (
+                        "requests",
+                        "standings_calls",
+                        "standings_rows",
+                        "standings_inserted",
+                        "team_statistics_calls",
+                        "team_statistics_inserted",
+                        "team_statistics_due_uncollected",
+                        "catalog_calls",
+                        "catalogs_inserted",
+                        "errors",
+                    ):
+                        slow_provider[key] = int(slow_provider[key]) + int(
+                            league_result[key]
+                        )
 
             game_history = {
                 "requests": 0,
@@ -564,6 +591,9 @@ def collect_durable_once(
                 )
 
             summary["slow_provider_enabled"] = int(slow_provider_enabled)
+            summary["slow_provider_league_ids"] = ",".join(
+                str(value) for value in slow_provider_league_ids
+            )
             summary["slow_provider_requests"] = int(slow_provider["requests"])
             summary["slow_standings_calls"] = int(slow_provider["standings_calls"])
             summary["slow_standings_inserted"] = int(
@@ -611,6 +641,12 @@ def collect_durable_once(
             )
             max_mlb_enrichment_requests = int(
                 os.getenv("BASEBALL_MAX_MLB_ENRICHMENT_REQUESTS", "4")
+            )
+            moneyline_core_features_enabled = os.getenv(
+                "BASEBALL_ENABLE_MONEYLINE_CORE_FEATURES", "false"
+            ).strip().lower() in {"1", "true", "yes", "on"}
+            moneyline_core_league_ids = parse_league_ids(
+                os.getenv("BASEBALL_MONEYLINE_CORE_LEAGUES", "1,2")
             )
             moneyline_v1_features_enabled = os.getenv(
                 "BASEBALL_ENABLE_MONEYLINE_V1_FEATURES", "false"
@@ -751,6 +787,33 @@ def collect_durable_once(
                     max_calls=max_mlb_enrichment_requests,
                 )
 
+            moneyline_core_features = {
+                "status": "DISABLED",
+                "league_ids": ",".join(
+                    str(value) for value in moneyline_core_league_ids
+                ),
+                "due_games": 0,
+                "already_materialized": 0,
+                "games_considered": 0,
+                "snapshots_inserted": 0,
+                "evidence_blocked": 0,
+                "unsupported_league": 0,
+                "due_games_unprocessed": 0,
+                "provider_calls": 0,
+            }
+            if execution_mode == "SCHEDULED" and moneyline_core_features_enabled:
+                provider_repository = PostgreSQLProviderDataRepository(connection)
+                feature_repository = PostgreSQLFeatureSnapshotRepository(connection)
+                moneyline_core_features = materialize_due_moneyline_core_v1_features(
+                    repository,
+                    provider_repository,
+                    feature_repository,
+                    league_ids=moneyline_core_league_ids,
+                    now=cycle_now,
+                    horizon_minutes=mlb_enrichment_horizon_minutes,
+                    max_games=max_moneyline_feature_games,
+                )
+
             moneyline_v1_features = {
                 "status": "DISABLED",
                 "linked_games_total": 0,
@@ -874,6 +937,40 @@ def collect_durable_once(
             )
             summary["mlb_live_enrichment_ready_for_feature_snapshot"] = int(
                 mlb_live_enrichment["ready_for_feature_snapshot"]
+            )
+
+            summary["moneyline_core_features_enabled"] = int(
+                moneyline_core_features_enabled
+            )
+            summary["moneyline_core_features_league_ids"] = str(
+                moneyline_core_features["league_ids"]
+            )
+            summary["moneyline_core_features_status"] = str(
+                moneyline_core_features["status"]
+            )
+            summary["moneyline_core_features_due_games"] = int(
+                moneyline_core_features["due_games"]
+            )
+            summary["moneyline_core_features_already_materialized"] = int(
+                moneyline_core_features["already_materialized"]
+            )
+            summary["moneyline_core_features_games_considered"] = int(
+                moneyline_core_features["games_considered"]
+            )
+            summary["moneyline_core_features_snapshots_inserted"] = int(
+                moneyline_core_features["snapshots_inserted"]
+            )
+            summary["moneyline_core_features_evidence_blocked"] = int(
+                moneyline_core_features["evidence_blocked"]
+            )
+            summary["moneyline_core_features_unsupported_league"] = int(
+                moneyline_core_features["unsupported_league"]
+            )
+            summary["moneyline_core_features_due_games_unprocessed"] = int(
+                moneyline_core_features["due_games_unprocessed"]
+            )
+            summary["moneyline_core_features_provider_calls"] = int(
+                moneyline_core_features["provider_calls"]
             )
 
             summary["moneyline_v1_features_enabled"] = int(
