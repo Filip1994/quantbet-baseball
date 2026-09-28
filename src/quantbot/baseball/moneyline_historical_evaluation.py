@@ -354,9 +354,7 @@ def evaluate_historical_moneyline_baseline(
         brier_score=(
             sum(row.brier_loss for row in examples) / count if count else None
         ),
-        log_loss=(
-            sum(row.log_loss for row in examples) / count if count else None
-        ),
+        log_loss=(sum(row.log_loss for row in examples) / count if count else None),
         accuracy=(sum(row.correct for row in examples) / count if count else None),
         shrinkage_games=shrinkage_games,
         min_overall_games=min_overall_games,
