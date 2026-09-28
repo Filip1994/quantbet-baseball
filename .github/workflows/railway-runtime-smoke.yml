@@ -22,6 +22,7 @@ on:
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
       - "src/quantbot/baseball/moneyline_features.py"
+      - "src/quantbot/baseball/moneyline_feature_materialization.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
       - "src/quantbot/baseball/moneyline_settlement.py"
       - "src/quantbot/baseball/monitoring_lifecycle.py"
@@ -48,6 +49,7 @@ on:
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
       - "tests/test_moneyline_features.py"
+      - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_features_postgres_integration.py"
       - "tests/test_moneyline_settlement.py"
       - "tests/test_monitoring_lifecycle.py"
@@ -92,6 +94,7 @@ on:
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
       - "src/quantbot/baseball/moneyline_features.py"
+      - "src/quantbot/baseball/moneyline_feature_materialization.py"
       - "src/quantbot/baseball/moneyline_monitoring.py"
       - "src/quantbot/baseball/moneyline_settlement.py"
       - "src/quantbot/baseball/monitoring_lifecycle.py"
@@ -118,6 +121,7 @@ on:
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
       - "tests/test_moneyline_features.py"
+      - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_features_postgres_integration.py"
       - "tests/test_moneyline_settlement.py"
       - "tests/test_monitoring_lifecycle.py"
@@ -185,6 +189,7 @@ jobs:
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/moneyline_features.py
+          src/quantbot/baseball/moneyline_feature_materialization.py
           src/quantbot/baseball/moneyline_monitoring.py
           src/quantbot/baseball/moneyline_settlement.py
           src/quantbot/baseball/monitoring_lifecycle.py
@@ -215,6 +220,7 @@ jobs:
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
           tests/test_moneyline_features.py
+          tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
@@ -261,6 +267,7 @@ jobs:
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
           src/quantbot/baseball/moneyline_features.py
+          src/quantbot/baseball/moneyline_feature_materialization.py
           src/quantbot/baseball/moneyline_monitoring.py
           src/quantbot/baseball/moneyline_settlement.py
           src/quantbot/baseball/monitoring_lifecycle.py
@@ -291,6 +298,7 @@ jobs:
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
           tests/test_moneyline_features.py
+          tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py
@@ -332,6 +340,7 @@ jobs:
           tests/test_durable_collector.py
           tests/test_moneyline_monitoring.py
           tests/test_moneyline_features.py
+          tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_features_postgres_integration.py
           tests/test_moneyline_settlement.py
           tests/test_monitoring_lifecycle.py

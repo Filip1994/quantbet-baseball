@@ -632,6 +632,14 @@ class PostgreSQLEvidenceRepository:
             cursor.execute("SELECT COUNT(*) FROM pick_events")
             pick_count = cursor.fetchone()[0]
 
+            cursor.execute(
+                "SELECT COUNT(*), COUNT(DISTINCT game_id), MAX(generated_at) "
+                "FROM feature_snapshots"
+            )
+            feature_snapshot_count, feature_snapshot_games, latest_feature_snapshot = (
+                cursor.fetchone()
+            )
+
             cursor.execute("SELECT COUNT(*) FROM model_predictions")
             prediction_count = cursor.fetchone()[0]
 
@@ -761,6 +769,11 @@ class PostgreSQLEvidenceRepository:
             "distinct_polled_games": int(polled_games),
             "latest_odds_poll_attempt_at": _iso_or_none(latest_poll),
             "pick_events": int(pick_count),
+            "feature_snapshots": int(feature_snapshot_count),
+            "distinct_feature_snapshot_games": int(feature_snapshot_games),
+            "latest_feature_snapshot_generated_at": _iso_or_none(
+                latest_feature_snapshot
+            ),
             "model_predictions": int(prediction_count),
             "value_evaluations": int(evaluation_count),
             "final_quote_verifications": int(verification_count),

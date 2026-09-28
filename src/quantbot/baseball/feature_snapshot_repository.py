@@ -156,6 +156,36 @@ class PostgreSQLFeatureSnapshotRepository:
             return None
         return _record(row[0])
 
+    def latest_for_game_version(
+        self,
+        *,
+        game_id: str,
+        feature_version: str,
+        as_of: datetime,
+    ) -> FeatureSnapshot | None:
+        cutoff = _as_of(as_of)
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT canonical_record
+                FROM feature_snapshots
+                WHERE game_id = %s
+                  AND feature_version = %s
+                  AND generated_at <= %s
+                  AND source_data_cutoff_at <= %s
+                ORDER BY
+                    generated_at DESC,
+                    source_data_cutoff_at DESC,
+                    snapshot_id DESC
+                LIMIT 1
+                """,
+                (game_id, feature_version, cutoff, cutoff),
+            )
+            row = cursor.fetchone()
+        if row is None:
+            return None
+        return _record(row[0])
+
     def latest_for_game(
         self,
         *,
