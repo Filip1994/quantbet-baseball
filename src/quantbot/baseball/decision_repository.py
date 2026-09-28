@@ -115,6 +115,22 @@ class PostgreSQLMoneylineDecisionRepository:
             ),
         )
 
+    def get_prediction_for_feature_snapshot(
+        self,
+        *,
+        model_version: str,
+        feature_snapshot_ref: str,
+    ) -> ModelPrediction | None:
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT canonical_record FROM model_predictions "
+                "WHERE model_version = %s AND feature_snapshot_ref = %s "
+                "ORDER BY predicted_at DESC, prediction_id DESC LIMIT 1",
+                (model_version, feature_snapshot_ref),
+            )
+            row = cursor.fetchone()
+        return None if row is None else ModelPrediction(**_canonical_object(row[0]))
+
     def get_prediction(self, prediction_id: str) -> ModelPrediction | None:
         with self.connection.cursor() as cursor:
             cursor.execute(
