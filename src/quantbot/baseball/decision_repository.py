@@ -140,6 +140,74 @@ class PostgreSQLMoneylineDecisionRepository:
             row = cursor.fetchone()
         return None if row is None else ModelPrediction(**_canonical_object(row[0]))
 
+    def due_predictions_for_evaluation(
+        self,
+        *,
+        as_of: datetime,
+        horizon_minutes: int,
+        limit: int,
+    ) -> tuple[ModelPrediction, ...]:
+        if as_of.tzinfo is None or as_of.utcoffset() is None:
+            raise ValueError("as_of must be timezone-aware")
+        if horizon_minutes < 1:
+            raise ValueError("horizon_minutes must be positive")
+        if limit < 1:
+            raise ValueError("limit must be positive")
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT mp.canonical_record
+                FROM model_predictions AS mp
+                JOIN LATERAL (
+                    SELECT kickoff_at
+                    FROM fixture_observations
+                    WHERE game_id = mp.game_id
+                      AND observed_at <= %s
+                    ORDER BY observed_at DESC, fixture_observation_id DESC
+                    LIMIT 1
+                ) AS fx ON TRUE
+                WHERE mp.predicted_at <= %s
+                  AND fx.kickoff_at > %s
+                  AND fx.kickoff_at <= %s + (%s * INTERVAL '1 minute')
+                ORDER BY fx.kickoff_at, mp.predicted_at, mp.prediction_id
+                LIMIT %s
+                """,
+                (as_of, as_of, as_of, as_of, horizon_minutes, limit),
+            )
+            rows = cursor.fetchall()
+        return tuple(ModelPrediction(**_canonical_object(row[0])) for row in rows)
+
+    def evaluation_pair_exists(
+        self,
+        *,
+        prediction_id: str,
+        bookmaker: str,
+        home_observation_id: str,
+        away_observation_id: str,
+        stage: str,
+    ) -> bool:
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT COUNT(*)
+                FROM value_evaluations
+                WHERE prediction_id = %s
+                  AND lower(bookmaker) = lower(%s)
+                  AND home_observation_id = %s
+                  AND away_observation_id = %s
+                  AND stage = %s
+                """,
+                (
+                    prediction_id,
+                    bookmaker,
+                    home_observation_id,
+                    away_observation_id,
+                    stage,
+                ),
+            )
+            row = cursor.fetchone()
+        return row is not None and int(row[0]) >= 2
+
     def append_evaluation(self, record: MoneylineEvaluation) -> bool:
         return self._append_fact(
             table="value_evaluations",
@@ -438,7 +506,7 @@ class PostgreSQLMoneylineDecisionRepository:
             cursor.execute(
                 "SELECT canonical_record FROM odds_observations "
                 "WHERE game_id = %s AND market_family = 'moneyline' "
-                "AND bookmaker = %s AND market_status = 'open' "
+                "AND lower(bookmaker) = lower(%s) AND market_status = 'open' "
                 "AND observed_at <= %s "
                 "ORDER BY observed_at DESC, observation_id DESC LIMIT %s",
                 (game_id, bookmaker, as_of, limit),
