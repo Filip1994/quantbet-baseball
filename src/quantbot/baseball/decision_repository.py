@@ -175,10 +175,7 @@ class PostgreSQLMoneylineDecisionRepository:
                 (as_of, as_of, as_of, as_of, horizon_minutes, limit),
             )
             rows = cursor.fetchall()
-        return tuple(
-            ModelPrediction(**_canonical_object(row[0]))
-            for row in rows
-        )
+        return tuple(ModelPrediction(**_canonical_object(row[0])) for row in rows)
 
     def evaluation_pair_exists(
         self,
