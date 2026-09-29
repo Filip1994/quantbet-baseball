@@ -14,6 +14,7 @@ from quantbot.baseball.cold_storage import (
     ColdArchivePolicy,
     S3ColdObjectStore,
     VerifiedColdObject,
+    policies_from_env,
     restore_archive,
     run_cold_storage_cycle,
 )
@@ -517,3 +518,25 @@ def test_mlb_identity_referenced_fixture_never_becomes_cold_eligible() -> None:
             ).fetchone()
             is not None
         )
+
+
+def test_default_production_policies_archive_only_operational_exhaust(
+    monkeypatch,
+) -> None:
+    monkeypatch.delenv("BASEBALL_COLD_POLL_ATTEMPT_DAYS", raising=False)
+    monkeypatch.delenv("BASEBALL_COLD_RUNTIME_CYCLE_DAYS", raising=False)
+    monkeypatch.delenv("BASEBALL_COLD_COLLECTION_CYCLE_DAYS", raising=False)
+    monkeypatch.delenv("BASEBALL_COLD_SCHEDULE_SNAPSHOT_DAYS", raising=False)
+
+    policies = policies_from_env()
+    tables = {policy.table_name for policy in policies}
+
+    assert tables == {
+        "odds_poll_attempts",
+        "runtime_cycles",
+        "collection_cycles",
+        "api_sports_game_schedule_snapshots",
+    }
+    assert "api_sports_game_history_snapshots" not in tables
+    assert "fixture_observations" not in tables
+    assert "odds_observations" not in tables

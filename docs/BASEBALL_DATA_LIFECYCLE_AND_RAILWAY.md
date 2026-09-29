@@ -163,12 +163,15 @@ It is designed to run as a low-frequency Railway maintenance cron so storage
 maintenance cannot delay feature creation, prediction, market evaluation,
 registration, monitoring, or settlement.
 
-### Hot forever
+### Hot data retained for model and analysis
 
-The following evidence remains directly queryable in PostgreSQL:
+The scheduled production archive does **not** remove market, model, replay, or
+research evidence from PostgreSQL. The following remain directly queryable hot:
 
 - stable `fixtures` identity;
-- latest game-history fact per provider game;
+- all `api_sports_game_history_snapshots`;
+- all `fixture_observations`;
+- all `odds_observations`;
 - team-statistics and standings research/model inputs;
 - feature snapshots and model predictions;
 - preliminary/final value evaluations;
@@ -177,21 +180,25 @@ The following evidence remains directly queryable in PostgreSQL:
 - game-result facts, settlement, CLV, and pick audit lineage;
 - Official MLB identity mappings and links.
 
-### Cold-eligible data
+The cold-storage module keeps restore compatibility for historical archive
+manifests, but the automatic daily production policy intentionally excludes
+game history, fixture timelines, and odds history.
 
-| Dataset | Default hot retention | Eligibility |
+### Cold-eligible production data
+
+Only operational exhaust is eligible for the scheduled daily archive:
+
+| Dataset | Default hot retention | Why it is safe to cold-tier |
 | --- | ---: | --- |
-| superseded game-history snapshots | 2 days | only an older snapshot when a newer snapshot for the same provider game exists |
-| superseded fixture observations | 7 days | older version only; no closing/result/MLB-identity reference |
-| unreferenced odds observations | 7 days | no value/closing/settlement decision reference |
-| odds poll attempts | 7 days | age only; never used as a decision fact after the event |
-| runtime cycles | 14 days | operational telemetry |
-| collection cycles | 14 days | operational telemetry |
-| API-Sports schedule snapshots | 14 days | old schedule-query telemetry |
+| odds poll attempts | 7 days | scheduler/collection telemetry, not a model or price observation |
+| runtime cycles | 14 days | worker execution telemetry |
+| collection cycles | 14 days | collector execution telemetry |
+| API-Sports schedule snapshots | 14 days | old provider-query telemetry; canonical fixtures remain hot |
 
-Retention is configurable through `BASEBALL_COLD_*_DAYS` environment
-variables. Exact decision evidence is reference-protected rather than deleted
-merely because it is old.
+Retention is configurable through the corresponding `BASEBALL_COLD_*_DAYS`
+environment variables. Any future attempt to cold-tier market or model evidence
+requires a separate explicit design decision and tests proving the active model,
+replay, validation, and settlement paths do not need it.
 
 ### Purge safety
 
@@ -204,10 +211,9 @@ A source row may be removed only after all of these steps succeed:
 5. exact-row purge inside a PostgreSQL transaction;
 6. immutable archive-manifest insert in the same transaction.
 
-Foreign keys protect decision-linked odds. Fixture deletion additionally
-re-checks closing, result, and Official MLB identity references inside the
-DELETE transaction. If the number of deletable rows changes, the transaction
-fails instead of partially purging evidence.
+The scheduled production policy only selects operational tables. The module
+still retains reference guards for legacy/manual archive compatibility, but
+those market and fixture tables are not selected by the daily production job.
 
 ### Restore
 
@@ -220,7 +226,6 @@ not become cold-eligible.
 ### Cost intent
 
 The immediate database is still small, so cold tiering is primarily a growth
-control and working-set optimization. The objective is to prevent high-frequency
-operational telemetry and superseded evidence from expanding PostgreSQL indexes
-and cache requirements month after month while keeping all frequently used
-decision and research data hot.
+control for operational telemetry. Model, market, replay, and research evidence
+remain hot even when keeping them costs more storage; decision quality and
+analytical availability take priority over marginal storage savings.
