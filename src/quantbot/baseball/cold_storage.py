@@ -13,7 +13,7 @@ import hashlib
 import json
 import os
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol
@@ -393,10 +393,7 @@ def _object_key(
 ) -> str:
     safe_prefix = prefix.strip("/") or "cold/baseball"
     day = archived_at.astimezone(UTC).strftime("%Y-%m-%d")
-    return (
-        f"{safe_prefix}/{policy.table_name}/{day}/"
-        f"{archive_id}.json.gz"
-    )
+    return f"{safe_prefix}/{policy.table_name}/{day}/{archive_id}.json.gz"
 
 
 def _manifest_record(
@@ -544,14 +541,13 @@ def restore_archive(
     with connection.transaction():
         with connection.cursor() as cursor:
             for record in records:
-                before = cursor.rowcount
                 cursor.execute(
                     f'INSERT INTO "{table_name}" '
                     f'SELECT * FROM json_populate_record(NULL::"{table_name}", %s::json) '
                     "ON CONFLICT DO NOTHING",
                     (json.dumps(record, separators=(",", ":")),),
                 )
-                if cursor.rowcount > 0 and cursor.rowcount != before:
+                if cursor.rowcount > 0:
                     inserted += int(cursor.rowcount)
     return inserted
 
