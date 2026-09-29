@@ -553,3 +553,8 @@ def test_playable_league_diagnostics_explain_current_market_qualification() -> N
     assert (
         after["latest_poll_with_canonical"] == before["latest_poll_with_canonical"] + 1
     )
+    assert (
+        after["complete_pair_within_six_hours"]
+        == before["complete_pair_within_six_hours"] + 1
+    )
+    assert 0 < after["nearest_complete_pair_kickoff_minutes"] <= 175

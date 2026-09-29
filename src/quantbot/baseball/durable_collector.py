@@ -578,6 +578,8 @@ def collect_durable_once(
                     "latest_poll_empty_response": 0,
                     "latest_poll_nonempty_zero_canonical": 0,
                     "latest_poll_with_canonical": 0,
+                    "nearest_complete_pair_kickoff_minutes": 0,
+                    "complete_pair_within_six_hours": 0,
                 }
             )
             slow_provider_league_ids = (
