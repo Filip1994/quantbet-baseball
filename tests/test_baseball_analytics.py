@@ -32,9 +32,7 @@ def _row(
         "kickoff_at": now - timedelta(hours=20),
         "settlement_outcome": outcome,
         "profit_per_unit": profit,
-        "paper_profit_minor": (
-            None if profit is None else round(profit * 30_000)
-        ),
+        "paper_profit_minor": (None if profit is None else round(profit * 30_000)),
         "clv_status": "AVAILABLE" if clv_delta is not None else None,
         "clv_probability_delta": clv_delta,
         "clv_price_ratio": 1.03 if clv_delta is not None else None,
