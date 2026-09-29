@@ -563,6 +563,23 @@ def collect_durable_once(
                 if dynamic_playable_leagues_enabled
                 else ()
             )
+            playable_league_diagnostics = (
+                repository.playable_league_diagnostics_for_pregame(
+                    as_of=cycle_now,
+                    horizon_minutes=36 * 60,
+                )
+                if dynamic_playable_leagues_enabled
+                else {
+                    "upcoming_with_league_id": 0,
+                    "with_open_moneyline": 0,
+                    "with_playable_book_moneyline": 0,
+                    "with_complete_playable_pair": 0,
+                    "with_poll_attempt": 0,
+                    "latest_poll_empty_response": 0,
+                    "latest_poll_nonempty_zero_canonical": 0,
+                    "latest_poll_with_canonical": 0,
+                }
+            )
             slow_provider_league_ids = (
                 dynamic_playable_league_ids
                 if dynamic_playable_leagues_enabled
@@ -654,6 +671,8 @@ def collect_durable_once(
             summary["dynamic_playable_league_ids"] = ",".join(
                 str(value) for value in dynamic_playable_league_ids
             )
+            for diagnostic_key, diagnostic_value in playable_league_diagnostics.items():
+                summary[f"dynamic_playable_{diagnostic_key}"] = int(diagnostic_value)
             summary["slow_provider_league_ids"] = ",".join(
                 str(value) for value in slow_provider_league_ids
             )
