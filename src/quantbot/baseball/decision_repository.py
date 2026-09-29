@@ -354,9 +354,7 @@ class PostgreSQLMoneylineDecisionRepository:
                 (as_of, as_of, as_of, as_of, horizon_minutes, limit),
             )
             rows = cursor.fetchall()
-        return tuple(
-            MoneylineEvaluation(**_canonical_object(row[0])) for row in rows
-        )
+        return tuple(MoneylineEvaluation(**_canonical_object(row[0])) for row in rows)
 
     def begin_verification(
         self,
