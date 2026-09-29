@@ -21,6 +21,7 @@ on:
       - "src/quantbot/baseball/mlb_identity_repository.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
+      - "src/quantbot/baseball/moneyline_registration_materialization.py"
       - "src/quantbot/baseball/moneyline_features.py"
       - "src/quantbot/baseball/moneyline_feature_materialization.py"
       - "src/quantbot/baseball/moneyline_baseline.py"
@@ -50,6 +51,7 @@ on:
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
+      - "tests/test_moneyline_registration_materialization.py"
       - "tests/test_moneyline_features.py"
       - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_baseline.py"
@@ -97,6 +99,7 @@ on:
       - "src/quantbot/baseball/mlb_identity_repository.py"
       - "src/quantbot/baseball/ingestion.py"
       - "src/quantbot/baseball/moneyline_registration.py"
+      - "src/quantbot/baseball/moneyline_registration_materialization.py"
       - "src/quantbot/baseball/moneyline_features.py"
       - "src/quantbot/baseball/moneyline_feature_materialization.py"
       - "src/quantbot/baseball/moneyline_baseline.py"
@@ -126,6 +129,7 @@ on:
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
+      - "tests/test_moneyline_registration_materialization.py"
       - "tests/test_moneyline_features.py"
       - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_baseline.py"
@@ -196,6 +200,7 @@ jobs:
           src/quantbot/baseball/feature_snapshot_repository.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
+          src/quantbot/baseball/moneyline_registration_materialization.py
           src/quantbot/baseball/moneyline_features.py
           src/quantbot/baseball/moneyline_feature_materialization.py
           src/quantbot/baseball/moneyline_baseline.py
@@ -229,6 +234,7 @@ jobs:
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
+          tests/test_moneyline_registration_materialization.py
           tests/test_moneyline_features.py
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
@@ -278,6 +284,7 @@ jobs:
           src/quantbot/baseball/feature_snapshot_repository.py
           src/quantbot/baseball/ingestion.py
           src/quantbot/baseball/moneyline_registration.py
+          src/quantbot/baseball/moneyline_registration_materialization.py
           src/quantbot/baseball/moneyline_features.py
           src/quantbot/baseball/moneyline_feature_materialization.py
           src/quantbot/baseball/moneyline_baseline.py
@@ -311,6 +318,7 @@ jobs:
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
+          tests/test_moneyline_registration_materialization.py
           tests/test_moneyline_features.py
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
@@ -355,6 +363,7 @@ jobs:
           tests/test_decision_lifecycle.py
           tests/test_durable_collector.py
           tests/test_moneyline_monitoring.py
+          tests/test_moneyline_registration_materialization.py
           tests/test_moneyline_features.py
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
