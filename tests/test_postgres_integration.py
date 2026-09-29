@@ -18,6 +18,8 @@ from quantbot.baseball.moneyline_registration import (
 )
 from quantbot.baseball.odds_poll_evidence import OddsPollAttempt
 from quantbot.baseball.postgres_repository import PostgreSQLEvidenceRepository
+from quantbot.baseball.provider_data import TeamStatisticsSnapshot
+from quantbot.baseball.provider_data_repository import PostgreSQLProviderDataRepository
 from quantbot.baseball.raw_archive import ArchiveReceipt
 from quantbot.baseball.runtime_evidence import CollectionCycle
 
@@ -523,8 +525,49 @@ def test_playable_league_diagnostics_explain_current_market_qualification() -> N
         source_payload_checksum="e" * 64,
     )
 
+    def team_stats(team_id: int, team_name: str) -> TeamStatisticsSnapshot:
+        return TeamStatisticsSnapshot(
+            snapshot_id=str(uuid.uuid4()),
+            provider="api-sports-baseball",
+            league_id=777,
+            season=2042,
+            team_id=team_id,
+            team_name=team_name,
+            observed_at="2042-04-03T16:04:00+00:00",
+            games_played_all=60,
+            games_played_home=30,
+            games_played_away=30,
+            wins_all=32,
+            wins_home=17,
+            wins_away=15,
+            win_pct_all=0.5333,
+            win_pct_home=0.5667,
+            win_pct_away=0.5,
+            losses_all=28,
+            losses_home=13,
+            losses_away=15,
+            loss_pct_all=0.4667,
+            loss_pct_home=0.4333,
+            loss_pct_away=0.5,
+            runs_for_total_all=270.0,
+            runs_for_total_home=144.0,
+            runs_for_total_away=126.0,
+            runs_for_avg_all=4.5,
+            runs_for_avg_home=4.8,
+            runs_for_avg_away=4.2,
+            runs_against_total_all=252.0,
+            runs_against_total_home=120.0,
+            runs_against_total_away=132.0,
+            runs_against_avg_all=4.2,
+            runs_against_avg_home=4.0,
+            runs_against_avg_away=4.4,
+            source_payload_ref=f"s3://raw/diagnostic-stats-{team_id}.json",
+            source_payload_checksum=("f" if team_id == 7701 else "a") * 64,
+        )
+
     with psycopg.connect(database_url) as connection:
         repository = PostgreSQLEvidenceRepository(connection)
+        provider_repository = PostgreSQLProviderDataRepository(connection)
         before = repository.playable_league_diagnostics_for_pregame(
             as_of=as_of,
             horizon_minutes=360,
@@ -534,6 +577,12 @@ def test_playable_league_diagnostics_explain_current_market_qualification() -> N
             (observation("home", 2.05), observation("away", 1.85))
         )
         repository.append_odds_poll_attempt(poll)
+        assert provider_repository.append_team_statistics(
+            team_stats(7701, "Diagnostic Home")
+        )
+        assert provider_repository.append_team_statistics(
+            team_stats(7702, "Diagnostic Away")
+        )
         after = repository.playable_league_diagnostics_for_pregame(
             as_of=as_of,
             horizon_minutes=360,
@@ -558,3 +607,15 @@ def test_playable_league_diagnostics_explain_current_market_qualification() -> N
         == before["complete_pair_within_six_hours"] + 1
     )
     assert 0 < after["nearest_complete_pair_kickoff_minutes"] <= 175
+    assert (
+        after["complete_pair_with_team_stats"]
+        == before["complete_pair_with_team_stats"] + 1
+    )
+    assert (
+        after["complete_pair_with_projection_ready_stats"]
+        == before["complete_pair_with_projection_ready_stats"] + 1
+    )
+    assert (
+        after["complete_pair_with_context_20plus"]
+        == before["complete_pair_with_context_20plus"] + 1
+    )
