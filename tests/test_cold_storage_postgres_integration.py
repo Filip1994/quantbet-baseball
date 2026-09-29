@@ -269,3 +269,69 @@ def test_referenced_odds_stay_hot_while_unreferenced_old_quote_is_archived(
         assert home.observation_id in ids
         assert away.observation_id in ids
         assert orphan.observation_id not in ids
+
+
+
+def test_latest_fixture_observation_remains_hot(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    database_url = _database_url()
+    apply_migrations(Path("."), database_url)
+    monkeypatch.setenv("BASEBALL_COLD_FIXTURE_RETENTION_DAYS", "1")
+
+    provider_game_id = 400_000_000 + (uuid.uuid4().int % 400_000_000)
+    game_id = str(provider_game_id)
+    older_id = str(uuid.uuid4())
+    latest_id = str(uuid.uuid4())
+
+    def fixture(observation_id: str, observed_at: str, status: str):
+        return FixtureObservation(
+            fixture_observation_id=observation_id,
+            game_id=game_id,
+            provider="api-sports-baseball",
+            provider_game_id=provider_game_id,
+            league="Cold Fixture League",
+            league_id=100,
+            home_team_id=1001,
+            home_team_name="Fixture Home",
+            away_team_id=1002,
+            away_team_name="Fixture Away",
+            kickoff_at="2002-01-02T19:00:00+00:00",
+            provider_status=status,
+            observed_at=observed_at,
+            source_payload_ref=f"s3://raw/{observation_id}.json",
+            source_payload_checksum="c" * 64,
+            schema_version="1.0",
+        )
+
+    older = fixture(older_id, "2002-01-02T15:00:00+00:00", "NS")
+    latest = fixture(latest_id, "2002-01-02T18:00:00+00:00", "NS")
+
+    with psycopg.connect(database_url) as connection:
+        evidence = PostgreSQLEvidenceRepository(connection)
+        assert evidence.append_fixture_observations((older, latest)) == 2
+
+        store = LocalColdArchiveStore(tmp_path / "bucket")
+        result = archive_dataset_batch(
+            connection,
+            store,
+            _policy("fixture-observations"),
+            now=datetime(2002, 1, 5, 0, 0, tzinfo=UTC),
+            batch_rows=100,
+        )
+        assert result["status"] == "ARCHIVED"
+
+        remaining = {
+            str(row[0])
+            for row in connection.execute(
+                """
+                SELECT fixture_observation_id
+                FROM fixture_observations
+                WHERE game_id = %s
+                """,
+                (game_id,),
+            ).fetchall()
+        }
+        assert older_id not in remaining
+        assert latest_id in remaining
