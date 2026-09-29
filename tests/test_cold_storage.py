@@ -32,7 +32,13 @@ class _MemoryColdStore:
     def __init__(self) -> None:
         self.objects: dict[str, bytes] = {}
 
-    def put_verified(self, *, key: str, body: bytes, checksum: str) -> VerifiedColdObject:
+    def put_verified(
+        self,
+        *,
+        key: str,
+        body: bytes,
+        checksum: str,
+    ) -> VerifiedColdObject:
         assert hashlib.sha256(body).hexdigest() == checksum
         self.objects[key] = body
         return VerifiedColdObject(
@@ -262,7 +268,7 @@ def test_decision_linked_odds_are_never_cold_eligible() -> None:
         stage="PRELIMINARY",
         evaluated_at="2040-07-01T16:02:00+00:00",
         min_edge=0.0,
-        min_expected_value=-1.0,
+        min_expected_value=0.0,
         max_uncertainty=0.05,
         max_quote_age_seconds=900,
     )
