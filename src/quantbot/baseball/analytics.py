@@ -68,10 +68,7 @@ def _wilson_interval(wins: int, trials: int) -> tuple[float | None, float | None
     centre = (observed + (z * z / (2 * trials))) / denominator
     margin = (
         z
-        * sqrt(
-            (observed * (1 - observed) / trials)
-            + (z * z / (4 * trials * trials))
-        )
+        * sqrt((observed * (1 - observed) / trials) + (z * z / (4 * trials * trials)))
         / denominator
     )
     return max(0.0, centre - margin), min(1.0, centre + margin)
@@ -192,14 +189,10 @@ def _clv_sign(row: dict[str, Any]) -> str:
 
 def _cohort_metrics(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
     settled = [
-        row
-        for row in rows
-        if row.get("settlement_outcome") in {"WIN", "LOSS", "PUSH"}
+        row for row in rows if row.get("settlement_outcome") in {"WIN", "LOSS", "PUSH"}
     ]
     graded = [
-        row
-        for row in settled
-        if row.get("settlement_outcome") in {"WIN", "LOSS"}
+        row for row in settled if row.get("settlement_outcome") in {"WIN", "LOSS"}
     ]
     wins = sum(row.get("settlement_outcome") == "WIN" for row in graded)
     losses = sum(row.get("settlement_outcome") == "LOSS" for row in graded)
@@ -331,9 +324,7 @@ def _cohort_metrics(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
         ),
         "avg_uncertainty": _mean(uncertainty),
         "clv_count": len(clv_values),
-        "clv_coverage_pct": (
-            len(clv_values) / len(settled) * 100 if settled else None
-        ),
+        "clv_coverage_pct": (len(clv_values) / len(settled) * 100 if settled else None),
         "avg_clv_probability_delta_pct": _pct(_mean(clv_values)),
         "median_clv_probability_delta_pct": _pct(_median(clv_values)),
         "positive_clv_rate_pct": (
@@ -375,8 +366,9 @@ def _streak_and_drawdown(rows: Sequence[dict[str, Any]]) -> dict[str, Any]:
             for row in rows
             if row.get("settlement_outcome") in {"WIN", "LOSS", "PUSH"}
         ),
-        key=lambda row: _dt(row.get("registered_at"))
-        or datetime.min.replace(tzinfo=UTC),
+        key=lambda row: (
+            _dt(row.get("registered_at")) or datetime.min.replace(tzinfo=UTC)
+        ),
     )
     cumulative = 0.0
     peak = 0.0
@@ -661,17 +653,17 @@ def _metrics_table(
     else:
         body = "".join(
             f"""<tr>
-<td><b>{escape(str(row.get(dimension) or '—'))}</b></td>
-<td>{row.get('registered_n', 0)}</td>
-<td>{row.get('settled_n', 0)}</td>
-<td>{row.get('wins', 0)}-{row.get('losses', 0)}-{row.get('pushes', 0)}</td>
-<td>{_fmt(row.get('win_rate_pct'), '%')}</td>
-<td>{_fmt(row.get('expected_win_rate_pct'), '%')}</td>
-<td class="{_metric_class(row.get('calibration_gap_pp'))}">{_fmt(row.get('calibration_gap_pp'), 'pp', signed=True)}</td>
-<td class="{_metric_class(row.get('roi_pct'))}">{_fmt(row.get('roi_pct'), '%', signed=True)}</td>
-<td class="{_metric_class(row.get('avg_clv_probability_delta_pct'))}">{_fmt(row.get('avg_clv_probability_delta_pct'), 'pp', signed=True)}</td>
-<td>{_fmt(row.get('brier_score'), digits=4)}</td>
-<td>{escape(str(row.get('sample_band') or '—'))}</td>
+<td><b>{escape(str(row.get(dimension) or "—"))}</b></td>
+<td>{row.get("registered_n", 0)}</td>
+<td>{row.get("settled_n", 0)}</td>
+<td>{row.get("wins", 0)}-{row.get("losses", 0)}-{row.get("pushes", 0)}</td>
+<td>{_fmt(row.get("win_rate_pct"), "%")}</td>
+<td>{_fmt(row.get("expected_win_rate_pct"), "%")}</td>
+<td class="{_metric_class(row.get("calibration_gap_pp"))}">{_fmt(row.get("calibration_gap_pp"), "pp", signed=True)}</td>
+<td class="{_metric_class(row.get("roi_pct"))}">{_fmt(row.get("roi_pct"), "%", signed=True)}</td>
+<td class="{_metric_class(row.get("avg_clv_probability_delta_pct"))}">{_fmt(row.get("avg_clv_probability_delta_pct"), "pp", signed=True)}</td>
+<td>{_fmt(row.get("brier_score"), digits=4)}</td>
+<td>{escape(str(row.get("sample_band") or "—"))}</td>
 </tr>"""
             for row in rows
         )
@@ -679,7 +671,7 @@ def _metrics_table(
 <section class="panel table-panel">
 <div class="panel-title"><b>{escape(title)}</b><span>registered → settled → calibration → price quality</span></div>
 <div class="table-wrap"><table><thead><tr>
-<th>{escape(dimension.replace('_', ' ').title())}</th><th>Reg</th><th>Settled</th><th>W-L-P</th>
+<th>{escape(dimension.replace("_", " ").title())}</th><th>Reg</th><th>Settled</th><th>W-L-P</th>
 <th>Win%</th><th>Exp%</th><th>Cal gap</th><th>ROI</th><th>Avg CLV Δ</th><th>Brier</th><th>Evidence</th>
 </tr></thead><tbody>{body}</tbody></table></div></section>"""
 
@@ -745,7 +737,12 @@ def render_baseball_analytics_html(snapshot: dict[str, Any]) -> str:
             _metric_class(lifetime.get("calibration_gap_pp")),
         ),
         ("Brier", _fmt(lifetime.get("brier_score"), digits=4), "probability error", ""),
-        ("Log loss", _fmt(lifetime.get("log_loss"), digits=4), "probability penalty", ""),
+        (
+            "Log loss",
+            _fmt(lifetime.get("log_loss"), digits=4),
+            "probability penalty",
+            "",
+        ),
         (
             "Avg CLV Δ",
             _fmt(
@@ -832,7 +829,7 @@ def render_baseball_analytics_html(snapshot: dict[str, Any]) -> str:
         ("Max L streak", risk.get("max_loss_streak", 0)),
     ]
     gate_html = "".join(
-        f'<div><small>{escape(label)}</small><b>{escape(str(value))}</b></div>'
+        f"<div><small>{escape(label)}</small><b>{escape(str(value))}</b></div>"
         for label, value in gate_items
     )
 
@@ -844,29 +841,32 @@ def render_baseball_analytics_html(snapshot: dict[str, Any]) -> str:
     ):
         row = snapshot["windows"][key]
         window_rows.append(
-            f"""<tr><td><b>{label}</b></td><td>{row.get('registered_n', 0)}</td><td>{row.get('settled_n', 0)}</td>
-<td>{row.get('wins', 0)}-{row.get('losses', 0)}-{row.get('pushes', 0)}</td>
-<td>{_fmt(row.get('win_rate_pct'), '%')}</td><td>{_fmt(row.get('expected_win_rate_pct'), '%')}</td>
-<td>{_fmt(row.get('calibration_gap_pp'), 'pp', signed=True)}</td><td>{_fmt(row.get('roi_pct'), '%', signed=True)}</td>
-<td>{_fmt(row.get('avg_clv_probability_delta_pct'), 'pp', signed=True)}</td><td>{escape(str(row.get('sample_band') or '—'))}</td></tr>"""
+            f"""<tr><td><b>{label}</b></td><td>{row.get("registered_n", 0)}</td><td>{row.get("settled_n", 0)}</td>
+<td>{row.get("wins", 0)}-{row.get("losses", 0)}-{row.get("pushes", 0)}</td>
+<td>{_fmt(row.get("win_rate_pct"), "%")}</td><td>{_fmt(row.get("expected_win_rate_pct"), "%")}</td>
+<td>{_fmt(row.get("calibration_gap_pp"), "pp", signed=True)}</td><td>{_fmt(row.get("roi_pct"), "%", signed=True)}</td>
+<td>{_fmt(row.get("avg_clv_probability_delta_pct"), "pp", signed=True)}</td><td>{escape(str(row.get("sample_band") or "—"))}</td></tr>"""
         )
 
     weekly = snapshot.get("weekly") or []
-    weekly_rows = "".join(
-        f"""<tr><td><b>{escape(str(row.get('week')))}</b></td><td>{row.get('registered_n', 0)}</td><td>{row.get('settled_n', 0)}</td>
-<td>{row.get('wins', 0)}-{row.get('losses', 0)}-{row.get('pushes', 0)}</td>
-<td>{_fmt(row.get('roi_pct'), '%', signed=True)}</td><td>{_fmt(row.get('avg_ev_pct'), '%', signed=True)}</td>
-<td>{_fmt(row.get('calibration_gap_pp'), 'pp', signed=True)}</td><td>{_fmt(row.get('avg_clv_probability_delta_pct'), 'pp', signed=True)}</td></tr>"""
-        for row in weekly[:26]
-    ) or '<tr><td class="empty" colspan="8">No weekly evidence yet.</td></tr>'
+    weekly_rows = (
+        "".join(
+            f"""<tr><td><b>{escape(str(row.get("week")))}</b></td><td>{row.get("registered_n", 0)}</td><td>{row.get("settled_n", 0)}</td>
+<td>{row.get("wins", 0)}-{row.get("losses", 0)}-{row.get("pushes", 0)}</td>
+<td>{_fmt(row.get("roi_pct"), "%", signed=True)}</td><td>{_fmt(row.get("avg_ev_pct"), "%", signed=True)}</td>
+<td>{_fmt(row.get("calibration_gap_pp"), "pp", signed=True)}</td><td>{_fmt(row.get("avg_clv_probability_delta_pct"), "pp", signed=True)}</td></tr>"""
+            for row in weekly[:26]
+        )
+        or '<tr><td class="empty" colspan="8">No weekly evidence yet.</td></tr>'
+    )
 
     eval_reasons = funnel.get("evaluation_reasons") or []
     verify_reasons = funnel.get("verification_reasons") or []
     reason_html = "".join(
-        f'<tr><td>{escape(str(row.get("reason")))}</td><td>{row.get("count", 0)}</td><td>Evaluation PASS</td></tr>'
+        f"<tr><td>{escape(str(row.get('reason')))}</td><td>{row.get('count', 0)}</td><td>Evaluation PASS</td></tr>"
         for row in eval_reasons
     ) + "".join(
-        f'<tr><td>{escape(str(row.get("reason")))}</td><td>{row.get("count", 0)}</td><td>Verification REJECTED</td></tr>'
+        f"<tr><td>{escape(str(row.get('reason')))}</td><td>{row.get('count', 0)}</td><td>Verification REJECTED</td></tr>"
         for row in verify_reasons
     )
     if not reason_html:
@@ -950,17 +950,17 @@ def render_baseball_analytics_html(snapshot: dict[str, Any]) -> str:
 <section class="section-title"><div><small>ANALYTICS</small><h2>Baseball Moneyline lab</h2></div>
 <span>probability quality · price quality · execution · realized returns</span></section>
 <div class="kpi-grid">{cards_html}</div>
-<section class="panel"><div class="panel-title"><b>Evidence status · {escape(sample_band)}</b><span>{lifetime.get('graded_n', 0)} graded picks</span></div>
-<p class="muted">{escape(sample_note)} 95% Wilson win-rate interval: {_fmt(lifetime.get('win_rate_wilson_95_low_pct'), '%')} to {_fmt(lifetime.get('win_rate_wilson_95_high_pct'), '%')}.</p></section>
+<section class="panel"><div class="panel-title"><b>Evidence status · {escape(sample_band)}</b><span>{lifetime.get("graded_n", 0)} graded picks</span></div>
+<p class="muted">{escape(sample_note)} 95% Wilson win-rate interval: {_fmt(lifetime.get("win_rate_wilson_95_low_pct"), "%")} to {_fmt(lifetime.get("win_rate_wilson_95_high_pct"), "%")}.</p></section>
 <section class="split"><article class="panel"><div class="panel-title"><b>Decision funnel</b><span>where candidates disappear</span></div><div class="metric-grid">{funnel_html}</div></article>
 <article class="panel"><div class="panel-title"><b>Execution / risk diagnostics</b><span>final gate + variance</span></div><div class="budget-grid">{gate_html}</div></article></section>
 <section class="panel table-panel"><div class="panel-title"><b>Blocked-gate reasons</b><span>PASS and final verification rejects</span></div>
 <div class="table-wrap"><table><thead><tr><th>Reason</th><th>N</th><th>Stage</th></tr></thead><tbody>{reason_html}</tbody></table></div></section>
 <section class="panel table-panel"><div class="panel-title"><b>Performance windows</b><span>decision-time cohorts</span></div>
-<div class="table-wrap"><table><thead><tr><th>Window</th><th>Reg</th><th>Settled</th><th>W-L-P</th><th>Win%</th><th>Exp%</th><th>Cal gap</th><th>ROI</th><th>Avg CLV Δ</th><th>Evidence</th></tr></thead><tbody>{''.join(window_rows)}</tbody></table></div></section>
+<div class="table-wrap"><table><thead><tr><th>Window</th><th>Reg</th><th>Settled</th><th>W-L-P</th><th>Win%</th><th>Exp%</th><th>Cal gap</th><th>ROI</th><th>Avg CLV Δ</th><th>Evidence</th></tr></thead><tbody>{"".join(window_rows)}</tbody></table></div></section>
 <section class="panel table-panel"><div class="panel-title"><b>Weekly regime tracker</b><span>latest 26 ISO weeks</span></div>
 <div class="table-wrap"><table><thead><tr><th>Week</th><th>Reg</th><th>Settled</th><th>W-L-P</th><th>ROI</th><th>Avg EV</th><th>Cal gap</th><th>Avg CLV Δ</th></tr></thead><tbody>{weekly_rows}</tbody></table></div></section>
 {cohort_sections}
 <section class="research-note"><b>How to read this page</b>
 <p>ROI answers whether paper bets made money. Calibration, Brier and log loss answer whether the model probabilities were honest. CLV answers whether we consistently bought a better price than the close. Gate slippage answers whether final verification preserved or destroyed the preliminary edge. Cohorts show where any signal actually lives instead of letting one aggregate number hide regime problems.</p>
-<p>Contract: {escape(str(snapshot.get('contract_version')))} · Analytics are read-only and use immutable production paper-pick facts.</p></section>"""
+<p>Contract: {escape(str(snapshot.get("contract_version")))} · Analytics are read-only and use immutable production paper-pick facts.</p></section>"""
