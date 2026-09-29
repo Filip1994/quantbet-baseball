@@ -34,6 +34,9 @@ _ALLOWED_TABLES = {
     "fixture_observations",
     "odds_observations",
     "odds_poll_attempts",
+    "runtime_cycles",
+    "collection_cycles",
+    "api_sports_game_schedule_snapshots",
 }
 
 
@@ -102,9 +105,13 @@ class S3ColdObjectStore:
         stored_size = int(head.get("ContentLength") or 0)
         stored_checksum = str((head.get("Metadata") or {}).get("sha256") or "")
         if stored_size != len(body) or stored_checksum != checksum:
-            raise RuntimeError("cold object verification failed after upload")
+            raise RuntimeError("cold object metadata verification failed after upload")
+        ref = f"s3://{self.bucket}/{key}"
+        read_back = self.get_verified(ref, checksum)
+        if read_back != body:
+            raise RuntimeError("cold object full read-back verification failed")
         return VerifiedColdObject(
-            ref=f"s3://{self.bucket}/{key}",
+            ref=ref,
             checksum=checksum,
             size_bytes=stored_size,
         )
@@ -208,6 +215,42 @@ def policies_from_env() -> tuple[ColdArchivePolicy, ...]:
                 )
             ),
         ),
+        ColdArchivePolicy(
+            table_name="runtime_cycles",
+            primary_key="run_id",
+            time_column="finished_at",
+            archive_mode="AGE",
+            retention=timedelta(
+                days=_policy_days(
+                    "BASEBALL_COLD_RUNTIME_CYCLE_DAYS",
+                    14,
+                )
+            ),
+        ),
+        ColdArchivePolicy(
+            table_name="collection_cycles",
+            primary_key="cycle_id",
+            time_column="finished_at",
+            archive_mode="AGE",
+            retention=timedelta(
+                days=_policy_days(
+                    "BASEBALL_COLD_COLLECTION_CYCLE_DAYS",
+                    14,
+                )
+            ),
+        ),
+        ColdArchivePolicy(
+            table_name="api_sports_game_schedule_snapshots",
+            primary_key="snapshot_id",
+            time_column="observed_at",
+            archive_mode="AGE",
+            retention=timedelta(
+                days=_policy_days(
+                    "BASEBALL_COLD_SCHEDULE_SNAPSHOT_DAYS",
+                    14,
+                )
+            ),
+        ),
     )
 
 
@@ -265,6 +308,18 @@ def _select_sql(policy: ColdArchivePolicy) -> str:
                   FROM game_result_facts AS result
                   WHERE result.fixture_observation_id = old.fixture_observation_id
               )
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM official_mlb_team_identity_mappings AS mapping
+                  WHERE mapping.api_fixture_observation_id =
+                      old.fixture_observation_id
+              )
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM official_mlb_game_identity_links AS link
+                  WHERE link.api_fixture_observation_id =
+                      old.fixture_observation_id
+              )
             ORDER BY old.observed_at, old.fixture_observation_id
             LIMIT %s
         """
@@ -311,6 +366,39 @@ def _select_sql(policy: ColdArchivePolicy) -> str:
             FROM odds_poll_attempts AS old
             WHERE old.attempted_at < %s
             ORDER BY old.attempted_at, old.poll_attempt_id
+            LIMIT %s
+        """
+    if policy.table_name == "runtime_cycles":
+        return """
+            SELECT
+                old.run_id::text AS primary_key,
+                old.finished_at AS record_at,
+                row_to_json(old) AS record
+            FROM runtime_cycles AS old
+            WHERE old.finished_at < %s
+            ORDER BY old.finished_at, old.run_id
+            LIMIT %s
+        """
+    if policy.table_name == "collection_cycles":
+        return """
+            SELECT
+                old.cycle_id::text AS primary_key,
+                old.finished_at AS record_at,
+                row_to_json(old) AS record
+            FROM collection_cycles AS old
+            WHERE old.finished_at < %s
+            ORDER BY old.finished_at, old.cycle_id
+            LIMIT %s
+        """
+    if policy.table_name == "api_sports_game_schedule_snapshots":
+        return """
+            SELECT
+                old.snapshot_id::text AS primary_key,
+                old.observed_at AS record_at,
+                row_to_json(old) AS record
+            FROM api_sports_game_schedule_snapshots AS old
+            WHERE old.observed_at < %s
+            ORDER BY old.observed_at, old.snapshot_id
             LIMIT %s
         """
     raise ValueError("unsupported cold-storage policy")
@@ -422,6 +510,55 @@ def _manifest_record(
     }
 
 
+def _delete_selected_sql(policy: ColdArchivePolicy) -> str:
+    if policy.table_name == "fixture_observations":
+        return """
+            DELETE FROM fixture_observations AS old
+            WHERE old.fixture_observation_id = ANY(%s::uuid[])
+              AND EXISTS (
+                  SELECT 1
+                  FROM fixture_observations AS newer
+                  WHERE newer.provider_game_id = old.provider_game_id
+                    AND (
+                        newer.observed_at > old.observed_at
+                        OR (
+                            newer.observed_at = old.observed_at
+                            AND newer.fixture_observation_id >
+                                old.fixture_observation_id
+                        )
+                    )
+              )
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM pick_closing_finalizations AS closing
+                  WHERE closing.fixture_observation_id =
+                      old.fixture_observation_id
+              )
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM game_result_facts AS result
+                  WHERE result.fixture_observation_id =
+                      old.fixture_observation_id
+              )
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM official_mlb_team_identity_mappings AS mapping
+                  WHERE mapping.api_fixture_observation_id =
+                      old.fixture_observation_id
+              )
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM official_mlb_game_identity_links AS link
+                  WHERE link.api_fixture_observation_id =
+                      old.fixture_observation_id
+              )
+        """
+    return (
+        f'DELETE FROM "{policy.table_name}" '
+        f'WHERE "{policy.primary_key}" = ANY(%s::uuid[])'
+    )
+
+
 def purge_verified_rows(
     connection: Any,
     policy: ColdArchivePolicy,
@@ -450,12 +587,11 @@ def purge_verified_rows(
         separators=(",", ":"),
     )
     table = policy.table_name
-    primary_key = policy.primary_key
     if table not in _ALLOWED_TABLES:
         raise ValueError("unsupported cold-storage table")
     with connection.transaction(), connection.cursor() as cursor:
         cursor.execute(
-            f'DELETE FROM "{table}" WHERE "{primary_key}" = ANY(%s::uuid[])',
+            _delete_selected_sql(policy),
             (ids,),
         )
         deleted = int(cursor.rowcount)
