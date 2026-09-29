@@ -166,43 +166,12 @@ def _policy_days(env_name: str, default: int) -> int:
 
 
 def policies_from_env() -> tuple[ColdArchivePolicy, ...]:
+    """Return production-safe policies for operational exhaust only.
+
+    Model, market-research, replay, and decision-evidence tables deliberately
+    remain hot even when individual rows appear superseded or unreferenced.
+    """
     return (
-        ColdArchivePolicy(
-            table_name="api_sports_game_history_snapshots",
-            primary_key="snapshot_id",
-            time_column="observed_at",
-            archive_mode="SUPERSEDED",
-            retention=timedelta(
-                days=_policy_days(
-                    "BASEBALL_COLD_GAME_HISTORY_SUPERSEDED_DAYS",
-                    2,
-                )
-            ),
-        ),
-        ColdArchivePolicy(
-            table_name="fixture_observations",
-            primary_key="fixture_observation_id",
-            time_column="observed_at",
-            archive_mode="SUPERSEDED_UNREFERENCED",
-            retention=timedelta(
-                days=_policy_days(
-                    "BASEBALL_COLD_FIXTURE_SUPERSEDED_DAYS",
-                    7,
-                )
-            ),
-        ),
-        ColdArchivePolicy(
-            table_name="odds_observations",
-            primary_key="observation_id",
-            time_column="observed_at",
-            archive_mode="UNREFERENCED",
-            retention=timedelta(
-                days=_policy_days(
-                    "BASEBALL_COLD_ODDS_UNREFERENCED_DAYS",
-                    7,
-                )
-            ),
-        ),
         ColdArchivePolicy(
             table_name="odds_poll_attempts",
             primary_key="poll_attempt_id",
