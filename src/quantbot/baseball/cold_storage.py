@@ -331,7 +331,7 @@ def select_eligible_rows(
     result: list[ColdArchiveRow] = []
     for primary_key, record_at, record in rows:
         if not isinstance(record, dict):
-            raise RuntimeError("row_to_json did not return an object")
+            raise TypeError("row_to_json did not return an object")
         result.append(
             ColdArchiveRow(
                 primary_key=str(primary_key),
@@ -453,58 +453,57 @@ def purge_verified_rows(
     primary_key = policy.primary_key
     if table not in _ALLOWED_TABLES:
         raise ValueError("unsupported cold-storage table")
-    with connection.transaction():
-        with connection.cursor() as cursor:
-            cursor.execute(
-                f'DELETE FROM "{table}" WHERE "{primary_key}" = ANY(%s::uuid[])',
-                (ids,),
+    with connection.transaction(), connection.cursor() as cursor:
+        cursor.execute(
+            f'DELETE FROM "{table}" WHERE "{primary_key}" = ANY(%s::uuid[])',
+            (ids,),
+        )
+        deleted = int(cursor.rowcount)
+        if deleted != len(ids):
+            raise RuntimeError(
+                f"cold purge row mismatch for {table}: "
+                f"expected {len(ids)}, deleted {deleted}"
             )
-            deleted = int(cursor.rowcount)
-            if deleted != len(ids):
-                raise RuntimeError(
-                    f"cold purge row mismatch for {table}: "
-                    f"expected {len(ids)}, deleted {deleted}"
-                )
-            cursor.execute(
-                """
-                INSERT INTO cold_storage_archives (
-                    archive_id,
-                    table_name,
-                    archive_mode,
-                    cutoff_at,
-                    object_ref,
-                    object_sha256,
-                    object_bytes,
-                    row_count,
-                    first_record_at,
-                    last_record_at,
-                    archived_at,
-                    purged_from_hot_at,
-                    schema_version,
-                    canonical_record
-                )
-                VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s::jsonb
-                )
-                """,
-                (
-                    archive_id,
-                    policy.table_name,
-                    policy.archive_mode,
-                    cutoff,
-                    verified.ref,
-                    verified.checksum,
-                    verified.size_bytes,
-                    len(rows),
-                    min(row.record_at for row in rows),
-                    max(row.record_at for row in rows),
-                    archived_at,
-                    archived_at,
-                    "1.0",
-                    canonical,
-                ),
+        cursor.execute(
+            """
+            INSERT INTO cold_storage_archives (
+                archive_id,
+                table_name,
+                archive_mode,
+                cutoff_at,
+                object_ref,
+                object_sha256,
+                object_bytes,
+                row_count,
+                first_record_at,
+                last_record_at,
+                archived_at,
+                purged_from_hot_at,
+                schema_version,
+                canonical_record
             )
+            VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s::jsonb
+            )
+            """,
+            (
+                archive_id,
+                policy.table_name,
+                policy.archive_mode,
+                cutoff,
+                verified.ref,
+                verified.checksum,
+                verified.size_bytes,
+                len(rows),
+                min(row.record_at for row in rows),
+                max(row.record_at for row in rows),
+                archived_at,
+                archived_at,
+                "1.0",
+                canonical,
+            ),
+        )
     return len(ids)
 
 
@@ -535,19 +534,18 @@ def restore_archive(
         raise RuntimeError("cold archive table identity mismatch")
     records = payload.get("rows")
     if not isinstance(records, list):
-        raise RuntimeError("cold archive rows are invalid")
+        raise TypeError("cold archive rows are invalid")
     inserted = 0
-    with connection.transaction():
-        with connection.cursor() as cursor:
-            for record in records:
-                cursor.execute(
-                    f'INSERT INTO "{table_name}" '
-                    f'SELECT * FROM json_populate_record(NULL::"{table_name}", %s::json) '
-                    "ON CONFLICT DO NOTHING",
-                    (json.dumps(record, separators=(",", ":")),),
-                )
-                if cursor.rowcount > 0:
-                    inserted += int(cursor.rowcount)
+    with connection.transaction(), connection.cursor() as cursor:
+        for record in records:
+            cursor.execute(
+                f'INSERT INTO "{table_name}" '
+                f'SELECT * FROM json_populate_record(NULL::"{table_name}", %s::json) '
+                "ON CONFLICT DO NOTHING",
+                (json.dumps(record, separators=(",", ":")),),
+            )
+            if cursor.rowcount > 0:
+                inserted += int(cursor.rowcount)
     return inserted
 
 
