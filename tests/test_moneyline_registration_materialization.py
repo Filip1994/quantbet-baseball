@@ -139,8 +139,8 @@ def test_postgres_exposes_best_due_candidate_for_registration() -> None:
         pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
     apply_migrations(Path("."), database_url)
 
-    game_id = f"registration-{uuid.uuid4()}"
     provider_game_id = 100_000_000 + (uuid.uuid4().int % 800_000_000)
+    game_id = str(provider_game_id)
     fixture = FixtureObservation(
         fixture_observation_id=str(uuid.uuid4()),
         game_id=game_id,
