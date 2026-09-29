@@ -1,0 +1,32 @@
+name: Format analytics helper
+
+on:
+  pull_request:
+    paths:
+      - "src/quantbot/baseball/analytics.py"
+      - "src/quantbot/baseball/dashboard.py"
+      - "tests/test_baseball_analytics.py"
+      - ".github/workflows/format-analytics-helper.yml"
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install ruff==0.16.6
+      - run: ruff format src/quantbot/baseball/analytics.py src/quantbot/baseball/dashboard.py tests/test_baseball_analytics.py
+      - name: Emit formatted files
+        run: |
+          echo "===ANALYTICS_B64==="
+          base64 -w0 src/quantbot/baseball/analytics.py
+          echo
+          echo "===DASHBOARD_B64==="
+          base64 -w0 src/quantbot/baseball/dashboard.py
+          echo
+          echo "===TEST_B64==="
+          base64 -w0 tests/test_baseball_analytics.py
+          echo
+          echo "===END_FORMATTED_FILES==="
