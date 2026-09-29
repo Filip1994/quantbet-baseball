@@ -85,6 +85,74 @@ def _run_armed_canary(
     return dict(run_canary_once(root, now=started_at))
 
 
+def _run_cold_archive(
+    root: Path,
+    *,
+    now: datetime,
+) -> dict[str, object]:
+    """Run bounded cold retention after decisioning without blocking live work."""
+
+    if not _enabled("BASEBALL_ENABLE_COLD_ARCHIVE"):
+        return {
+            "status": "DISABLED",
+            "objects_written": 0,
+            "rows_purged": 0,
+            "compressed_bytes": 0,
+        }
+    if not _enabled("BASEBALL_COLD_ARCHIVE_PURGE_ENABLED"):
+        return {
+            "status": "PURGE_DISABLED",
+            "objects_written": 0,
+            "rows_purged": 0,
+            "compressed_bytes": 0,
+        }
+
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if not database_url:
+        return {
+            "status": "BLOCKED",
+            "reason": "DATABASE_URL_MISSING",
+            "objects_written": 0,
+            "rows_purged": 0,
+            "compressed_bytes": 0,
+        }
+
+    import psycopg
+
+    from .cold_archive import cold_store_from_env
+    from .cold_storage import run_cold_archive_once
+
+    try:
+        store = cold_store_from_env(
+            root / "data" / "cold",
+            require_remote=True,
+        )
+        with psycopg.connect(database_url) as connection:
+            return dict(
+                run_cold_archive_once(
+                    connection,
+                    store,
+                    now=now,
+                    run_hour_utc=_integer_env(
+                        "BASEBALL_COLD_ARCHIVE_RUN_HOUR_UTC",
+                        4,
+                    ),
+                    batch_rows=_integer_env(
+                        "BASEBALL_COLD_ARCHIVE_BATCH_ROWS",
+                        5000,
+                    ),
+                )
+            )
+    except Exception as exc:  # Archive failure must never block live decisioning.
+        return {
+            "status": "FAILED",
+            "error_type": type(exc).__name__,
+            "objects_written": 0,
+            "rows_purged": 0,
+            "compressed_bytes": 0,
+        }
+
+
 def _record_runtime(
     result: dict[str, object],
     *,
@@ -350,6 +418,24 @@ def run_once(root: Path | None = None) -> dict[str, object]:
         result["mlb_enrichment_canary"] = enrichment_canary
         if enrichment_canary.get("status") in {"FAILED", "BLOCKED"}:
             result["status"] = "enrichment-canary-failed"
+
+    cold_archive = _run_cold_archive(
+        project_root,
+        now=datetime.now(UTC),
+    )
+    result["cold_archive"] = cold_archive
+    collection_summary = result.get("collection")
+    if isinstance(collection_summary, dict):
+        collection_summary["cold_archive_status"] = str(cold_archive["status"])
+        collection_summary["cold_archive_objects_written"] = int(
+            cold_archive.get("objects_written", 0)
+        )
+        collection_summary["cold_archive_rows_purged"] = int(
+            cold_archive.get("rows_purged", 0)
+        )
+        collection_summary["cold_archive_compressed_bytes"] = int(
+            cold_archive.get("compressed_bytes", 0)
+        )
 
     health = _record_runtime(
         result,
