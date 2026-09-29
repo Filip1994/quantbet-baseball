@@ -445,6 +445,9 @@ def collect_durable_once(
     moneyline_final_max_quote_age_seconds = float(
         os.getenv("BASEBALL_MONEYLINE_FINAL_MAX_QUOTE_AGE_SECONDS", "120")
     )
+    registration_request_reserve = (
+        max_moneyline_registrations if moneyline_registration_enabled else 0
+    )
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
     if max_monitoring_refreshes < 1:
@@ -512,12 +515,7 @@ def collect_durable_once(
                 cycle_request_cap=effective_request_cap,
                 requests_used=client.request_count,
                 max_odds_requests=max_odds_requests,
-                schedule_request_reserve=2
-                + (
-                    max_moneyline_registrations
-                    if moneyline_registration_enabled
-                    else 0
-                ),
+                schedule_request_reserve=2 + registration_request_reserve,
             )
             summary = collect_with_dependencies(
                 client,
@@ -573,7 +571,7 @@ def collect_durable_once(
             if (
                 execution_mode == "SCHEDULED"
                 and slow_provider_enabled
-                and client.remaining_budget > 0
+                and client.remaining_budget > registration_request_reserve
                 and max_slow_provider_requests > 0
             ):
                 slow_repository = PostgreSQLProviderDataRepository(connection)
@@ -582,7 +580,11 @@ def collect_durable_once(
                         0,
                         max_slow_provider_requests - int(slow_provider["requests"]),
                     )
-                    if remaining_slow_budget == 0 or client.remaining_budget == 0:
+                    available_slow_budget = max(
+                        0,
+                        client.remaining_budget - registration_request_reserve,
+                    )
+                    if remaining_slow_budget == 0 or available_slow_budget == 0:
                         break
                     league_result = collect_slow_provider_data(
                         client,
@@ -590,7 +592,7 @@ def collect_durable_once(
                         now=cycle_now,
                         max_requests=min(
                             remaining_slow_budget,
-                            client.remaining_budget,
+                            available_slow_budget,
                         ),
                         league_id=slow_league_id,
                         season=cycle_now.year,
@@ -626,7 +628,7 @@ def collect_durable_once(
             if (
                 execution_mode == "SCHEDULED"
                 and slow_provider_enabled
-                and client.remaining_budget > 0
+                and client.remaining_budget > registration_request_reserve
                 and history_request_cap > 0
             ):
                 history_repository = PostgreSQLGameHistoryRepository(connection)
@@ -636,7 +638,10 @@ def collect_durable_once(
                     now=cycle_now,
                     max_requests=min(
                         history_request_cap,
-                        client.remaining_budget,
+                        max(
+                            0,
+                            client.remaining_budget - registration_request_reserve,
+                        ),
                     ),
                     league_id=1,
                     season=cycle_now.year,
