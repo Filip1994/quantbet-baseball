@@ -42,10 +42,6 @@ CREATE TABLE IF NOT EXISTS cold_archive_manifests (
     ),
     CONSTRAINT cold_archive_canonical_object CHECK (
         jsonb_typeof(canonical_record) = 'object'
-    ),
-    CONSTRAINT cold_archive_dataset_checksum_unique UNIQUE (
-        dataset,
-        object_checksum
     )
 );
 
