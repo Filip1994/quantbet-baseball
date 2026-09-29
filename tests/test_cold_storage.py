@@ -175,7 +175,7 @@ def test_superseded_game_history_archives_purges_and_restores() -> None:
         summary = run_cold_storage_cycle(
             connection,
             store,
-            now=datetime(2040, 7, 10, 12, 0, tzinfo=UTC),
+            now=datetime(2003, 1, 10, 12, 0, tzinfo=UTC),
             policies=(policy,),
             max_rows_per_table=100,
             purge_enabled=True,
@@ -427,12 +427,21 @@ def test_mlb_identity_referenced_fixture_never_becomes_cold_eligible() -> None:
 
     provider_game_id = 500_000_000 + (uuid.uuid4().int % 300_000_000)
     game_id = str(provider_game_id)
-    old = _fixture(game_id, provider_game_id)
+    base = _fixture(game_id, provider_game_id)
+    old = FixtureObservation(
+        **{
+            **base.to_dict(),
+            "fixture_observation_id": str(uuid.uuid4()),
+            "kickoff_at": "2003-01-01T19:00:00+00:00",
+            "observed_at": "2003-01-01T12:00:00+00:00",
+            "source_payload_ref": "s3://raw/cold-fixture-old.json",
+        }
+    )
     newer = FixtureObservation(
         **{
             **old.to_dict(),
             "fixture_observation_id": str(uuid.uuid4()),
-            "observed_at": "2040-07-09T12:00:00+00:00",
+            "observed_at": "2003-01-09T12:00:00+00:00",
             "source_payload_ref": "s3://raw/cold-fixture-newer.json",
             "source_payload_checksum": "e" * 64,
         }
@@ -479,7 +488,7 @@ def test_mlb_identity_referenced_fixture_never_becomes_cold_eligible() -> None:
                 mapping_version,
                 old.home_team_id,
                 60_000 + (uuid.uuid4().int % 10_000),
-                datetime(2040, 7, 9, 13, 0, tzinfo=UTC),
+                datetime(2003, 1, 9, 13, 0, tzinfo=UTC),
                 old.fixture_observation_id,
                 "f" * 64,
                 "a" * 64,
