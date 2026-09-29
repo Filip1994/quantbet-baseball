@@ -191,7 +191,6 @@ class BaseballDashboardRepository:
                 """
             ).fetchall()
 
-
         gate_map = {str(row["target"]): dict(row) for row in gates}
         return {
             "generated_at": now,
@@ -827,7 +826,9 @@ class BaseballDashboardHTTPService:
                         self,
                         200,
                         dashboard.render(
-                            "tab=analytics" if parsed.path == "/analytics" else parsed.query
+                            "tab=analytics"
+                            if parsed.path == "/analytics"
+                            else parsed.query
                         ),
                         "text/html; charset=utf-8",
                     )
