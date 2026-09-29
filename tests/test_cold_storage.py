@@ -520,7 +520,6 @@ def test_mlb_identity_referenced_fixture_never_becomes_cold_eligible() -> None:
         )
 
 
-
 def test_default_production_policies_archive_only_operational_exhaust(
     monkeypatch,
 ) -> None:
