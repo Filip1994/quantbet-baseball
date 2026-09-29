@@ -52,6 +52,7 @@ on:
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
       - "tests/test_moneyline_registration_materialization.py"
+      - "tests/test_moneyline_runtime_e2e.py"
       - "tests/test_moneyline_features.py"
       - "tests/test_moneyline_feature_materialization.py"
       - "tests/test_moneyline_baseline.py"
@@ -235,6 +236,7 @@ jobs:
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
           tests/test_moneyline_registration_materialization.py
+          tests/test_moneyline_runtime_e2e.py
           tests/test_moneyline_features.py
           tests/test_moneyline_feature_materialization.py
           tests/test_moneyline_baseline.py
