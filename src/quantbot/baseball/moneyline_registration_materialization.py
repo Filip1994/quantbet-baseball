@@ -91,9 +91,7 @@ def materialize_due_moneyline_registrations(
                 policy=active_policy,
             )
         except (EvidenceError, LookupError, RuntimeError, TypeError, ValueError):
-            result["registration_failures"] = (
-                int(result["registration_failures"]) + 1
-            )
+            result["registration_failures"] = int(result["registration_failures"]) + 1
             continue
 
         if registration.verification.status == "READY":
@@ -101,13 +99,9 @@ def materialize_due_moneyline_registrations(
             if registration.pick is not None:
                 result["picks_registered"] = int(result["picks_registered"]) + 1
         elif registration.verification.status == "REJECTED":
-            result["verifications_rejected"] = (
-                int(result["verifications_rejected"]) + 1
-            )
+            result["verifications_rejected"] = int(result["verifications_rejected"]) + 1
         else:
-            result["registration_failures"] = (
-                int(result["registration_failures"]) + 1
-            )
+            result["registration_failures"] = int(result["registration_failures"]) + 1
 
     result["provider_calls"] = max(0, _request_count(client) - before_calls)
     if int(result["registration_failures"]) > 0:
