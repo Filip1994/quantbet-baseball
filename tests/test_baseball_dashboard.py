@@ -10,6 +10,13 @@ class FakeRepository:
     def check_database(self) -> bool:
         return True
 
+    def analytics_evidence(self):
+        return {
+            "rows": [],
+            "evaluation_funnel": [],
+            "verification_funnel": [],
+        }
+
     def snapshot(self):
         now = datetime.now(UTC)
         runtime_time = now - (
@@ -187,6 +194,7 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     dashboard = BaseballDashboard(FakeRepository())
 
     research = dashboard.render("tab=research")
+    analytics = dashboard.render("tab=analytics")
     history = dashboard.render("tab=history")
 
     assert "No settled research picks yet." in research
@@ -200,5 +208,8 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     )
     assert "Paper P/L" in research
     assert "DB-backed" in research
+    assert "Baseball Moneyline lab" in analytics
+    assert "Decision funnel" in analytics
+    assert "SIGNAL_ONLY" in analytics
     assert "No registered paper picks yet." in history
     assert "300 RSD" in history or "300 RSD" in research

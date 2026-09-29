@@ -18,6 +18,7 @@ from urllib.parse import parse_qs, urlsplit
 import psycopg
 from psycopg.rows import dict_row
 
+from .analytics import build_baseball_analytics_snapshot, render_baseball_analytics_html
 from .postgres_repository import PostgreSQLEvidenceRepository
 
 WORKER_FRESHNESS = timedelta(minutes=35)
@@ -208,10 +209,94 @@ class BaseballDashboardRepository:
             "picks": [dict(row) for row in picks],
         }
 
+    def analytics_evidence(self) -> dict[str, Any]:
+        """Read full decision-lifecycle evidence only for analytics requests."""
+        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
+            analytics_rows = connection.execute(
+                """
+                WITH latest_fixture AS (
+                    SELECT DISTINCT ON (game_id)
+                           game_id, league, home_team_name, away_team_name
+                    FROM fixture_observations
+                    ORDER BY game_id, observed_at DESC,
+                             fixture_observation_id DESC
+                )
+                SELECT r.pick_id, r.game_id, f.league,
+                       f.home_team_name, f.away_team_name,
+                       r.selection, r.bookmaker, r.entry_odds,
+                       r.model_probability, r.market_probability,
+                       r.fair_decimal_odds, r.edge,
+                       r.expected_value_per_unit, r.uncertainty_metric,
+                       r.model_version, r.registered_at, r.kickoff_at,
+                       r.paper_stake_minor, r.currency,
+                       s.outcome AS settlement_outcome,
+                       s.profit_per_unit, s.closing_odds,
+                       s.clv_status, s.clv_probability_delta,
+                       s.clv_price_ratio, s.settled_at,
+                       CASE
+                           WHEN s.settlement_id IS NULL THEN NULL
+                           ELSE ROUND(s.profit_per_unit * r.paper_stake_minor)::BIGINT
+                       END AS paper_profit_minor,
+                       pre.selected_odds AS preliminary_odds,
+                       pre.edge AS preliminary_edge,
+                       pre.expected_value_per_unit AS preliminary_ev,
+                       pre.quote_age_seconds AS preliminary_quote_age_seconds,
+                       fin.quote_age_seconds AS final_quote_age_seconds
+                FROM registered_picks r
+                LEFT JOIN latest_fixture f ON f.game_id = r.game_id
+                LEFT JOIN final_quote_verifications fqv
+                  ON fqv.verification_id = r.verification_id
+                LEFT JOIN value_evaluations pre
+                  ON pre.evaluation_id = fqv.preliminary_evaluation_id
+                LEFT JOIN value_evaluations fin
+                  ON fin.evaluation_id = r.final_evaluation_id
+                LEFT JOIN pick_settlements s ON s.pick_id = r.pick_id
+                ORDER BY r.registered_at, r.pick_id
+                """
+            ).fetchall()
+
+            evaluation_funnel = connection.execute(
+                """
+                SELECT stage, outcome, reason_code, COUNT(*)::BIGINT AS count
+                FROM value_evaluations
+                GROUP BY stage, outcome, reason_code
+                ORDER BY stage, outcome, count DESC, reason_code
+                """
+            ).fetchall()
+
+            verification_funnel = connection.execute(
+                """
+                SELECT status, reason_codes, COUNT(*)::BIGINT AS count
+                FROM final_quote_verifications
+                GROUP BY status, reason_codes
+                ORDER BY status, count DESC
+                """
+            ).fetchall()
+
+        return {
+            "rows": [dict(row) for row in analytics_rows],
+            "evaluation_funnel": [dict(row) for row in evaluation_funnel],
+            "verification_funnel": [dict(row) for row in verification_funnel],
+        }
+
 
 class BaseballDashboard:
     def __init__(self, repository: BaseballDashboardRepository) -> None:
         self.repository = repository
+
+    def analytics_snapshot(
+        self,
+        operational: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        base = operational or self.snapshot()
+        evidence = self.repository.analytics_evidence()
+        return build_baseball_analytics_snapshot(
+            evidence.get("rows") or (),
+            evaluation_funnel=evidence.get("evaluation_funnel") or (),
+            verification_funnel=evidence.get("verification_funnel") or (),
+            health=base.get("health") or {},
+            as_of=base.get("generated_at"),
+        )
 
     def snapshot(self) -> dict[str, Any]:
         data = self.repository.snapshot()
@@ -305,12 +390,16 @@ class BaseballDashboard:
         data = self.snapshot()
         params = parse_qs(query)
         tab = (params.get("tab") or ["system"])[0]
-        if tab not in {"system", "research", "history"}:
+        if tab not in {"system", "research", "analytics", "history"}:
             tab = "system"
+
+        if tab == "analytics":
+            data["analytics"] = self.analytics_snapshot(data)
 
         body = {
             "system": self._system_html,
             "research": self._research_html,
+            "analytics": self._analytics_html,
             "history": self._history_html,
         }[tab](data)
         return self._page(data, tab, body)
@@ -328,6 +417,7 @@ class BaseballDashboard:
             for name, label in (
                 ("system", "System"),
                 ("research", "Research"),
+                ("analytics", "Analytics"),
                 ("history", "History"),
             )
         )
@@ -335,11 +425,12 @@ class BaseballDashboard:
         generated = (
             data["generated_at"].astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
         )
+        refresh_seconds = 120 if tab == "analytics" else 30
         return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="30">
+<meta http-equiv="refresh" content="{refresh_seconds}">
 <title>QuantBet Baseball</title>
 <style>{_CSS}</style>
 </head><body>
@@ -365,7 +456,7 @@ class BaseballDashboard:
 </header>
 <section class="status-strip">{status_strip}</section>
 {body}
-<footer><span>Auto-refresh 30s · PostgreSQL is authoritative · dashboard makes no provider calls</span><span>{generated}</span></footer>
+<footer><span>Auto-refresh {refresh_seconds}s · PostgreSQL is authoritative · dashboard makes no provider calls</span><span>{generated}</span></footer>
 </main></div></body></html>"""
 
     def _system_html(self, data: dict[str, Any]) -> str:
@@ -587,6 +678,9 @@ class BaseballDashboard:
 <div><span>PLAYABLE</span><strong>Bet365 · 1xBet</strong></div>
 </section>"""
 
+    def _analytics_html(self, data: dict[str, Any]) -> str:
+        return render_baseball_analytics_html(data["analytics"])
+
     def _history_html(self, data: dict[str, Any]) -> str:
         rows = data.get("picks") or []
         body = "".join(self._pick_row(row) for row in rows)
@@ -703,7 +797,27 @@ class BaseballDashboardHTTPService:
                             "text/plain; charset=utf-8",
                         )
                     return
-                if parsed.path not in {"/", "/dashboard"}:
+                if parsed.path == "/analytics.json":
+                    if not service._authorize(self):
+                        return
+                    try:
+                        payload = dashboard.analytics_snapshot()
+                        safe = service._json_safe(payload)
+                        service._text(
+                            self,
+                            200,
+                            json.dumps(safe, separators=(",", ":")) + "\n",
+                            "application/json; charset=utf-8",
+                        )
+                    except Exception as exc:  # noqa: BLE001
+                        service._text(
+                            self,
+                            503,
+                            type(exc).__name__ + "\n",
+                            "text/plain; charset=utf-8",
+                        )
+                    return
+                if parsed.path not in {"/", "/dashboard", "/analytics"}:
                     service._text(self, 404, "not_found\n", "text/plain; charset=utf-8")
                     return
                 if not service._authorize(self):
@@ -712,7 +826,11 @@ class BaseballDashboardHTTPService:
                     service._text(
                         self,
                         200,
-                        dashboard.render(parsed.query),
+                        dashboard.render(
+                            "tab=analytics"
+                            if parsed.path == "/analytics"
+                            else parsed.query
+                        ),
                         "text/html; charset=utf-8",
                     )
                 except Exception as exc:  # noqa: BLE001
