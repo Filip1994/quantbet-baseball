@@ -45,7 +45,7 @@ def test_runtime_cycle_archives_and_restores_exact_row(
     monkeypatch.setenv("BASEBALL_COLD_RUNTIME_RETENTION_DAYS", "1")
 
     run_id = str(uuid.uuid4())
-    started = datetime(2039, 1, 1, 0, 0, tzinfo=UTC)
+    started = datetime(2000, 1, 1, 0, 0, tzinfo=UTC)
     stats = {"status": "old-runtime", "counter": 7}
 
     with psycopg.connect(database_url) as connection:
@@ -71,7 +71,7 @@ def test_runtime_cycle_archives_and_restores_exact_row(
             connection,
             store,
             _policy("runtime-cycles"),
-            now=datetime(2040, 1, 1, 0, 0, tzinfo=UTC),
+            now=datetime(2001, 1, 5, 0, 0, tzinfo=UTC),
             batch_rows=10,
         )
 
@@ -160,7 +160,7 @@ def _quote(
         source_payload_checksum="a" * 64,
         schema_version="1.0",
         market_status="open",
-        kickoff_at="2039-01-02T19:00:00+00:00",
+        kickoff_at="2001-01-02T19:00:00+00:00",
     )
 
 
@@ -185,9 +185,9 @@ def test_referenced_odds_stay_hot_while_unreferenced_old_quote_is_archived(
         home_team_name="Cold Home",
         away_team_id=992,
         away_team_name="Cold Away",
-        kickoff_at="2039-01-02T19:00:00+00:00",
+        kickoff_at="2001-01-02T19:00:00+00:00",
         provider_status="NS",
-        observed_at="2039-01-02T16:00:00+00:00",
+        observed_at="2001-01-02T16:00:00+00:00",
         source_payload_ref="s3://raw/cold-safety-fixture.json",
         source_payload_checksum="b" * 64,
         schema_version="1.0",
@@ -197,28 +197,28 @@ def test_referenced_odds_stay_hot_while_unreferenced_old_quote_is_archived(
         observation_id=str(uuid.uuid4()),
         selection="home",
         odds=2.10,
-        observed_at="2039-01-02T16:05:00+00:00",
+        observed_at="2001-01-02T16:05:00+00:00",
     )
     away = _quote(
         game_id=game_id,
         observation_id=str(uuid.uuid4()),
         selection="away",
         odds=1.80,
-        observed_at="2039-01-02T16:05:00+00:00",
+        observed_at="2001-01-02T16:05:00+00:00",
     )
     orphan = _quote(
         game_id=game_id,
         observation_id=str(uuid.uuid4()),
         selection="home",
         odds=2.20,
-        observed_at="2039-01-02T15:00:00+00:00",
+        observed_at="2001-01-02T15:00:00+00:00",
     )
     prediction = build_model_prediction(
         game_id=game_id,
         model_version="team-strength-poisson-baseline-v1",
         feature_snapshot_ref=f"feature-{game_id}",
-        source_data_cutoff_at="2039-01-02T16:00:00+00:00",
-        predicted_at="2039-01-02T16:01:00+00:00",
+        source_data_cutoff_at="2001-01-02T16:00:00+00:00",
+        predicted_at="2001-01-02T16:01:00+00:00",
         home_probability=0.55,
         away_probability=0.45,
         uncertainty_metric=0.025,
@@ -228,7 +228,7 @@ def test_referenced_odds_stay_hot_while_unreferenced_old_quote_is_archived(
         home,
         away,
         stage="PRELIMINARY",
-        evaluated_at="2039-01-02T16:06:00+00:00",
+        evaluated_at="2001-01-02T16:06:00+00:00",
         min_edge=0.02,
         min_expected_value=0.0,
         max_uncertainty=0.05,
@@ -249,7 +249,7 @@ def test_referenced_odds_stay_hot_while_unreferenced_old_quote_is_archived(
             connection,
             store,
             _policy("odds-observations"),
-            now=datetime(2040, 1, 1, 0, 0, tzinfo=UTC),
+            now=datetime(2001, 1, 5, 0, 0, tzinfo=UTC),
             batch_rows=100,
         )
         assert result["status"] == "ARCHIVED"
