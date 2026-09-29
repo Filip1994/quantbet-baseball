@@ -213,3 +213,59 @@ def test_research_and_history_render_empty_states_without_fabrication() -> None:
     assert "SIGNAL_ONLY" in analytics
     assert "No registered paper picks yet." in history
     assert "300 RSD" in history or "300 RSD" in research
+
+
+def test_registered_pick_renders_serbian_decision_notes() -> None:
+    dashboard = BaseballDashboard(FakeRepository())
+    row = {
+        "pick_id": "11111111-1111-1111-1111-111111111111",
+        "home_team_name": "Home Team",
+        "away_team_name": "Away Team",
+        "league": "MLB",
+        "selection": "home",
+        "bookmaker": "Bet365",
+        "entry_odds": 1.95,
+        "model_probability": 0.58,
+        "market_probability": 0.54,
+        "fair_decimal_odds": 1.724,
+        "edge": 0.04,
+        "expected_value_per_unit": 0.131,
+        "uncertainty_metric": 0.025,
+        "model_version": "team-strength-poisson-baseline-v1",
+        "source_data_cutoff_at": "2026-09-29T08:55:00+00:00",
+        "final_verification_status": "READY",
+        "final_evaluation_outcome": "CANDIDATE",
+        "final_quote_age_seconds": 4.2,
+        "final_min_edge": 0.02,
+        "final_min_expected_value": 0.0,
+        "decision_feature_version": "moneyline-core-v1",
+        "decision_features": {
+            "home_overall_runs_per_game": 5.10,
+            "home_context_runs_per_game": 5.40,
+            "home_overall_runs_allowed_per_game": 4.00,
+            "home_context_runs_allowed_per_game": 3.80,
+            "home_context_sample_games": 40,
+            "away_overall_runs_per_game": 4.20,
+            "away_context_runs_per_game": 3.90,
+            "away_overall_runs_allowed_per_game": 4.80,
+            "away_context_runs_allowed_per_game": 5.10,
+            "away_context_sample_games": 38,
+        },
+        "lifecycle_state": "REGISTERED",
+        "settlement_outcome": None,
+        "paper_profit_minor": None,
+        "clv_probability_delta": None,
+    }
+
+    html = dashboard._pick_row(row)
+
+    assert "📝" in html
+    assert "Zašto je izabran Home Team" in html
+    assert "Kako je prošao DC" in html
+    assert "Tržišna šansa bez margine" in html
+    assert "Sirove varijable koje su stvarno ušle u model" in html
+    assert "Home Team: broj domaćih utakmica" in html
+    assert "Away Team: broj gostujućih utakmica" in html
+    assert "58.00%" in html
+    assert "+4.00 p.p." in html
+    assert "FINAL CANDIDATE + READY" in html
