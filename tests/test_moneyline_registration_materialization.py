@@ -140,11 +140,12 @@ def test_postgres_exposes_best_due_candidate_for_registration() -> None:
     apply_migrations(Path("."), database_url)
 
     game_id = f"registration-{uuid.uuid4()}"
+    provider_game_id = 100_000_000 + (uuid.uuid4().int % 800_000_000)
     fixture = FixtureObservation(
         fixture_observation_id=str(uuid.uuid4()),
         game_id=game_id,
         provider="api-sports-baseball",
-        provider_game_id=990001,
+        provider_game_id=provider_game_id,
         league="Test League",
         league_id=1,
         home_team_id=990011,
