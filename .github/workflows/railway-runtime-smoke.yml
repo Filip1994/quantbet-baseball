@@ -6,6 +6,8 @@ on:
       - "src/quantbot/baseball/api.py"
       - "src/quantbot/baseball/activation_gate.py"
       - "src/quantbot/baseball/canary.py"
+      - "src/quantbot/baseball/cold_archive.py"
+      - "src/quantbot/baseball/cold_storage.py"
       - "src/quantbot/baseball/db.py"
       - "src/quantbot/baseball/decision_lifecycle.py"
       - "src/quantbot/baseball/decision_repository.py"
@@ -48,6 +50,8 @@ on:
       - "requirements-dev.txt"
       - "pyproject.toml"
       - "tests/test_decision_lifecycle.py"
+      - "tests/test_cold_archive.py"
+      - "tests/test_cold_storage_postgres_integration.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
@@ -85,6 +89,8 @@ on:
       - "src/quantbot/baseball/api.py"
       - "src/quantbot/baseball/activation_gate.py"
       - "src/quantbot/baseball/canary.py"
+      - "src/quantbot/baseball/cold_archive.py"
+      - "src/quantbot/baseball/cold_storage.py"
       - "src/quantbot/baseball/db.py"
       - "src/quantbot/baseball/decision_lifecycle.py"
       - "src/quantbot/baseball/decision_repository.py"
@@ -127,6 +133,8 @@ on:
       - "requirements-dev.txt"
       - "pyproject.toml"
       - "tests/test_decision_lifecycle.py"
+      - "tests/test_cold_archive.py"
+      - "tests/test_cold_storage_postgres_integration.py"
       - "tests/test_durable_collector.py"
       - "tests/test_ingestion.py"
       - "tests/test_moneyline_monitoring.py"
@@ -192,6 +200,8 @@ jobs:
           src/quantbot/baseball/api.py
           src/quantbot/baseball/activation_gate.py
           src/quantbot/baseball/canary.py
+          src/quantbot/baseball/cold_archive.py
+          src/quantbot/baseball/cold_storage.py
           src/quantbot/baseball/db.py
           src/quantbot/baseball/decision_lifecycle.py
           src/quantbot/baseball/decision_repository.py
@@ -232,6 +242,8 @@ jobs:
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
+          tests/test_cold_archive.py
+          tests/test_cold_storage_postgres_integration.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
@@ -277,6 +289,8 @@ jobs:
           src/quantbot/baseball/api.py
           src/quantbot/baseball/activation_gate.py
           src/quantbot/baseball/canary.py
+          src/quantbot/baseball/cold_archive.py
+          src/quantbot/baseball/cold_storage.py
           src/quantbot/baseball/db.py
           src/quantbot/baseball/decision_lifecycle.py
           src/quantbot/baseball/decision_repository.py
@@ -317,6 +331,8 @@ jobs:
           src/quantbot/baseball/raw_archive.py
           src/quantbot/baseball/worker.py
           tests/test_decision_lifecycle.py
+          tests/test_cold_archive.py
+          tests/test_cold_storage_postgres_integration.py
           tests/test_durable_collector.py
           tests/test_ingestion.py
           tests/test_moneyline_monitoring.py
@@ -363,6 +379,8 @@ jobs:
           tests/test_raw_archive.py
           tests/test_ingestion.py
           tests/test_decision_lifecycle.py
+          tests/test_cold_archive.py
+          tests/test_cold_storage_postgres_integration.py
           tests/test_durable_collector.py
           tests/test_moneyline_monitoring.py
           tests/test_moneyline_registration_materialization.py
