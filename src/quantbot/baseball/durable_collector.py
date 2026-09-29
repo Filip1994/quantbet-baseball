@@ -580,6 +580,9 @@ def collect_durable_once(
                     "latest_poll_with_canonical": 0,
                     "nearest_complete_pair_kickoff_minutes": 0,
                     "complete_pair_within_six_hours": 0,
+                    "complete_pair_with_team_stats": 0,
+                    "complete_pair_with_projection_ready_stats": 0,
+                    "complete_pair_with_context_20plus": 0,
                 }
             )
             slow_provider_league_ids = (
