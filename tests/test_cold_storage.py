@@ -319,7 +319,6 @@ def test_decision_linked_odds_are_never_cold_eligible() -> None:
         assert unreferenced.observation_id not in remaining_ids
 
 
-
 class _FakeS3Client:
     def __init__(self, *, corrupt_read: bool = False) -> None:
         self.corrupt_read = corrupt_read
