@@ -9,7 +9,9 @@ import pytest
 from quantbot.baseball.db import apply_migrations
 from quantbot.baseball.decision_repository import PostgreSQLMoneylineDecisionRepository
 from quantbot.baseball.evidence import OddsObservation
-from quantbot.baseball.feature_snapshot_repository import PostgreSQLFeatureSnapshotRepository
+from quantbot.baseball.feature_snapshot_repository import (
+    PostgreSQLFeatureSnapshotRepository,
+)
 from quantbot.baseball.fixture_evidence import FixtureObservation
 from quantbot.baseball.moneyline_core_materialization import (
     materialize_due_moneyline_core_v1_features,
