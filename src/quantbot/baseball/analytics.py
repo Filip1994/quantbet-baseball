@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime, timedelta
 from html import escape
 from math import log, sqrt
 from statistics import mean, median
-from typing import Any, Callable
+from typing import Any
 
 ANALYTICS_CONTRACT_VERSION = "BASEBALL_MONEYLINE_ANALYTICS_V1"
 
