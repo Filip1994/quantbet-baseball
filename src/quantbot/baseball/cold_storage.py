@@ -456,8 +456,7 @@ def purge_verified_rows(
     with connection.transaction():
         with connection.cursor() as cursor:
             cursor.execute(
-                f'DELETE FROM "{table}" '
-                f'WHERE "{primary_key}" = ANY(%s::uuid[])',
+                f'DELETE FROM "{table}" WHERE "{primary_key}" = ANY(%s::uuid[])',
                 (ids,),
             )
             deleted = int(cursor.rowcount)
