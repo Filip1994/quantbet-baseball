@@ -790,12 +790,12 @@ class BaseballDashboard:
             ("home_context_runs_per_game", f"{home}: osvojeni runovi kod kuće", False),
             ("home_overall_runs_allowed_per_game", f"{home}: dozvoljeni runovi, ukupno", False),
             ("home_context_runs_allowed_per_game", f"{home}: dozvoljeni runovi kod kuće", False),
-            ("home_context_sample_games", f"{home}: home sample", True),
+            ("home_context_sample_games", f"{home}: broj domaćih utakmica", True),
             ("away_overall_runs_per_game", f"{away}: osvojeni runovi, ukupno", False),
             ("away_context_runs_per_game", f"{away}: osvojeni runovi u gostima", False),
             ("away_overall_runs_allowed_per_game", f"{away}: dozvoljeni runovi, ukupno", False),
             ("away_context_runs_allowed_per_game", f"{away}: dozvoljeni runovi u gostima", False),
-            ("away_context_sample_games", f"{away}: away sample", True),
+            ("away_context_sample_games", f"{away}: broj gostujućih utakmica", True),
         )
         feature_rows = "".join(
             f"<div><span>{escape(label)}</span><b>{escape(feature_value(name, games=games))}</b></div>"
@@ -873,17 +873,19 @@ class BaseballDashboard:
       <a class="note-close" href="#close" aria-label="Zatvori">×</a>
     </div>
     <p class="note-summary">{human_reason}</p>
+    <h4>Kako je prošao DC</h4>
+    <p class="note-context">U DC su ušli modelska verovatnoća, tržišna verovatnoća bez margine, finalna kvota, edge, EV, uncertainty, starost kvote i sačuvani minimum za edge/EV.</p>
     <div class="note-gates">
-      <div><span>Model p</span><b>{escape(model_text)}</b></div>
-      <div><span>Market p (de-vig)</span><b>{escape(market_text)}</b></div>
+      <div><span>Modelska šansa</span><b>{escape(model_text)}</b></div>
+      <div><span>Tržišna šansa bez margine</span><b>{escape(market_text)}</b></div>
       <div><span>Edge</span><b>{escape(edge_text)}</b><small>minimum {escape(min_edge_text)}</small></div>
-      <div><span>Final odds</span><b>{escape(odds_text)}</b><small>fair {escape(fair_odds_text)}</small></div>
+      <div><span>Finalna kvota</span><b>{escape(odds_text)}</b><small>fer kvota {escape(fair_odds_text)}</small></div>
       <div><span>EV</span><b>{escape(ev_text)}</b><small>minimum {escape(min_ev_text)}</small></div>
       <div><span>Uncertainty</span><b>{escape(uncertainty_text)}</b></div>
-      <div><span>Final quote age</span><b>{escape(quote_age_text)}</b></div>
-      <div><span>Final gate</span><b>{escape(final_outcome)} · {escape(verification)}</b></div>
+      <div><span>Starost finalne kvote</span><b>{escape(quote_age_text)}</b></div>
+      <div><span>Završna provera</span><b>{escape(final_outcome)} · {escape(verification)}</b></div>
     </div>
-    <h4>Varijable koje su stvarno ušle u model</h4>
+    <h4>Sirove varijable koje su stvarno ušle u model</h4>
     <div class="note-features">{feature_rows}</div>
     <p class="note-context">{escape(context_note)}</p>
     <div class="note-meta">
@@ -891,7 +893,7 @@ class BaseballDashboard:
       <span>Feature snapshot: <b>{escape(feature_version)}</b></span>
       <span>Data cutoff: <b>{escape(cutoff)}</b></span>
     </div>
-    <p class="note-foot">Decision chain je prvo našao preliminary candidate, zatim povukao svežu kvotu istog bookmakera i iste selekcije, ponovo izračunao value i tek nakon FINAL CANDIDATE + READY verifikacije registrovao paper pick. Maksimalni pragovi za uncertainty i quote-age nisu zapisani uz stari v1 evaluation record, pa ih ovaj prikaz ne nagađa.</p>
+    <p class="note-foot">DC je prvo našao preliminarnog kandidata, zatim povukao svežu kvotu istog bookmakera i iste selekcije, ponovo izračunao value i tek nakon FINAL CANDIDATE + READY verifikacije registrovao paper pick. Maksimalni pragovi za uncertainty i starost kvote nisu zapisani uz stari v1 evaluation record, pa ih ovaj prikaz ne nagađa.</p>
   </article>
 </div>"""
 
