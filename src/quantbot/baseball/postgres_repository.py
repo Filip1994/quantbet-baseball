@@ -523,7 +523,10 @@ class PostgreSQLEvidenceRepository:
                         provider_game_id,
                         game_id,
                         kickoff_at,
-                        canonical_record
+                        canonical_record,
+                        home_team_id,
+                        away_team_id,
+                        (canonical_record->>'league_id')::BIGINT AS league_id
                     FROM fixture_observations
                     WHERE observed_at <= %s
                       AND kickoff_at > %s
@@ -538,6 +541,9 @@ class PostgreSQLEvidenceRepository:
                     SELECT
                         latest.game_id,
                         latest.kickoff_at,
+                        latest.league_id,
+                        latest.home_team_id,
+                        latest.away_team_id,
                         EXISTS (
                             SELECT 1
                             FROM odds_observations AS oo
@@ -569,7 +575,27 @@ class PostgreSQLEvidenceRepository:
                         ) AS has_complete_playable_pair,
                         poll.response_rows AS latest_poll_response_rows,
                         poll.raw_market_rows AS latest_poll_raw_market_rows,
-                        poll.canonical_rows AS latest_poll_canonical_rows
+                        poll.canonical_rows AS latest_poll_canonical_rows,
+                        (
+                            home_stats.team_id IS NOT NULL
+                            AND away_stats.team_id IS NOT NULL
+                        ) AS has_complete_team_stats,
+                        (
+                            home_stats.team_id IS NOT NULL
+                            AND away_stats.team_id IS NOT NULL
+                            AND home_stats.runs_for_avg_all > 0
+                            AND home_stats.runs_for_avg_home > 0
+                            AND home_stats.runs_against_avg_all > 0
+                            AND home_stats.runs_against_avg_home > 0
+                            AND away_stats.runs_for_avg_all > 0
+                            AND away_stats.runs_for_avg_away > 0
+                            AND away_stats.runs_against_avg_all > 0
+                            AND away_stats.runs_against_avg_away > 0
+                        ) AS has_projection_ready_stats,
+                        (
+                            home_stats.games_played_home >= 20
+                            AND away_stats.games_played_away >= 20
+                        ) AS has_context_20plus
                     FROM latest
                     LEFT JOIN LATERAL (
                         SELECT
@@ -582,6 +608,38 @@ class PostgreSQLEvidenceRepository:
                         ORDER BY attempted_at DESC, poll_attempt_id DESC
                         LIMIT 1
                     ) AS poll ON TRUE
+                    LEFT JOIN LATERAL (
+                        SELECT
+                            team_id,
+                            games_played_home,
+                            runs_for_avg_all,
+                            runs_for_avg_home,
+                            runs_against_avg_all,
+                            runs_against_avg_home
+                        FROM api_sports_team_statistics_snapshots
+                        WHERE league_id = latest.league_id
+                          AND season = EXTRACT(YEAR FROM latest.kickoff_at)::INTEGER
+                          AND team_id = latest.home_team_id
+                          AND observed_at <= %s
+                        ORDER BY observed_at DESC, snapshot_id DESC
+                        LIMIT 1
+                    ) AS home_stats ON TRUE
+                    LEFT JOIN LATERAL (
+                        SELECT
+                            team_id,
+                            games_played_away,
+                            runs_for_avg_all,
+                            runs_for_avg_away,
+                            runs_against_avg_all,
+                            runs_against_avg_away
+                        FROM api_sports_team_statistics_snapshots
+                        WHERE league_id = latest.league_id
+                          AND season = EXTRACT(YEAR FROM latest.kickoff_at)::INTEGER
+                          AND team_id = latest.away_team_id
+                          AND observed_at <= %s
+                        ORDER BY observed_at DESC, snapshot_id DESC
+                        LIMIT 1
+                    ) AS away_stats ON TRUE
                 )
                 SELECT
                     COUNT(*),
@@ -610,6 +668,18 @@ class PostgreSQLEvidenceRepository:
                     COUNT(*) FILTER (
                         WHERE has_complete_playable_pair
                           AND kickoff_at <= %s + INTERVAL '6 hours'
+                    ),
+                    COUNT(*) FILTER (
+                        WHERE has_complete_playable_pair
+                          AND has_complete_team_stats
+                    ),
+                    COUNT(*) FILTER (
+                        WHERE has_complete_playable_pair
+                          AND has_projection_ready_stats
+                    ),
+                    COUNT(*) FILTER (
+                        WHERE has_complete_playable_pair
+                          AND has_context_20plus
                     )
                 FROM classified
                 """,
@@ -623,11 +693,13 @@ class PostgreSQLEvidenceRepository:
                     cutoff,
                     cutoff,
                     cutoff,
+                    cutoff,
+                    cutoff,
                 ),
             )
             row = cursor.fetchone()
 
-        values = row or (0,) * 10
+        values = row or (0,) * 13
         keys = (
             "upcoming_with_league_id",
             "with_open_moneyline",
@@ -639,6 +711,9 @@ class PostgreSQLEvidenceRepository:
             "latest_poll_with_canonical",
             "nearest_complete_pair_kickoff_minutes",
             "complete_pair_within_six_hours",
+            "complete_pair_with_team_stats",
+            "complete_pair_with_projection_ready_stats",
+            "complete_pair_with_context_20plus",
         )
         return {key: int(value or 0) for key, value in zip(keys, values, strict=True)}
 
