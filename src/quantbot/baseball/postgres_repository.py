@@ -500,6 +500,127 @@ class PostgreSQLEvidenceRepository:
         }
         return tuple(sorted(league_ids))
 
+    def playable_league_diagnostics_for_pregame(
+        self,
+        *,
+        as_of: datetime,
+        horizon_minutes: int = 2160,
+    ) -> dict[str, int]:
+        """Explain why current pregame fixtures do or do not qualify as playable."""
+
+        if as_of.tzinfo is None or as_of.utcoffset() is None:
+            raise ValueError("as_of must be timezone-aware")
+        if horizon_minutes < 1:
+            raise ValueError("horizon_minutes must be positive")
+
+        cutoff = as_of.astimezone(UTC)
+        horizon = cutoff + timedelta(minutes=horizon_minutes)
+        with self._connection.cursor() as cursor:
+            cursor.execute(
+                """
+                WITH latest AS (
+                    SELECT DISTINCT ON (provider_game_id)
+                        provider_game_id,
+                        game_id,
+                        kickoff_at,
+                        canonical_record
+                    FROM fixture_observations
+                    WHERE observed_at <= %s
+                      AND kickoff_at > %s
+                      AND kickoff_at <= %s
+                      AND canonical_record->>'league_id' IS NOT NULL
+                    ORDER BY
+                        provider_game_id,
+                        observed_at DESC,
+                        fixture_observation_id DESC
+                ),
+                classified AS (
+                    SELECT
+                        latest.game_id,
+                        EXISTS (
+                            SELECT 1
+                            FROM odds_observations AS oo
+                            WHERE oo.game_id = latest.game_id
+                              AND oo.observed_at <= %s
+                              AND oo.market_family = 'moneyline'
+                              AND oo.market_status = 'open'
+                        ) AS has_moneyline,
+                        EXISTS (
+                            SELECT 1
+                            FROM odds_observations AS oo
+                            WHERE oo.game_id = latest.game_id
+                              AND oo.observed_at <= %s
+                              AND oo.market_family = 'moneyline'
+                              AND oo.market_status = 'open'
+                              AND lower(oo.bookmaker) IN ('1xbet', 'bet365')
+                        ) AS has_playable_book,
+                        EXISTS (
+                            SELECT 1
+                            FROM odds_observations AS oo
+                            WHERE oo.game_id = latest.game_id
+                              AND oo.observed_at <= %s
+                              AND oo.market_family = 'moneyline'
+                              AND oo.market_status = 'open'
+                              AND lower(oo.bookmaker) IN ('1xbet', 'bet365')
+                              AND oo.selection IN ('home', 'away')
+                            GROUP BY lower(oo.bookmaker), oo.observed_at
+                            HAVING COUNT(DISTINCT oo.selection) = 2
+                        ) AS has_complete_playable_pair,
+                        poll.response_rows AS latest_poll_response_rows,
+                        poll.raw_market_rows AS latest_poll_raw_market_rows,
+                        poll.canonical_rows AS latest_poll_canonical_rows
+                    FROM latest
+                    LEFT JOIN LATERAL (
+                        SELECT
+                            response_rows,
+                            raw_market_rows,
+                            canonical_rows
+                        FROM odds_poll_attempts
+                        WHERE game_id = latest.game_id
+                          AND attempted_at <= %s
+                        ORDER BY attempted_at DESC, poll_attempt_id DESC
+                        LIMIT 1
+                    ) AS poll ON TRUE
+                )
+                SELECT
+                    COUNT(*),
+                    COUNT(*) FILTER (WHERE has_moneyline),
+                    COUNT(*) FILTER (WHERE has_playable_book),
+                    COUNT(*) FILTER (WHERE has_complete_playable_pair),
+                    COUNT(*) FILTER (WHERE latest_poll_response_rows IS NOT NULL),
+                    COUNT(*) FILTER (WHERE latest_poll_response_rows = 0),
+                    COUNT(*) FILTER (
+                        WHERE latest_poll_response_rows > 0
+                          AND latest_poll_canonical_rows = 0
+                    ),
+                    COUNT(*) FILTER (WHERE latest_poll_canonical_rows > 0)
+                FROM classified
+                """,
+                (
+                    cutoff,
+                    cutoff,
+                    horizon,
+                    cutoff,
+                    cutoff,
+                    cutoff,
+                    cutoff,
+                ),
+            )
+            row = cursor.fetchone()
+
+        values = row or (0,) * 8
+        keys = (
+            "upcoming_with_league_id",
+            "with_open_moneyline",
+            "with_playable_book_moneyline",
+            "with_complete_playable_pair",
+            "with_poll_attempt",
+            "latest_poll_empty_response",
+            "latest_poll_nonempty_zero_canonical",
+            "latest_poll_with_canonical",
+        )
+        return {key: int(value or 0) for key, value in zip(keys, values, strict=True)}
+
     def append_fixture_schedule_snapshot(
         self,
         record: FixtureScheduleSnapshot,
