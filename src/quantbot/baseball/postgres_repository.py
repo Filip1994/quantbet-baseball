@@ -1051,6 +1051,18 @@ class PostgreSQLEvidenceRepository:
             )
             mlb_identity_game_links, latest_mlb_identity_link_at = cursor.fetchone()
 
+            cursor.execute(
+                "SELECT COUNT(*), COALESCE(SUM(row_count), 0), "
+                "COALESCE(SUM(compressed_bytes), 0), MAX(purged_at) "
+                "FROM cold_archive_manifests"
+            )
+            (
+                cold_archive_objects,
+                cold_archive_rows_purged,
+                cold_archive_compressed_bytes,
+                latest_cold_archive_purged_at,
+            ) = cursor.fetchone()
+
         return {
             "fixture_observations": int(fixture_count),
             "distinct_fixtures": int(fixture_games),
@@ -1112,6 +1124,12 @@ class PostgreSQLEvidenceRepository:
             "latest_odds_observed_at": _iso_or_none(latest_odds),
             "latest_collection_finished_at": _iso_or_none(latest_collection),
             "latest_runtime_finished_at": _iso_or_none(latest_runtime),
+            "cold_archive_objects": int(cold_archive_objects),
+            "cold_archive_rows_purged": int(cold_archive_rows_purged),
+            "cold_archive_compressed_bytes": int(cold_archive_compressed_bytes),
+            "latest_cold_archive_purged_at": _iso_or_none(
+                latest_cold_archive_purged_at
+            ),
         }
 
     def stats(self) -> RepositoryStats:
