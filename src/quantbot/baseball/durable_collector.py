@@ -45,6 +45,10 @@ from .moneyline_core_materialization import materialize_due_moneyline_core_v1_fe
 from .moneyline_feature_materialization import materialize_due_moneyline_v1_features
 from .moneyline_monitoring import monitor_due_moneyline_picks
 from .moneyline_prediction_materialization import materialize_due_baseline_predictions
+from .moneyline_registration import MoneylineDecisionPolicy
+from .moneyline_registration_materialization import (
+    materialize_due_moneyline_registrations,
+)
 from .moneyline_settlement import settle_due_moneyline_picks
 from .moneyline_value_evaluation import materialize_due_moneyline_evaluations
 from .monitoring_lifecycle import OddsLifecyclePolicy
@@ -429,12 +433,34 @@ def collect_durable_once(
         if max_settlement_refreshes_override is not None
         else int(os.getenv("BASEBALL_MAX_SETTLEMENT_REFRESHES", "10"))
     )
+    moneyline_registration_enabled = os.getenv(
+        "BASEBALL_ENABLE_MONEYLINE_REGISTRATION", "false"
+    ).strip().lower() in {"1", "true", "yes", "on"}
+    max_moneyline_registrations = int(
+        os.getenv("BASEBALL_MAX_MONEYLINE_REGISTRATIONS", "1")
+    )
+    moneyline_registration_horizon_minutes = int(
+        os.getenv("BASEBALL_MONEYLINE_REGISTRATION_HORIZON_MINUTES", "360")
+    )
+    moneyline_final_max_quote_age_seconds = float(
+        os.getenv("BASEBALL_MONEYLINE_FINAL_MAX_QUOTE_AGE_SECONDS", "120")
+    )
     if max_odds_requests < 1:
         raise ValueError("BASEBALL_MAX_ODDS_REQUESTS must be positive")
     if max_monitoring_refreshes < 1:
         raise ValueError("BASEBALL_MAX_MONITORING_REFRESHES must be positive")
     if max_settlement_refreshes < 1:
         raise ValueError("BASEBALL_MAX_SETTLEMENT_REFRESHES must be positive")
+    if max_moneyline_registrations < 1:
+        raise ValueError("BASEBALL_MAX_MONEYLINE_REGISTRATIONS must be positive")
+    if moneyline_registration_horizon_minutes < 1:
+        raise ValueError(
+            "BASEBALL_MONEYLINE_REGISTRATION_HORIZON_MINUTES must be positive"
+        )
+    if moneyline_final_max_quote_age_seconds < 0:
+        raise ValueError(
+            "BASEBALL_MONEYLINE_FINAL_MAX_QUOTE_AGE_SECONDS cannot be negative"
+        )
 
     cycle_started_at = datetime.now(UTC)
     cycle_now = now or cycle_started_at
@@ -486,6 +512,12 @@ def collect_durable_once(
                 cycle_request_cap=effective_request_cap,
                 requests_used=client.request_count,
                 max_odds_requests=max_odds_requests,
+                schedule_request_reserve=2
+                + (
+                    max_moneyline_registrations
+                    if moneyline_registration_enabled
+                    else 0
+                ),
             )
             summary = collect_with_dependencies(
                 client,
@@ -950,6 +982,37 @@ def collect_durable_once(
                     max_quote_age_seconds=moneyline_max_quote_age_seconds,
                 )
 
+            moneyline_registration = {
+                "status": "DISABLED",
+                "candidates_seen": 0,
+                "candidates_considered": 0,
+                "verifications_ready": 0,
+                "verifications_rejected": 0,
+                "picks_registered": 0,
+                "registration_failures": 0,
+                "provider_calls": 0,
+            }
+            if execution_mode == "SCHEDULED" and moneyline_registration_enabled:
+                decision_repository = PostgreSQLMoneylineDecisionRepository(connection)
+                moneyline_registration = materialize_due_moneyline_registrations(
+                    client,
+                    decision_repository,
+                    now=cycle_now,
+                    horizon_minutes=moneyline_registration_horizon_minutes,
+                    max_candidates=max_moneyline_registrations,
+                    policy=MoneylineDecisionPolicy(
+                        min_edge=moneyline_min_edge,
+                        min_expected_value=moneyline_min_expected_value,
+                        max_uncertainty=moneyline_max_uncertainty,
+                        preliminary_max_quote_age_seconds=(
+                            moneyline_max_quote_age_seconds
+                        ),
+                        final_max_quote_age_seconds=(
+                            moneyline_final_max_quote_age_seconds
+                        ),
+                    ),
+                )
+
             moneyline_v1_features = {
                 "status": "DISABLED",
                 "linked_games_total": 0,
@@ -1183,6 +1246,37 @@ def collect_durable_once(
                 moneyline_value_evaluation["provider_calls"]
             )
 
+            summary["moneyline_registration_enabled"] = int(
+                moneyline_registration_enabled
+            )
+            summary["moneyline_registration_horizon_minutes"] = (
+                moneyline_registration_horizon_minutes
+            )
+            summary["moneyline_registration_status"] = str(
+                moneyline_registration["status"]
+            )
+            summary["moneyline_registration_candidates_seen"] = int(
+                moneyline_registration["candidates_seen"]
+            )
+            summary["moneyline_registration_candidates_considered"] = int(
+                moneyline_registration["candidates_considered"]
+            )
+            summary["moneyline_registration_verifications_ready"] = int(
+                moneyline_registration["verifications_ready"]
+            )
+            summary["moneyline_registration_verifications_rejected"] = int(
+                moneyline_registration["verifications_rejected"]
+            )
+            summary["moneyline_registration_picks_registered"] = int(
+                moneyline_registration["picks_registered"]
+            )
+            summary["moneyline_registration_failures"] = int(
+                moneyline_registration["registration_failures"]
+            )
+            summary["moneyline_registration_provider_calls"] = int(
+                moneyline_registration["provider_calls"]
+            )
+
             summary["moneyline_v1_features_enabled"] = int(
                 moneyline_v1_features_enabled
             )
@@ -1244,6 +1338,7 @@ def collect_durable_once(
                 int(summary["errors"])
                 + int(slow_provider["errors"])
                 + int(game_history["errors"])
+                + int(moneyline_registration["registration_failures"])
             )
             summary["api_requests"] = client.request_count
             summary["api_remaining"] = client.remaining_budget
