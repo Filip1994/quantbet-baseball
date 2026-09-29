@@ -550,4 +550,6 @@ def test_playable_league_diagnostics_explain_current_market_qualification() -> N
         == before["with_complete_playable_pair"] + 1
     )
     assert after["with_poll_attempt"] == before["with_poll_attempt"] + 1
-    assert after["latest_poll_with_canonical"] == before["latest_poll_with_canonical"] + 1
+    assert (
+        after["latest_poll_with_canonical"] == before["latest_poll_with_canonical"] + 1
+    )
