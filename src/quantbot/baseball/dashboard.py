@@ -788,7 +788,7 @@ class BaseballDashboard:
             if number is None:
                 return "—"
             if games:
-                return f"{int(round(number))} utakmica"
+                return f"{round(number)} utakmica"
             return f"{number:.2f} run/utakmici"
 
         feature_specs = (
