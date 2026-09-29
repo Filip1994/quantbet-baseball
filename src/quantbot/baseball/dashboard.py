@@ -169,7 +169,8 @@ class BaseballDashboardRepository:
                        r.model_probability, r.market_probability,
                        r.fair_decimal_odds, r.edge,
                        r.expected_value_per_unit, r.uncertainty_metric,
-                       r.model_version, r.registered_at, r.kickoff_at,
+                       r.model_version, r.source_data_cutoff_at,
+                       r.registered_at, r.kickoff_at,
                        COALESCE(m.state, 'REGISTERED') AS lifecycle_state,
                        c.outcome AS closing_outcome,
                        s.outcome AS settlement_outcome,
@@ -177,12 +178,32 @@ class BaseballDashboardRepository:
                        s.clv_status, s.clv_probability_delta,
                        s.clv_price_ratio, s.settled_at,
                        r.paper_stake_minor, r.currency,
+                       fqv.status AS final_verification_status,
+                       pre.outcome AS preliminary_outcome,
+                       pre.reason_code AS preliminary_reason_code,
+                       pre.quote_age_seconds AS preliminary_quote_age_seconds,
+                       fin.outcome AS final_evaluation_outcome,
+                       fin.reason_code AS final_reason_code,
+                       fin.quote_age_seconds AS final_quote_age_seconds,
+                       fin.min_edge AS final_min_edge,
+                       fin.min_expected_value AS final_min_expected_value,
+                       fs.feature_version AS decision_feature_version,
+                       fs.features AS decision_features,
+                       fs.null_reasons AS decision_null_reasons,
                        CASE
                            WHEN s.settlement_id IS NULL THEN NULL
                            ELSE ROUND(s.profit_per_unit * r.paper_stake_minor)::BIGINT
                        END AS paper_profit_minor
                 FROM registered_picks r
                 LEFT JOIN latest_fixture f ON f.game_id = r.game_id
+                LEFT JOIN final_quote_verifications fqv
+                  ON fqv.verification_id = r.verification_id
+                LEFT JOIN value_evaluations pre
+                  ON pre.evaluation_id = fqv.preliminary_evaluation_id
+                LEFT JOIN value_evaluations fin
+                  ON fin.evaluation_id = r.final_evaluation_id
+                LEFT JOIN feature_snapshots fs
+                  ON fs.snapshot_id::text = r.feature_snapshot_ref
                 LEFT JOIN pick_monitoring_states m ON m.pick_id = r.pick_id
                 LEFT JOIN pick_closing_finalizations c ON c.pick_id = r.pick_id
                 LEFT JOIN pick_settlements s ON s.pick_id = r.pick_id
@@ -708,9 +729,10 @@ class BaseballDashboard:
         clv = self._pct(row.get("clv_probability_delta"))
         bookmaker = str(row.get("bookmaker") or "—")
         book_class = "bet365" if "365" in bookmaker.casefold() else "one-x"
+        pick_note = self._pick_note_html(row, home=str(home), away=str(away))
         return f"""<tr>
 <td><b>{escape(str(away))} @ {escape(str(home))}</b><small>{escape(str(row.get("league") or "—"))}</small></td>
-<td>{escape(str(row.get("selection") or "—").upper())}</td>
+<td class="pick-cell">{escape(str(row.get("selection") or "—").upper())}{pick_note}</td>
 <td><span class="book {book_class}">{escape(bookmaker)}</span></td>
 <td>{self._odds(row.get("entry_odds"))}</td>
 <td>{self._pct(row.get("model_probability"))}</td>
@@ -720,6 +742,181 @@ class BaseballDashboard:
 <td><span class="pill">{escape(str(row.get("lifecycle_state") or "—"))}</span></td>
 <td><span class="result {escape(str(result).casefold())}">{escape(str(result))}</span></td>
 <td>{escape(pnl)}</td><td>{clv}</td></tr>"""
+
+    def _pick_note_html(
+        self,
+        row: dict[str, Any],
+        *,
+        home: str,
+        away: str,
+    ) -> str:
+        pick_id = str(row.get("pick_id") or "")
+        safe_id = "".join(char for char in pick_id if char.isalnum() or char in "-_")
+        modal_id = f"pick-note-{safe_id or 'unknown'}"
+        selection = str(row.get("selection") or "").casefold()
+        selected_team = (
+            home
+            if selection == "home"
+            else away
+            if selection == "away"
+            else "izabrani tim"
+        )
+
+        raw_features = row.get("decision_features") or {}
+        if isinstance(raw_features, str):
+            try:
+                raw_features = json.loads(raw_features)
+            except json.JSONDecodeError:
+                raw_features = {}
+        features = raw_features if isinstance(raw_features, dict) else {}
+
+        def plain_pct(value: Any) -> str:
+            number = _number(value)
+            return "—" if number is None else f"{number * 100:.2f}%"
+
+        def signed_pct(value: Any) -> str:
+            number = _number(value)
+            return "—" if number is None else f"{number * 100:+.2f}%"
+
+        def points(value: Any) -> str:
+            number = _number(value)
+            return "—" if number is None else f"{number * 100:+.2f} p.p."
+
+        def feature_value(name: str, *, games: bool = False) -> str:
+            value = features.get(name)
+            number = _number(value)
+            if number is None:
+                return "—"
+            if games:
+                return f"{round(number)} utakmica"
+            return f"{number:.2f} run/utakmici"
+
+        feature_specs = (
+            ("home_overall_runs_per_game", f"{home}: osvojeni runovi, ukupno", False),
+            ("home_context_runs_per_game", f"{home}: osvojeni runovi kod kuće", False),
+            (
+                "home_overall_runs_allowed_per_game",
+                f"{home}: dozvoljeni runovi, ukupno",
+                False,
+            ),
+            (
+                "home_context_runs_allowed_per_game",
+                f"{home}: dozvoljeni runovi kod kuće",
+                False,
+            ),
+            ("home_context_sample_games", f"{home}: broj domaćih utakmica", True),
+            ("away_overall_runs_per_game", f"{away}: osvojeni runovi, ukupno", False),
+            ("away_context_runs_per_game", f"{away}: osvojeni runovi u gostima", False),
+            (
+                "away_overall_runs_allowed_per_game",
+                f"{away}: dozvoljeni runovi, ukupno",
+                False,
+            ),
+            (
+                "away_context_runs_allowed_per_game",
+                f"{away}: dozvoljeni runovi u gostima",
+                False,
+            ),
+            ("away_context_sample_games", f"{away}: broj gostujućih utakmica", True),
+        )
+        feature_rows = "".join(
+            f"<div><span>{escape(label)}</span><b>{escape(feature_value(name, games=games))}</b></div>"
+            for name, label, games in feature_specs
+        )
+
+        model_p = _number(row.get("model_probability"))
+        market_p = _number(row.get("market_probability"))
+        entry_odds = _number(row.get("entry_odds"))
+        edge = _number(row.get("edge"))
+        ev = _number(row.get("expected_value_per_unit"))
+        uncertainty = _number(row.get("uncertainty_metric"))
+        min_edge = _number(row.get("final_min_edge"))
+        min_ev = _number(row.get("final_min_expected_value"))
+        quote_age = _number(row.get("final_quote_age_seconds"))
+
+        model_text = plain_pct(model_p)
+        market_text = plain_pct(market_p)
+        edge_text = points(edge)
+        ev_text = signed_pct(ev)
+        odds_text = "—" if entry_odds is None else f"{entry_odds:.2f}"
+        uncertainty_text = plain_pct(uncertainty)
+        min_edge_text = "—" if min_edge is None else f"{min_edge * 100:.2f} p.p."
+        min_ev_text = "—" if min_ev is None else f"{min_ev * 100:.2f}%"
+        quote_age_text = "—" if quote_age is None else f"{quote_age:.1f}s"
+        fair_odds_text = self._odds(row.get("fair_decimal_odds"))
+        verification = str(row.get("final_verification_status") or "READY")
+        final_outcome = str(row.get("final_evaluation_outcome") or "CANDIDATE")
+        model_version = str(row.get("model_version") or "—")
+        feature_version = str(row.get("decision_feature_version") or "—")
+        cutoff = _iso(row.get("source_data_cutoff_at")) or "—"
+
+        if model_p is not None and market_p is not None:
+            human_reason = (
+                f"Model je {escape(selected_team)} dao {model_text} šanse za pobedu, "
+                f"dok je de-vig tržište bilo na {market_text}. Razlika je {edge_text}. "
+                f"Na finalnoj kvoti {odds_text} očekivana vrednost je {ev_text}."
+            )
+        else:
+            human_reason = (
+                "Pick je prošao finalni decision chain na sačuvanom modelskom i tržišnom "
+                "evidence-u, ali deo numeričkog prikaza trenutno nije dostupan."
+            )
+
+        optional_context_present = any(
+            key in features
+            for key in (
+                "home_starter_identified",
+                "away_starter_identified",
+                "home_lineup_populated",
+                "away_lineup_populated",
+                "home_bullpen_state",
+                "away_bullpen_state",
+                "home_starter_state",
+                "away_starter_state",
+            )
+        )
+        context_note = (
+            "Starter, lineup i bullpen podaci su postojali u snapshotu, ali ovaj "
+            "baseline v1 ih koristi samo za opis kvaliteta konteksta — nisu menjali "
+            "izračunatu win probability."
+            if optional_context_present
+            else "Ovaj baseline v1 je odluku računao iz team-strength run-rate varijabli "
+            "ispod. Starter, lineup i bullpen nisu bili numerički input u probability."
+        )
+
+        return f"""
+<a class="note-icon" href="#{escape(modal_id)}" title="Zašto je pick izabran" aria-label="Otvori objašnjenje pika">📝</a>
+<div class="pick-note-modal" id="{escape(modal_id)}">
+  <a class="note-backdrop" href="#close" aria-label="Zatvori"></a>
+  <article class="pick-note-card" role="dialog" aria-modal="true" aria-label="Objašnjenje registrovanog pika">
+    <div class="note-head">
+      <div><small>DECISION NOTES · SR</small><h3>Zašto je izabran {escape(selected_team)}</h3></div>
+      <a class="note-close" href="#close" aria-label="Zatvori">×</a>
+    </div>
+    <p class="note-summary">{human_reason}</p>
+    <h4>Kako je prošao DC</h4>
+    <p class="note-context">U DC su ušli modelska verovatnoća, tržišna verovatnoća bez margine, finalna kvota, edge, EV, uncertainty, starost kvote i sačuvani minimum za edge/EV.</p>
+    <div class="note-gates">
+      <div><span>Modelska šansa</span><b>{escape(model_text)}</b></div>
+      <div><span>Tržišna šansa bez margine</span><b>{escape(market_text)}</b></div>
+      <div><span>Edge</span><b>{escape(edge_text)}</b><small>minimum {escape(min_edge_text)}</small></div>
+      <div><span>Finalna kvota</span><b>{escape(odds_text)}</b><small>fer kvota {escape(fair_odds_text)}</small></div>
+      <div><span>EV</span><b>{escape(ev_text)}</b><small>minimum {escape(min_ev_text)}</small></div>
+      <div><span>Uncertainty</span><b>{escape(uncertainty_text)}</b></div>
+      <div><span>Starost finalne kvote</span><b>{escape(quote_age_text)}</b></div>
+      <div><span>Završna provera</span><b>{escape(final_outcome)} · {escape(verification)}</b></div>
+    </div>
+    <h4>Sirove varijable koje su stvarno ušle u model</h4>
+    <div class="note-features">{feature_rows}</div>
+    <p class="note-context">{escape(context_note)}</p>
+    <div class="note-meta">
+      <span>Model: <b>{escape(model_version)}</b></span>
+      <span>Feature snapshot: <b>{escape(feature_version)}</b></span>
+      <span>Data cutoff: <b>{escape(cutoff)}</b></span>
+    </div>
+    <p class="note-foot">DC je prvo našao preliminarnog kandidata, zatim povukao svežu kvotu istog bookmakera i iste selekcije, ponovo izračunao value i tek nakon FINAL CANDIDATE + READY verifikacije registrovao paper pick. Maksimalni pragovi za uncertainty i starost kvote nisu zapisani uz stari v1 evaluation record, pa ih ovaj prikaz ne nagađa.</p>
+  </article>
+</div>"""
 
     @staticmethod
     def _status_chip(item: StatusItem) -> str:
@@ -955,8 +1152,9 @@ main{min-width:0;padding:25px 30px 18px;max-width:1680px;width:100%;margin:auto}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.kpi{background:linear-gradient(145deg,#172329,#111a1f);border:1px solid var(--line);border-radius:12px;padding:15px}.kpi small{color:var(--muted);text-transform:uppercase;font-size:9px;letter-spacing:.08em}.kpi b{display:block;font-size:22px;margin:7px 0 2px;color:var(--cream)}.kpi span{font-size:9px;color:#718287}
 .table-panel{margin-top:11px}.table-wrap{overflow:auto;max-height:64vh}table{border-collapse:separate;border-spacing:0;width:100%;font-size:11px}th,td{padding:10px 12px;border-bottom:1px solid #243239;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#172329;color:#839397;text-transform:uppercase;font-size:9px;letter-spacing:.07em;z-index:2}tbody tr:hover{background:#1b292f}td small{display:block;color:var(--muted);font-size:9px;margin-top:3px}.empty{text-align:center;padding:45px!important;color:var(--muted)}
 .book{display:inline-flex;padding:5px 8px;border-radius:6px;font-weight:900}.book.bet365{background:#176847;color:#f5e36f}.book.one-x{background:#183952;color:#8fc8f3}.pill,.result{display:inline-flex;padding:4px 7px;border-radius:999px;border:1px solid #3b4a50;font-size:9px;font-weight:850}.result.win{color:var(--green);border-color:#38674a}.result.loss{color:var(--red);border-color:#6c3b3e}.result.push{color:var(--blue)}.result.pending{color:var(--amber)}
+.pick-cell{white-space:nowrap}.note-icon{display:inline-flex;align-items:center;justify-content:center;margin-left:7px;vertical-align:middle;width:25px;height:25px;border:1px solid #43545b;border-radius:7px;background:#111b20;text-decoration:none;font-size:13px;line-height:1;transition:.15s}.note-icon:hover{border-color:var(--cream);transform:translateY(-1px)}.pick-note-modal{display:none}.pick-note-modal:target{display:flex;align-items:center;justify-content:center;position:fixed;inset:0;z-index:80;padding:18px;white-space:normal}.note-backdrop{position:absolute;inset:0;background:rgba(5,9,11,.82);backdrop-filter:blur(4px)}.pick-note-card{position:relative;z-index:1;width:min(820px,96vw);max-height:86vh;overflow:auto;background:#121c21;border:1px solid #40535b;border-radius:15px;box-shadow:0 24px 90px #000c;padding:20px;color:var(--text)}.note-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:13px}.note-head small{color:var(--seam);font-size:9px;letter-spacing:.14em;font-weight:900}.note-head h3{margin:4px 0 0;font-size:20px}.note-close{color:var(--muted);text-decoration:none;font-size:28px;line-height:1;padding:2px 7px}.note-close:hover{color:white}.note-summary{font-size:13px;line-height:1.65;color:#d7dfdc;background:#172329;border:1px solid #2f4148;border-radius:10px;padding:13px 14px;margin:14px 0}.note-gates{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}.note-gates>div{border:1px solid #2d3d44;background:#10191d;border-radius:9px;padding:10px}.note-gates span,.note-features span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.04em}.note-gates b{display:block;margin-top:5px;font-size:13px}.note-gates small{display:block;color:#718287;font-size:8px;margin-top:3px}.pick-note-card h4{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--cream);margin:18px 0 9px}.note-features{display:grid;grid-template-columns:1fr 1fr;border:1px solid #2d3d44;border-radius:10px;overflow:hidden}.note-features>div{padding:10px 12px;border-bottom:1px solid #26363d}.note-features>div:nth-child(odd){border-right:1px solid #26363d}.note-features b{display:block;margin-top:4px;font-size:11px}.note-context,.note-foot{font-size:10px;line-height:1.55;color:#8fa0a4}.note-context{padding:10px 12px;border-left:2px solid var(--amber);background:#191d1a}.note-meta{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.note-meta span{font-size:9px;color:var(--muted);border:1px solid #2b3a40;border-radius:7px;padding:7px 8px}.note-meta b{color:#c7d0cd}.note-foot{margin:0;padding-top:11px;border-top:1px solid var(--line)}
 .research-note{margin-top:11px;border:1px solid #36454b;border-radius:12px;padding:15px;background:linear-gradient(100deg,#172329,#131c20)}.research-note>b{color:var(--cream)}.research-note p{color:#9aabad;max-width:1000px;line-height:1.55}.research-note div{display:flex;align-items:center;gap:9px}.research-note span{font-size:8px;letter-spacing:.12em;color:var(--green)}.research-note strong{font-size:11px}
 footer{display:flex;justify-content:space-between;gap:20px;color:#65777b;font-size:10px;margin-top:13px;padding:8px 2px}
 @media(max-width:1150px){.status-strip{grid-template-columns:repeat(3,1fr)}.health-grid{grid-template-columns:repeat(2,1fr)}.split{grid-template-columns:1fr}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:720px){.shell{display:block}aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:13px}.brand{margin:0 0 12px}nav{grid-template-columns:repeat(2,1fr)}.side-note{display:none}main{padding:15px}.status-strip{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start}.health-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr}.budget-grid,.canary-row{grid-template-columns:repeat(2,1fr)}footer{display:block;line-height:1.7}}
+@media(max-width:720px){.shell{display:block}aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:13px}.brand{margin:0 0 12px}nav{grid-template-columns:repeat(2,1fr)}.side-note{display:none}main{padding:15px}.status-strip{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start}.health-grid{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr}.budget-grid,.canary-row{grid-template-columns:repeat(2,1fr)}.note-gates{grid-template-columns:repeat(2,1fr)}.note-features{grid-template-columns:1fr}.note-features>div:nth-child(odd){border-right:0}footer{display:block;line-height:1.7}}
 """
