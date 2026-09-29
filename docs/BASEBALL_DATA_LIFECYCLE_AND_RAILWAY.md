@@ -1,9 +1,9 @@
 # QuantBet Baseball — Data Lifecycle and Railway Architecture
 
 **Created at:** 2026-09-15  
-**Last updated:** 2026-09-15  
-**Revision:** 1.1  
-**Status:** ARCHITECTURAL BASELINE — implementation pending
+**Last updated:** 2026-09-29  
+**Revision:** 2.0  
+**Status:** HOT/COLD RETENTION IMPLEMENTED — production activation gated
 
 ## 1. Decision
 
@@ -149,3 +149,83 @@ The system must distinguish storage capacity from RAM. Terabyte-scale retention 
 10. Add deletion only after restore and replay tests exist.
 
 SQLite is not part of the intended production architecture unless a future explicit decision changes this baseline.
+
+
+## 9. Implemented hot/cold retention — 2026-09-29
+
+The production PostgreSQL database is intentionally not used as an unlimited
+historical warehouse. The worker now has a bounded, post-decision cold-retention
+stage that reuses the existing S3-compatible Baseball raw bucket.
+
+The archive stage has two independent runtime gates:
+
+- `BASEBALL_ENABLE_COLD_ARCHIVE`;
+- `BASEBALL_COLD_ARCHIVE_PURGE_ENABLED`.
+
+The live decision cycle completes before archival is attempted. Archive errors
+are reported in runtime telemetry but do not change the betting-cycle status.
+Deletion fails closed: no source row is removed until its compressed archive
+object has been uploaded, read back, SHA-256 verified, and recorded in a
+PostgreSQL manifest.
+
+### 9.1 Retention classes
+
+| Dataset | Hot retention | Cold behavior | Decision-lineage protection |
+| --- | ---: | --- | --- |
+| `runtime_cycles` | 14 days | verified JSONL.gz | operational telemetry only |
+| `collection_cycles` | 14 days | verified JSONL.gz | operational telemetry only |
+| `odds_poll_attempts` | 14 days after kickoff | verified JSONL.gz | poll metadata only |
+| `api_sports_game_schedule_snapshots` | 14 days | verified JSONL.gz | raw schedule payload already separately archived |
+| `fixture_observations` | 30 days after kickoff | only older, unreferenced observations | latest fixture row and all result/closing/MLB-identity references remain hot |
+| `odds_observations` | 30 days after kickoff | only unreferenced observations | every quote referenced by evaluation, verification, registered pick, closing, or settlement remains hot |
+| `api_sports_game_history_snapshots` | HOT | not archived by this policy | direct chronological research/backtest input |
+| `api_sports_team_statistics_snapshots` | HOT | not archived by this policy | direct PIT model input |
+| `api_sports_standing_snapshots` | HOT | not archived by this policy | retained for current analysis |
+| feature/prediction/evaluation/pick/CLV/settlement lineage | HOT | not archived by this policy | compact decision audit trail |
+
+Retention-day values are configurable through `BASEBALL_COLD_*_RETENTION_DAYS`
+environment variables. Defaults are deliberately conservative.
+
+### 9.2 Archive format and verification
+
+Cold objects use deterministic gzip-compressed JSONL with one exact
+`to_jsonb(source_row)` document per line. Each object has:
+
+- a SHA-256 checksum;
+- a durable object reference;
+- source table and dataset identity;
+- row count and event-time range;
+- compressed size;
+- export, verification, and purge timestamps.
+
+`cold_archive_manifests` stores the durable archive catalogue.
+`cold_archive_runs` prevents duplicate daily maintenance runs.
+`cold_archive_restore_events` records restore activity.
+
+### 9.3 Restore contract
+
+A manifest can be restored into the original table. Restore:
+
+1. downloads the archived object;
+2. verifies SHA-256 again;
+3. verifies the archived row count;
+4. reconstructs the original PostgreSQL row shape with
+   `jsonb_populate_record`;
+5. inserts with normal table constraints and conflict protection;
+6. records a restore event.
+
+Restore is therefore a tested operational path rather than an assumption.
+
+### 9.4 Cost intent
+
+This policy targets database working-set and index growth, not merely raw disk
+bytes. Historical raw API payloads were already being written to object
+storage. The new layer prevents high-frequency operational exhaust from
+remaining indefinitely in PostgreSQL while keeping all evidence required for
+live decisions, settlement, CLV, model validation, and exact decision audit
+available hot.
+
+No `VACUUM FULL` or blocking physical compaction is part of the scheduled
+worker. Normal PostgreSQL vacuuming can reuse freed pages; physical shrinkage
+can be considered separately only if measured storage cost later justifies a
+maintenance window.
