@@ -537,6 +537,7 @@ class PostgreSQLEvidenceRepository:
                 classified AS (
                     SELECT
                         latest.game_id,
+                        latest.kickoff_at,
                         EXISTS (
                             SELECT 1
                             FROM odds_observations AS oo
@@ -593,7 +594,23 @@ class PostgreSQLEvidenceRepository:
                         WHERE latest_poll_response_rows > 0
                           AND latest_poll_canonical_rows = 0
                     ),
-                    COUNT(*) FILTER (WHERE latest_poll_canonical_rows > 0)
+                    COUNT(*) FILTER (WHERE latest_poll_canonical_rows > 0),
+                    COALESCE(
+                        CEIL(
+                            EXTRACT(
+                                EPOCH FROM (
+                                    MIN(kickoff_at) FILTER (
+                                        WHERE has_complete_playable_pair
+                                    ) - %s
+                                )
+                            ) / 60.0
+                        )::INTEGER,
+                        0
+                    ),
+                    COUNT(*) FILTER (
+                        WHERE has_complete_playable_pair
+                          AND kickoff_at <= %s + INTERVAL '6 hours'
+                    )
                 FROM classified
                 """,
                 (
@@ -604,11 +621,13 @@ class PostgreSQLEvidenceRepository:
                     cutoff,
                     cutoff,
                     cutoff,
+                    cutoff,
+                    cutoff,
                 ),
             )
             row = cursor.fetchone()
 
-        values = row or (0,) * 8
+        values = row or (0,) * 10
         keys = (
             "upcoming_with_league_id",
             "with_open_moneyline",
@@ -618,6 +637,8 @@ class PostgreSQLEvidenceRepository:
             "latest_poll_empty_response",
             "latest_poll_nonempty_zero_canonical",
             "latest_poll_with_canonical",
+            "nearest_complete_pair_kickoff_minutes",
+            "complete_pair_within_six_hours",
         )
         return {key: int(value or 0) for key, value in zip(keys, values, strict=True)}
 
