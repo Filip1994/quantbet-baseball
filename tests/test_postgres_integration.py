@@ -460,3 +460,94 @@ def test_final_price_deterioration_rejects_registration() -> None:
         )
         assert replay.verification == result.verification
         assert replay.pick is None
+
+
+def test_playable_league_diagnostics_explain_current_market_qualification() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+    apply_migrations(Path("."), database_url)
+
+    provider_game_id = 500_000_000 + (uuid.uuid4().int % 400_000_000)
+    game_id = str(provider_game_id)
+    as_of = datetime(2042, 4, 3, 16, 5, tzinfo=UTC)
+    fixture = FixtureObservation(
+        fixture_observation_id=str(uuid.uuid4()),
+        game_id=game_id,
+        provider="api-sports-baseball",
+        provider_game_id=provider_game_id,
+        league="Diagnostic League",
+        league_id=777,
+        home_team_id=7701,
+        home_team_name="Diagnostic Home",
+        away_team_id=7702,
+        away_team_name="Diagnostic Away",
+        kickoff_at="2042-04-03T19:00:00+00:00",
+        provider_status="NS",
+        observed_at="2042-04-03T16:00:00+00:00",
+        source_payload_ref="s3://raw/diagnostic-fixture.json",
+        source_payload_checksum="c" * 64,
+        schema_version="1.0",
+    )
+
+    def observation(selection: str, odds: float) -> OddsObservation:
+        return OddsObservation(
+            observation_id=str(uuid.uuid4()),
+            game_id=game_id,
+            market_family="moneyline",
+            line=None,
+            selection=selection,
+            bookmaker="Bet365",
+            decimal_odds=odds,
+            raw_price=str(odds),
+            observed_at="2042-04-03T16:04:00+00:00",
+            retrieved_at="2042-04-03T16:04:00+00:00",
+            source_payload_ref=f"s3://raw/diagnostic-{selection}.json",
+            source_payload_checksum="d" * 64,
+            schema_version="1.0",
+            market_status="open",
+            kickoff_at="2042-04-03T19:00:00+00:00",
+        )
+
+    poll = OddsPollAttempt(
+        poll_attempt_id=str(uuid.uuid4()),
+        game_id=game_id,
+        provider="api-sports-baseball",
+        provider_game_id=provider_game_id,
+        attempted_at="2042-04-03T16:04:00+00:00",
+        kickoff_at="2042-04-03T19:00:00+00:00",
+        response_rows=1,
+        raw_market_rows=2,
+        canonical_rows=2,
+        source_payload_ref="s3://raw/diagnostic-poll.json",
+        source_payload_checksum="e" * 64,
+    )
+
+    with psycopg.connect(database_url) as connection:
+        repository = PostgreSQLEvidenceRepository(connection)
+        before = repository.playable_league_diagnostics_for_pregame(
+            as_of=as_of,
+            horizon_minutes=360,
+        )
+        repository.append_fixture_observations((fixture,))
+        repository.append_observations(
+            (observation("home", 2.05), observation("away", 1.85))
+        )
+        repository.append_odds_poll_attempt(poll)
+        after = repository.playable_league_diagnostics_for_pregame(
+            as_of=as_of,
+            horizon_minutes=360,
+        )
+
+    assert after["upcoming_with_league_id"] == before["upcoming_with_league_id"] + 1
+    assert after["with_open_moneyline"] == before["with_open_moneyline"] + 1
+    assert (
+        after["with_playable_book_moneyline"]
+        == before["with_playable_book_moneyline"] + 1
+    )
+    assert (
+        after["with_complete_playable_pair"]
+        == before["with_complete_playable_pair"] + 1
+    )
+    assert after["with_poll_attempt"] == before["with_poll_attempt"] + 1
+    assert after["latest_poll_with_canonical"] == before["latest_poll_with_canonical"] + 1
