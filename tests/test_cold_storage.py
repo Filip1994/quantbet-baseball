@@ -1,5 +1,6 @@
 import gzip
 import hashlib
+import io
 import json
 import os
 import uuid
@@ -11,6 +12,7 @@ import pytest
 
 from quantbot.baseball.cold_storage import (
     ColdArchivePolicy,
+    S3ColdObjectStore,
     VerifiedColdObject,
     restore_archive,
     run_cold_storage_cycle,
@@ -315,3 +317,195 @@ def test_decision_linked_odds_are_never_cold_eligible() -> None:
         assert home.observation_id in remaining_ids
         assert away.observation_id in remaining_ids
         assert unreferenced.observation_id not in remaining_ids
+
+
+
+class _FakeS3Client:
+    def __init__(self, *, corrupt_read: bool = False) -> None:
+        self.corrupt_read = corrupt_read
+        self.objects: dict[tuple[str, str], tuple[bytes, dict[str, str]]] = {}
+
+    def put_object(self, *, Bucket, Key, Body, Metadata, **kwargs):
+        self.objects[(Bucket, Key)] = (bytes(Body), dict(Metadata))
+
+    def head_object(self, *, Bucket, Key):
+        body, metadata = self.objects[(Bucket, Key)]
+        return {"ContentLength": len(body), "Metadata": metadata}
+
+    def get_object(self, *, Bucket, Key):
+        body, _ = self.objects[(Bucket, Key)]
+        if self.corrupt_read:
+            body += b"corrupt"
+        return {"Body": io.BytesIO(body)}
+
+
+def test_s3_upload_requires_full_sha256_read_back() -> None:
+    body = b"archive-object"
+    checksum = hashlib.sha256(body).hexdigest()
+    good = S3ColdObjectStore(client=_FakeS3Client(), bucket="cold-test")
+
+    verified = good.put_verified(
+        key="cold/baseball/test.json.gz",
+        body=body,
+        checksum=checksum,
+    )
+    assert verified.checksum == checksum
+    assert verified.size_bytes == len(body)
+
+    corrupt = S3ColdObjectStore(
+        client=_FakeS3Client(corrupt_read=True),
+        bucket="cold-test",
+    )
+    with pytest.raises(RuntimeError, match="checksum verification"):
+        corrupt.put_verified(
+            key="cold/baseball/corrupt.json.gz",
+            body=body,
+            checksum=checksum,
+        )
+
+
+def test_operational_runtime_cycles_archive_after_retention() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+    apply_migrations(Path("."), database_url)
+
+    run_id = str(uuid.uuid4())
+    old_time = datetime(2000, 1, 1, 0, 0, tzinfo=UTC)
+    policy = ColdArchivePolicy(
+        table_name="runtime_cycles",
+        primary_key="run_id",
+        time_column="finished_at",
+        archive_mode="AGE",
+        retention=timedelta(days=14),
+    )
+    store = _MemoryColdStore()
+
+    with psycopg.connect(database_url) as connection:
+        connection.execute(
+            """
+            INSERT INTO runtime_cycles (
+                run_id,
+                started_at,
+                finished_at,
+                collection_enabled,
+                mode,
+                status,
+                stats
+            )
+            VALUES (%s, %s, %s, TRUE, 'collection', 'ready', '{}'::jsonb)
+            """,
+            (run_id, old_time, old_time),
+        )
+        connection.commit()
+
+        summary = run_cold_storage_cycle(
+            connection,
+            store,
+            now=datetime(2000, 1, 20, 0, 0, tzinfo=UTC),
+            policies=(policy,),
+            max_rows_per_table=100,
+            purge_enabled=True,
+        )
+        connection.commit()
+
+        assert summary["rows_archived"] == 1
+        assert (
+            connection.execute(
+                "SELECT 1 FROM runtime_cycles WHERE run_id = %s",
+                (run_id,),
+            ).fetchone()
+            is None
+        )
+
+
+def test_mlb_identity_referenced_fixture_never_becomes_cold_eligible() -> None:
+    database_url = os.getenv("DATABASE_URL")
+    if not database_url:
+        pytest.skip("DATABASE_URL is required for PostgreSQL integration testing")
+    apply_migrations(Path("."), database_url)
+
+    provider_game_id = 500_000_000 + (uuid.uuid4().int % 300_000_000)
+    game_id = str(provider_game_id)
+    old = _fixture(game_id, provider_game_id)
+    newer = FixtureObservation(
+        **{
+            **old.to_dict(),
+            "fixture_observation_id": str(uuid.uuid4()),
+            "observed_at": "2040-07-09T12:00:00+00:00",
+            "source_payload_ref": "s3://raw/cold-fixture-newer.json",
+            "source_payload_checksum": "e" * 64,
+        }
+    )
+    mapping_version = f"cold-test-{uuid.uuid4()}"
+    policy = ColdArchivePolicy(
+        table_name="fixture_observations",
+        primary_key="fixture_observation_id",
+        time_column="observed_at",
+        archive_mode="SUPERSEDED_UNREFERENCED",
+        retention=timedelta(days=7),
+    )
+    store = _MemoryColdStore()
+
+    with psycopg.connect(database_url) as connection:
+        evidence = PostgreSQLEvidenceRepository(connection)
+        assert evidence.append_fixture_observations((old, newer)) == 2
+        connection.execute(
+            """
+            INSERT INTO official_mlb_team_identity_mappings (
+                mapping_id,
+                mapping_version,
+                api_sports_team_id,
+                api_sports_team_name,
+                official_mlb_team_id,
+                official_mlb_team_name,
+                verified_at,
+                api_fixture_observation_id,
+                api_source_payload_ref,
+                api_source_payload_checksum,
+                mlb_schedule_source_payload_ref,
+                mlb_schedule_source_payload_checksum,
+                schema_version,
+                canonical_record
+            )
+            VALUES (
+                %s, %s, %s, 'Cold Home', %s, 'Cold MLB Home',
+                %s, %s, 's3://raw/api.json', %s,
+                's3://raw/mlb.json', %s, '1.0', '{}'::jsonb
+            )
+            """,
+            (
+                str(uuid.uuid4()),
+                mapping_version,
+                old.home_team_id,
+                60_000 + (uuid.uuid4().int % 10_000),
+                datetime(2040, 7, 9, 13, 0, tzinfo=UTC),
+                old.fixture_observation_id,
+                "f" * 64,
+                "a" * 64,
+            ),
+        )
+        connection.commit()
+
+        summary = run_cold_storage_cycle(
+            connection,
+            store,
+            now=datetime(2040, 7, 10, 12, 0, tzinfo=UTC),
+            policies=(policy,),
+            max_rows_per_table=100,
+            purge_enabled=True,
+        )
+        connection.commit()
+
+        assert summary["rows_archived"] == 0
+        assert (
+            connection.execute(
+                """
+                SELECT 1
+                FROM fixture_observations
+                WHERE fixture_observation_id = %s
+                """,
+                (old.fixture_observation_id,),
+            ).fetchone()
+            is not None
+        )
