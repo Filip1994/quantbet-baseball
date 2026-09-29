@@ -191,6 +191,28 @@ class BaseballDashboardRepository:
                 """
             ).fetchall()
 
+
+        gate_map = {str(row["target"]): dict(row) for row in gates}
+        return {
+            "generated_at": now,
+            "health": health,
+            "runtime": dict(runtime) if runtime else None,
+            "gates": gate_map,
+            "canary": dict(canary) if canary else None,
+            "performance": dict(performance) if performance else {},
+            "money": dict(money)
+            if money
+            else {
+                "settled_stake_minor": 0,
+                "realized_profit_minor": 0,
+            },
+            "breakdown": [dict(row) for row in breakdown],
+            "picks": [dict(row) for row in picks],
+        }
+
+    def analytics_evidence(self) -> dict[str, Any]:
+        """Read full decision-lifecycle evidence only for analytics requests."""
+        with psycopg.connect(self.database_url, row_factory=dict_row) as connection:
             analytics_rows = connection.execute(
                 """
                 WITH latest_fixture AS (
@@ -252,23 +274,8 @@ class BaseballDashboardRepository:
                 """
             ).fetchall()
 
-        gate_map = {str(row["target"]): dict(row) for row in gates}
         return {
-            "generated_at": now,
-            "health": health,
-            "runtime": dict(runtime) if runtime else None,
-            "gates": gate_map,
-            "canary": dict(canary) if canary else None,
-            "performance": dict(performance) if performance else {},
-            "money": dict(money)
-            if money
-            else {
-                "settled_stake_minor": 0,
-                "realized_profit_minor": 0,
-            },
-            "breakdown": [dict(row) for row in breakdown],
-            "picks": [dict(row) for row in picks],
-            "analytics_rows": [dict(row) for row in analytics_rows],
+            "rows": [dict(row) for row in analytics_rows],
             "evaluation_funnel": [dict(row) for row in evaluation_funnel],
             "verification_funnel": [dict(row) for row in verification_funnel],
         }
@@ -277,6 +284,20 @@ class BaseballDashboardRepository:
 class BaseballDashboard:
     def __init__(self, repository: BaseballDashboardRepository) -> None:
         self.repository = repository
+
+    def analytics_snapshot(
+        self,
+        operational: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        base = operational or self.snapshot()
+        evidence = self.repository.analytics_evidence()
+        return build_baseball_analytics_snapshot(
+            evidence.get("rows") or (),
+            evaluation_funnel=evidence.get("evaluation_funnel") or (),
+            verification_funnel=evidence.get("verification_funnel") or (),
+            health=base.get("health") or {},
+            as_of=base.get("generated_at"),
+        )
 
     def snapshot(self) -> dict[str, Any]:
         data = self.repository.snapshot()
@@ -364,13 +385,6 @@ class BaseballDashboard:
             ),
         ]
         data["statuses"] = statuses
-        data["analytics"] = build_baseball_analytics_snapshot(
-            data.get("analytics_rows") or (),
-            evaluation_funnel=data.get("evaluation_funnel") or (),
-            verification_funnel=data.get("verification_funnel") or (),
-            health=health,
-            as_of=now,
-        )
         return data
 
     def render(self, query: str = "") -> str:
@@ -379,6 +393,9 @@ class BaseballDashboard:
         tab = (params.get("tab") or ["system"])[0]
         if tab not in {"system", "research", "analytics", "history"}:
             tab = "system"
+
+        if tab == "analytics":
+            data["analytics"] = self.analytics_snapshot(data)
 
         body = {
             "system": self._system_html,
@@ -784,7 +801,7 @@ class BaseballDashboardHTTPService:
                     if not service._authorize(self):
                         return
                     try:
-                        payload = dashboard.snapshot()["analytics"]
+                        payload = dashboard.analytics_snapshot()
                         safe = service._json_safe(payload)
                         service._text(
                             self,
