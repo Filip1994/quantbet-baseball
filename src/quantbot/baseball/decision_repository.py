@@ -278,6 +278,86 @@ class PostgreSQLMoneylineDecisionRepository:
             row = cursor.fetchone()
         return None if row is None else MoneylineEvaluation(**_canonical_object(row[0]))
 
+    def due_preliminary_candidates_for_registration(
+        self,
+        *,
+        as_of: datetime,
+        horizon_minutes: int,
+        limit: int,
+    ) -> tuple[MoneylineEvaluation, ...]:
+        if as_of.tzinfo is None or as_of.utcoffset() is None:
+            raise ValueError("as_of must be timezone-aware")
+        if horizon_minutes < 1:
+            raise ValueError("horizon_minutes must be positive")
+        if limit < 1:
+            raise ValueError("limit must be positive")
+
+        with self.connection.cursor() as cursor:
+            cursor.execute(
+                """
+                WITH ranked AS (
+                    SELECT
+                        ve.canonical_record,
+                        fx.kickoff_at,
+                        ve.expected_value_per_unit,
+                        ve.edge,
+                        ve.selected_odds,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY ve.game_id
+                            ORDER BY
+                                CASE fqv.status
+                                    WHEN 'READY' THEN 0
+                                    WHEN 'REQUESTED' THEN 1
+                                    ELSE 2
+                                END,
+                                ve.expected_value_per_unit DESC,
+                                ve.edge DESC,
+                                ve.selected_odds DESC,
+                                ve.evaluated_at DESC,
+                                ve.evaluation_id DESC
+                        ) AS candidate_rank
+                    FROM value_evaluations AS ve
+                    JOIN LATERAL (
+                        SELECT kickoff_at
+                        FROM fixture_observations
+                        WHERE game_id = ve.game_id
+                          AND observed_at <= %s
+                        ORDER BY observed_at DESC, fixture_observation_id DESC
+                        LIMIT 1
+                    ) AS fx ON TRUE
+                    LEFT JOIN final_quote_verifications AS fqv
+                      ON fqv.preliminary_evaluation_id = ve.evaluation_id
+                    LEFT JOIN registered_picks AS rp
+                      ON rp.game_id = ve.game_id
+                     AND rp.market_family = 'moneyline'
+                    WHERE ve.stage = 'PRELIMINARY'
+                      AND ve.outcome = 'CANDIDATE'
+                      AND ve.evaluated_at <= %s
+                      AND fx.kickoff_at > %s
+                      AND fx.kickoff_at <= %s + (%s * INTERVAL '1 minute')
+                      AND rp.pick_id IS NULL
+                      AND (
+                          fqv.status IS NULL
+                          OR fqv.status IN ('REQUESTED', 'READY')
+                      )
+                )
+                SELECT canonical_record
+                FROM ranked
+                WHERE candidate_rank = 1
+                ORDER BY
+                    kickoff_at,
+                    expected_value_per_unit DESC,
+                    edge DESC,
+                    selected_odds DESC
+                LIMIT %s
+                """,
+                (as_of, as_of, as_of, as_of, horizon_minutes, limit),
+            )
+            rows = cursor.fetchall()
+        return tuple(
+            MoneylineEvaluation(**_canonical_object(row[0])) for row in rows
+        )
+
     def begin_verification(
         self,
         record: FinalQuoteVerification,
