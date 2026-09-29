@@ -754,7 +754,13 @@ class BaseballDashboard:
         safe_id = "".join(char for char in pick_id if char.isalnum() or char in "-_")
         modal_id = f"pick-note-{safe_id or 'unknown'}"
         selection = str(row.get("selection") or "").casefold()
-        selected_team = home if selection == "home" else away if selection == "away" else "izabrani tim"
+        selected_team = (
+            home
+            if selection == "home"
+            else away
+            if selection == "away"
+            else "izabrani tim"
+        )
 
         raw_features = row.get("decision_features") or {}
         if isinstance(raw_features, str):
@@ -788,13 +794,29 @@ class BaseballDashboard:
         feature_specs = (
             ("home_overall_runs_per_game", f"{home}: osvojeni runovi, ukupno", False),
             ("home_context_runs_per_game", f"{home}: osvojeni runovi kod kuće", False),
-            ("home_overall_runs_allowed_per_game", f"{home}: dozvoljeni runovi, ukupno", False),
-            ("home_context_runs_allowed_per_game", f"{home}: dozvoljeni runovi kod kuće", False),
+            (
+                "home_overall_runs_allowed_per_game",
+                f"{home}: dozvoljeni runovi, ukupno",
+                False,
+            ),
+            (
+                "home_context_runs_allowed_per_game",
+                f"{home}: dozvoljeni runovi kod kuće",
+                False,
+            ),
             ("home_context_sample_games", f"{home}: broj domaćih utakmica", True),
             ("away_overall_runs_per_game", f"{away}: osvojeni runovi, ukupno", False),
             ("away_context_runs_per_game", f"{away}: osvojeni runovi u gostima", False),
-            ("away_overall_runs_allowed_per_game", f"{away}: dozvoljeni runovi, ukupno", False),
-            ("away_context_runs_allowed_per_game", f"{away}: dozvoljeni runovi u gostima", False),
+            (
+                "away_overall_runs_allowed_per_game",
+                f"{away}: dozvoljeni runovi, ukupno",
+                False,
+            ),
+            (
+                "away_context_runs_allowed_per_game",
+                f"{away}: dozvoljeni runovi u gostima",
+                False,
+            ),
             ("away_context_sample_games", f"{away}: broj gostujućih utakmica", True),
         )
         feature_rows = "".join(
@@ -858,8 +880,7 @@ class BaseballDashboard:
             "baseline v1 ih koristi samo za opis kvaliteta konteksta — nisu menjali "
             "izračunatu win probability."
             if optional_context_present
-            else
-            "Ovaj baseline v1 je odluku računao iz team-strength run-rate varijabli "
+            else "Ovaj baseline v1 je odluku računao iz team-strength run-rate varijabli "
             "ispod. Starter, lineup i bullpen nisu bili numerički input u probability."
         )
 
