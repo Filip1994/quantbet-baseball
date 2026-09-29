@@ -425,11 +425,12 @@ class BaseballDashboard:
         generated = (
             data["generated_at"].astimezone(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
         )
+        refresh_seconds = 120 if tab == "analytics" else 30
         return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="refresh" content="30">
+<meta http-equiv="refresh" content="{refresh_seconds}">
 <title>QuantBet Baseball</title>
 <style>{_CSS}</style>
 </head><body>
@@ -455,7 +456,7 @@ class BaseballDashboard:
 </header>
 <section class="status-strip">{status_strip}</section>
 {body}
-<footer><span>Auto-refresh 30s · PostgreSQL is authoritative · dashboard makes no provider calls</span><span>{generated}</span></footer>
+<footer><span>Auto-refresh {refresh_seconds}s · PostgreSQL is authoritative · dashboard makes no provider calls</span><span>{generated}</span></footer>
 </main></div></body></html>"""
 
     def _system_html(self, data: dict[str, Any]) -> str:
