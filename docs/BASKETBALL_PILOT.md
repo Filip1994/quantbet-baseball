@@ -36,3 +36,6 @@ The probe is intentionally capped at 12 requests and prints only compact capabil
 - no live analysis;
 - no recurring polling;
 - no changes to Baseball `main`.
+
+
+Pilot trigger marker: 2026-10-01 capability audit deployment.
