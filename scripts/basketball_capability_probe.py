@@ -79,10 +79,12 @@ def main():
     }, ensure_ascii=False))
 
     completed = []
-    for days_back in (1, 2, 3, 7, 14):
-        games, _ = api_get("games", date=str(today - timedelta(days=days_back)))
+    # Free API-Basketball access is date-window limited. Stay strictly within
+    # yesterday/today so the capability audit does not waste requests.
+    for target_date in (today - timedelta(days=1), today):
+        games, _ = api_get("games", date=str(target_date))
         finished = [g for g in games if ((g.get("status") or {}).get("short") in {"FT", "AOT"})]
-        completed.extend(finished[:3])
+        completed.extend(finished[:5])
         if len(completed) >= 5:
             break
 
@@ -93,8 +95,9 @@ def main():
     }, ensure_ascii=False))
 
     upcoming = []
-    for days_ahead in range(0, 4):
-        games, _ = api_get("games", date=str(today + timedelta(days=days_ahead)))
+    # Free window currently permits today and tomorrow.
+    for target_date in (today, today + timedelta(days=1)):
+        games, _ = api_get("games", date=str(target_date))
         scheduled = [g for g in games if ((g.get("status") or {}).get("short") in {"NS", "TBD"})]
         upcoming.extend(scheduled[:5])
         if upcoming:
